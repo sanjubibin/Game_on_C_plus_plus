@@ -156,7 +156,7 @@ Built on the existing engine (`engine/`: Application, fixed-timestep loop, scene
 | UI | Dialogue boxes, shop/budget screens, journal — scene overlays |
 | Data | nlohmann-json (MSYS2 package) |
 | Save / load | Autosave on sleep; whole game state to JSON |
-| "AAA" | Polish: art direction, animation, audio, game feel, accessibility, localization |
+| "AAA" | Polish: art direction, animation, audio, game feel, accessibility (English only) |
 
 ## Roadmap
 
@@ -274,8 +274,7 @@ Built on top of Phase 1:
 
 ## Roadmap after Phase 5
 
-- **Localization:** the text lives in JSON, so translations can be added per language - pick the
-  language(s) first.
+- **Language:** English only (decided). No translation is planned.
 - **Art and audio assets:** replace the code-drawn placeholders with drawn sprites and recorded
   sound once assets are chosen.
 - **More chapters and generations,** and **testing with real kids** to tune difficulty and text.
