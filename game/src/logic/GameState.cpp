@@ -15,7 +15,7 @@ bool EndsWith(const std::string& text, const std::string& suffix) {
 }  // namespace
 
 void ClampStat(const std::string& key, int& value) {
-    if (key == "money") {
+    if (key == "money" || key.starts_with("bank.") || key.starts_with("staff.")) {
         value = std::max(value, 0);
     } else if (key == "reputation" || key == "health" || key == "happiness" ||
                EndsWith(key, ".trust") || EndsWith(key, ".fun") || EndsWith(key, ".respect")) {

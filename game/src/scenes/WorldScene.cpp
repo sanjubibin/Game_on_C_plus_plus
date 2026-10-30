@@ -368,6 +368,21 @@ void WorldScene::DrawTiles(const Camera2D& camera) const {
                     DrawRectangleRec({r.x + 16.0f - wave, r.y + 22.0f, 9.0f, 2.0f}, Color{170, 215, 245, 255});
                     break;
                 }
+                case 'c': {
+                    // Strawberry field: soil rows with green plants and red berries.
+                    DrawRectangleRec(r, Color{150, 110, 72, 255});
+                    for (int row = 0; row < 2; ++row) {
+                        const float py = r.y + 9.0f + F(row) * 16.0f;
+                        DrawRectangleRec({r.x, py - 2.0f, kTile, 5.0f}, Color{126, 90, 58, 255});
+                        DrawCircleV({r.x + 8.0f, py - 3.0f}, 5.0f, Color{70, 150, 70, 255});
+                        DrawCircleV({r.x + 24.0f, py - 3.0f}, 5.0f, Color{70, 150, 70, 255});
+                        if ((h >> row) % 2 == 0) {
+                            DrawCircleV({r.x + 10.0f, py}, 2.2f, Color{224, 49, 49, 255});
+                            DrawCircleV({r.x + 22.0f, py - 1.0f}, 2.2f, Color{224, 49, 49, 255});
+                        }
+                    }
+                    break;
+                }
                 case 'p':
                 case 'o':
                     DrawRectangleRec(r, Shade(plaza, static_cast<int>(h % 9) - 4));
@@ -551,6 +566,8 @@ void WorldScene::DrawSpots() const {
             DrawSign({center.x, center.y + 12.0f}, "FOR RENT");
         } else if (spot.draw == "signpost") {
             DrawSign({center.x, center.y + 12.0f}, "MARKET ->");
+        } else if (spot.draw == "signpost_farm") {
+            DrawSign({center.x + 10.0f, center.y + 12.0f}, "<- FARM");
         }
     }
 }
@@ -658,11 +675,9 @@ void WorldScene::DrawHud() const {
     ui::Bar({130.0f, 124.0f, 160.0f, 10.0f}, F(health) / 100.0f, game::IsTired(st) ? kBad : kGood,
             Color{230, 220, 205, 255});
 
-    // Quest tracker.
-    for (const game::QuestDef& quest : s_.content.quests) {
-        if (game::GetQuestStatus(quest, st) != game::QuestStatus::Active) {
-            continue;
-        }
+    // Quest tracker: the current chapter's quest first.
+    if (const game::QuestDef* tracked = game::TrackedQuest(st, s_.content)) {
+        const game::QuestDef& quest = *tracked;
         const game::QuestStep* step = game::CurrentStep(quest, st);
         const float panelW = 420.0f;
         const float textW = panelW - 32.0f;
@@ -672,7 +687,6 @@ void WorldScene::DrawHud() const {
         ui::Text("QUEST", {panel.x + 16.0f, panel.y + 10.0f}, 15.0f, kAccent, true);
         ui::Text(quest.title, {panel.x + 16.0f, panel.y + 28.0f}, 22.0f, kInk, true);
         ui::TextWrapped(step->text, {panel.x + 16.0f, panel.y + 60.0f, textW, stepH}, 20.0f, kInk);
-        break;
     }
 
     // Controls hint.

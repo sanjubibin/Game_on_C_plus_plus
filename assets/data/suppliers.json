@@ -1,0 +1,25 @@
+{
+  "suppliers": [
+    {
+      "id": "lin", "name": "Lin's Wholesale", "npc": "mrs_lin",
+      "intro": "You buy at COST PRICE here. Sell for more to make a PROFIT.",
+      "items": [
+        { "item": "lemonade", "cost": 1 },
+        { "item": "apples", "cost": 1 },
+        { "item": "biscuits", "cost": 2 },
+        { "item": "cookies", "cost": 2 },
+        { "item": "sandwiches", "cost": 3 },
+        { "item": "milkshakes", "cost": 2 }
+      ]
+    },
+    {
+      "id": "farm", "name": "Green Hill Farm Shop", "npc": "ama",
+      "intro": "Straight from the field - no middleman. Things you can't buy in town!",
+      "items": [
+        { "item": "strawberries", "cost": 2 },
+        { "item": "honey", "cost": 3 },
+        { "item": "apples", "cost": 1 }
+      ]
+    }
+  ]
+}

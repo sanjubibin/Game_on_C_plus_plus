@@ -7,6 +7,7 @@
 #include <sstream>
 #include <string>
 
+#include "logic/Bank.h"
 #include "logic/Content.h"
 #include "logic/Encounter.h"
 #include "logic/GameState.h"
@@ -290,6 +291,110 @@ void TestChapterOneWiring() {
     CHECK(game::PickEveningEvent(missed, content) == "chapter1_end_ok");
 }
 
+void TestChapterTwoWiring() {
+    game::Content content;
+    try {
+        content = game::Content::Load(FUN_ASSETS_DIR);
+    } catch (const std::exception&) {
+        CHECK(false);
+        return;
+    }
+    auto talk = [&](const game::GameState& s, const std::string& npc) {
+        const game::NpcDef* def = content.FindNpc(npc);
+        return def ? game::PickTalkEvent(*def, s) : std::string("<missing>");
+    };
+    auto visibleChoices = [&](const game::GameState& s, const std::string& event) {
+        std::vector<std::string> labels;
+        for (const game::ChoiceDef& c : content.FindEvent(event)->choices) {
+            if (game::CheckCondition(c.showWhen, s)) {
+                labels.push_back(c.label);
+            }
+        }
+        return labels;
+    };
+    auto play = [&](game::GameState& s, const std::string& event, int choice = -1) {
+        const game::EventDef* def = content.FindEvent(event);
+        if (def == nullptr) {
+            CHECK(false);
+            return;
+        }
+        s.seenEvents.insert(event);
+        game::ApplyEffects(def->effects, s);
+        game::Schedule(s, def->later);
+        if (choice >= 0) {
+            game::ApplyEffects(def->choices[static_cast<std::size_t>(choice)].effects, s);
+        }
+    };
+
+    CHECK(content.ChapterTitle(2) == "The Corner Shop");
+    game::GameState s;
+    s.Set("chapter", 2);
+    s.Set("money", 40);
+    s.day = 14;
+    s.seenEvents = {"festival_morning", "morning_day2", "morning_stranger_rumor", "morning_market_news"};
+    game::EndDay(s);
+    std::vector<std::string> morning = game::StartDay(s, content);
+    CHECK(morning.size() == 1 && morning[0] == "ch2_start");
+    CHECK(visibleChoices(s, "shop_door").size() == 1);  // just looking, before the partnership
+    play(s, "ch2_partner");
+    CHECK(s.HasFlag("shop_partner"));
+    CHECK(visibleChoices(s, "shop_door").size() == 3);
+    CHECK(talk(s, "dad") == "dad_partner");
+
+    const game::QuestDef* tracked = game::TrackedQuest(s, content);
+    CHECK(tracked != nullptr && tracked->chapter == 2);
+
+    // Upgrades: the fridge option disappears once bought.
+    CHECK(visibleChoices(s, "upgrade_menu").size() == 5);
+    play(s, "dad_fridge_plan");
+    CHECK(s.HasFlag("bank_news"));
+    CHECK(visibleChoices(s, "upgrade_menu").size() == 4);
+
+    // The bank: introduction, then a loan after the interview.
+    CHECK(talk(s, "adeyemi") == "adeyemi_intro");
+    s.seenEvents.insert("adeyemi_intro");
+    CHECK(talk(s, "adeyemi") == "adeyemi_menu");
+    CHECK(visibleChoices(s, "adeyemi_menu").size() == 3);
+    play(s, "loan_offer_good", 0);
+    CHECK(s.Get("money") == 120 && s.Get("bank.loan") == 88 && s.Get("bank.payment") == 22);
+    CHECK(visibleChoices(s, "adeyemi_menu").size() == 2);  // no second loan
+    play(s, "upgrade_menu", 0);
+    CHECK(s.HasFlag("fridge") && s.Get("money") == 40);
+    CHECK(game::ItemAvailable(content.items.at("milkshakes"), s));
+
+    // The farm: strawberries only once you've met Farmer Ama.
+    CHECK(!game::ItemAvailable(content.items.at("strawberries"), s));
+    CHECK(talk(s, "ama") == "ama_intro");
+    play(s, "ama_intro");
+    CHECK(game::ItemAvailable(content.items.at("strawberries"), s));
+    CHECK(talk(s, "ama") == "ama_harvest");
+    play(s, "ama_harvest", 0);
+    CHECK(s.StockOf("strawberries") == 6 && talk(s, "ama").starts_with("idle."));
+
+    // Fair pay sets the wage policy.
+    play(s, "staff_pay_talk", 1);
+    CHECK(s.Get("staff.wage") == 3 && s.Get("staff.morale_pct") == 100);
+
+    // Price war: lemonade is worth less... unless you have a fridge.
+    game::GameState noFridge = s;
+    noFridge.ClearFlag("fridge");
+    play(noFridge, "price_war_start");
+    CHECK(game::ItemValue(content.items.at("lemonade"), noFridge) == 2);
+    CHECK(game::ItemValue(content.items.at("lemonade"), s) == 3);
+    CHECK(noFridge.scheduled.size() == 1 && noFridge.scheduled[0].event == "price_war_ends");
+
+    // A week starts: the loan payment comes out first thing.
+    s.day = 21;
+    s.seenEvents.insert({"ch2_start", "morning_farm_news", "staff_pay_talk", "price_war_start", "price_war_start_fridge"});
+    game::EndDay(s);
+    game::StartDay(s, content);
+    CHECK(s.Get("bank.loan") == 66 && s.Get("money") == 18);
+
+    // Day 28 ends the chapter.
+    s.day = 28;
+    CHECK(game::PickEveningEvent(s, content) == "chapter2_end");
+}
+
 void TestSellingSession() {
     game::Content content;
     game::ItemDef lemonade;
@@ -303,12 +408,17 @@ void TestSellingSession() {
     leo.id = "leo";
     leo.name = "Leo";
     leo.bonus = {0.15f, "Leo's sign"};
+    leo.staff = {true, 0.7f};
     content.npcs.push_back(leo);
+    game::NpcDef maya;
+    maya.id = "maya";
+    maya.name = "Maya";
+    maya.staff = {true, 0.6f};
+    content.npcs.push_back(maya);
 
     game::VenueDef stall;
     stall.id = "stall";
     stall.name = "Stall";
-    stall.helper = "maya";
     stall.fee = 5;
     stall.customers = 1.7f;
     stall.bonuses.push_back({Parse(R"({"flag": "kofi_friend"})"), 0.1f, "Kofi"});
@@ -322,9 +432,10 @@ void TestSellingSession() {
     s.prices["lemonade"] = 2;  // below the usual value: everyone buys
 
     CHECK(game::CannotOpenReason(s, content, stall).empty());
-    CHECK(game::HelperCanRun(s, content, stall));
-    const game::SessionReport r = game::RunSellSession(s, content, stall, false);
-    CHECK(r.fee == 5);
+    CHECK(game::StaffCandidates(s, content).size() == 2);
+    CHECK(game::StaffUnavailableReason(s, content, stall, "maya").empty());
+    const game::SessionReport r = game::RunSellSession(s, content, stall);
+    CHECK(r.fee == 5 && r.wage == 0 && r.staff.empty());
     CHECK(r.sales.tooExpensive == 0);
     CHECK(r.costOfSold == r.sales.TotalSold());
     CHECK(s.Get("money") == 20 + r.sales.revenue - 5);
@@ -334,14 +445,35 @@ void TestSellingSession() {
     CHECK(r.bonusTexts.size() == 1);  // Leo, but not Kofi yet
     CHECK(r.leftover.at("lemonade") == 30 - r.sales.TotalSold());
 
-    // A helper keeps your clock still and can only run it once a day.
+    // Staff keep your clock still, are paid up front, and work once a day.
+    s.AddStock({"lemonade", 30, 1, 1, false});
+    s.Set("staff.wage", 3);
     s.SetFlag("today.festival");
     const int before = s.minutes;
-    const game::SessionReport helped = game::RunSellSession(s, content, stall, true);
-    CHECK(helped.helperRan);
+    const int moneyBefore = s.Get("money");
+    const game::SessionReport staffed = game::RunSellSession(s, content, stall, "maya");
+    CHECK(staffed.staff == "maya" && staffed.wage == 3);
     CHECK(s.minutes == before);
-    CHECK(s.HasFlag("today.helper_ran") && s.HasFlag("stall_festival_sale"));
-    CHECK(!game::HelperCanRun(s, content, stall));
+    CHECK(s.Get("money") == moneyBefore + staffed.sales.revenue - 5 - 3);
+    CHECK(s.HasFlag("today.staff_maya") && s.HasFlag("stall_festival_sale"));
+    CHECK(!game::StaffUnavailableReason(s, content, stall, "maya").empty());  // already worked
+    CHECK(!game::StaffUnavailableReason(s, content, stall, "leo").empty());   // stall already staffed
+    s.SetFlag("leo_upset");
+    game::VenueDef cart;
+    cart.id = "cart";
+    cart.name = "Cart";
+    CHECK(!game::StaffUnavailableReason(s, content, cart, "leo").empty());  // upset
+    s.ClearFlag("leo_upset");
+    CHECK(game::StaffUnavailableReason(s, content, cart, "leo").empty());
+
+    // Happier staff sell more: same seed, higher morale, more customers.
+    game::GameState low = s;
+    game::GameState high = s;
+    low.Set("staff.morale_pct", 75);
+    high.Set("staff.morale_pct", 115);
+    const int lowCustomers = static_cast<int>(game::RunSellSession(low, content, cart, "leo").sales.customers.size());
+    const int highCustomers = static_cast<int>(game::RunSellSession(high, content, cart, "leo").sales.customers.size());
+    CHECK(highCustomers > lowCustomers);
 
     // Can't open without the fee or after 17:00.
     game::GameState poor = s;
@@ -352,7 +484,7 @@ void TestSellingSession() {
     late.minutes = 17 * 60;
     CHECK(!game::CannotOpenReason(late, content, stall).empty());
 
-    // Unlock and hide flags control what the wholesaler sells.
+    // Unlock and hide flags control what suppliers sell.
     game::ItemDef cookies;
     cookies.unlockFlag = "mom_recipe";
     cookies.hideFlag = "never";
@@ -361,6 +493,65 @@ void TestSellingSession() {
     CHECK(game::ItemAvailable(cookies, s));
     s.SetFlag("never");
     CHECK(!game::ItemAvailable(cookies, s));
+}
+
+void TestBank() {
+    game::EconomyDef economy;  // 5% interest, late fee 3, 7-day weeks
+    CHECK(!game::IsWeekStart(1, economy) && game::IsWeekStart(8, economy) && game::IsWeekStart(15, economy));
+    CHECK(!game::IsWeekStart(9, economy));
+    CHECK(game::NextWeekStart(9, economy) == 15 && game::NextWeekStart(8, economy) == 15);
+    CHECK(game::SavingsInterest(100, 5) == 5);
+    CHECK(game::SavingsInterest(12, 5) == 1);  // small savings still grow
+    CHECK(game::SavingsInterest(5, 5) == 0);
+    CHECK(game::LoanTotal(80, 10) == 88 && game::LoanTotal(80, 25) == 100);
+    CHECK(game::WeeklyPayment(88, 4) == 22 && game::WeeklyPayment(10, 4) == 3);
+
+    game::GameState s;
+    s.Set("money", 50);
+    CHECK(game::Deposit(s, 40) && s.Get("money") == 10 && s.Get("bank.savings") == 40);
+    CHECK(!game::Deposit(s, 11));
+    CHECK(!game::Withdraw(s, 41));
+    CHECK(game::Withdraw(s, 10) && s.Get("bank.savings") == 30 && s.Get("money") == 20);
+
+    game::TakeLoan(s, 80, 10, 4);
+    CHECK(s.Get("money") == 100 && s.Get("bank.loan") == 88 && s.Get("bank.payment") == 22);
+
+    // A week passes: interest on savings, then the payment.
+    game::ProcessWeek(s, economy);
+    CHECK(s.Get("bank.savings") == 31 && s.Get("bank.interest_earned") == 1);
+    CHECK(s.Get("money") == 78 && s.Get("bank.loan") == 66);
+
+    // Too little money: a late fee instead of a payment.
+    s.Set("money", 5);
+    game::ProcessWeek(s, economy);
+    CHECK(s.Get("bank.loan") == 69 && s.HasFlag("loan_missed") && s.Get("money") == 5);
+
+    // Paying it all back clears the weekly payment and leaves a memory.
+    s.Set("money", 100);
+    CHECK(game::RepayLoan(s, 500));
+    CHECK(s.Get("bank.loan") == 0 && s.Get("bank.payment") == 0 && s.Get("money") == 31);
+    CHECK(!s.memories.empty());
+
+    // Through effects, as events use it.
+    game::GameState e;
+    game::ApplyEffects(Parse(R"({"take_loan": {"amount": 80, "rate": 25, "weeks": 4},
+                                  "set": {"staff.wage": 3}})"), e);
+    CHECK(e.Get("money") == 80 && e.Get("bank.loan") == 100 && e.Get("bank.payment") == 25);
+    CHECK(e.Get("staff.wage") == 3);
+}
+
+void TestItemRules() {
+    game::ItemDef lemonade;
+    lemonade.value = 3;
+    lemonade.shelfDays = 1;
+    lemonade.fridgeShelfDays = 3;
+    lemonade.valueWhen.push_back({Parse(R"({"flag": "price_war", "not_flag": "fridge"})"), 2, ""});
+    game::GameState s;
+    CHECK(game::ItemValue(lemonade, s) == 3 && game::ShelfDays(lemonade, s) == 1);
+    s.SetFlag("price_war");
+    CHECK(game::ItemValue(lemonade, s) == 2);
+    s.SetFlag("fridge");  // cold drinks beat cheap warm ones
+    CHECK(game::ItemValue(lemonade, s) == 3 && game::ShelfDays(lemonade, s) == 3);
 }
 
 void TestEncounterRules() {
@@ -545,7 +736,10 @@ int main() {
     TestRealContent();
     TestStoryWiring();
     TestChapterOneWiring();
+    TestChapterTwoWiring();
     TestSellingSession();
+    TestBank();
+    TestItemRules();
     TestEncounterRules();
     TestLifeWheelAndBedtime();
 

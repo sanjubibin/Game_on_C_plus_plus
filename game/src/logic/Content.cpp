@@ -160,6 +160,10 @@ void ParseItems(const Json::Value& root, Content& c) {
         item.cost = Int(v, "cost", 1);
         item.value = Int(v, "value", 2);
         item.shelfDays = Int(v, "shelf_days", 30);
+        item.fridgeShelfDays = Int(v, "fridge_shelf_days", 0);
+        for (const Json::Value& rule : Field(v, "value_when")) {
+            item.valueWhen.push_back({Field(rule, "when"), Int(rule, "value", item.value), Str(rule, "reason")});
+        }
         item.appeal = Float(v, "appeal", 1.0f);
         item.hotAppeal = Float(v, "hot_appeal", item.appeal);
         item.unlockFlag = Str(v, "unlock_flag");
@@ -190,6 +194,9 @@ void ParseNpcs(const Json::Value& root, Content& c) {
         npc.map = Str(v, "map", "town");
         npc.bonus.customers = Float(Field(v, "bonus"), "customers", 0.0f);
         npc.bonus.text = Str(Field(v, "bonus"), "text");
+        const Json::Value& staff = Field(v, "staff");
+        npc.staff.canWork = staff.isObject();
+        npc.staff.efficiency = Float(staff, "efficiency", npc.staff.efficiency);
         npc.body = ParseRgb(Str(v, "body"), Rgb{90, 120, 200});
         npc.hair = ParseRgb(Str(v, "hair"), Rgb{60, 40, 30});
         npc.skin = ParseRgb(Str(v, "skin"), Rgb{240, 200, 160});
@@ -218,6 +225,7 @@ void ParseQuests(const Json::Value& root, Content& c) {
     for (const Json::Value& v : Field(root, "quests")) {
         QuestDef quest;
         quest.id = Str(v, "id");
+        quest.chapter = Int(v, "chapter", 1);
         quest.title = Str(v, "title");
         quest.summary = Str(v, "summary");
         quest.startFlag = Str(v, "start_flag");
@@ -272,7 +280,7 @@ void ParseVenues(const Json::Value& root, Content& c) {
         venue.id = Str(v, "id");
         venue.name = Str(v, "name", venue.id);
         venue.backdrop = Str(v, "backdrop", "park");
-        venue.helper = Str(v, "helper");
+        venue.staffable = Bool(v, "staffable", true);
         venue.customers = Float(v, "customers", 1.0f);
         venue.festivalCustomers = Float(v, "festival_customers", 1.0f);
         venue.fee = Int(v, "fee", 0);
@@ -284,8 +292,27 @@ void ParseVenues(const Json::Value& root, Content& c) {
     }
 }
 
+void ParseSuppliers(const Json::Value& root, Content& c) {
+    for (const Json::Value& v : Field(root, "suppliers")) {
+        SupplierDef supplier;
+        supplier.id = Str(v, "id");
+        supplier.name = Str(v, "name", supplier.id);
+        supplier.npc = Str(v, "npc");
+        supplier.intro = Str(v, "intro");
+        for (const Json::Value& item : Field(v, "items")) {
+            supplier.items.push_back({Str(item, "item"), Int(item, "cost", 1)});
+        }
+        c.suppliers[supplier.id] = std::move(supplier);
+    }
+}
+
 void ParseStart(const Json::Value& root, Content& c) {
     c.start.map = Str(root, "map", "town");
+    c.start.chapters = Strings(root, "chapters");
+    const Json::Value& economy = Field(root, "economy");
+    c.economy.savingsInterestPercent = Int(economy, "savings_interest", c.economy.savingsInterestPercent);
+    c.economy.lateFee = Int(economy, "late_fee", c.economy.lateFee);
+    c.economy.weekLength = std::max(1, Int(economy, "week_length", c.economy.weekLength));
     c.start.stats = Field(root, "stats");
     c.start.flags = Strings(root, "flags");
     c.start.party = Strings(root, "party");
@@ -377,6 +404,7 @@ Content Content::Load(const std::string& assetsDir) {
     LoadFile(data + "quests.json", [&](const Json::Value& root) { ParseQuests(root, c); });
     LoadFile(data + "encounters.json", [&](const Json::Value& root) { ParseEncounters(root, c); });
     LoadFile(data + "venues.json", [&](const Json::Value& root) { ParseVenues(root, c); });
+    LoadFile(data + "suppliers.json", [&](const Json::Value& root) { ParseSuppliers(root, c); });
     LoadFile(data + "start.json", [&](const Json::Value& root) { ParseStart(root, c); });
 
     // Every .json file in assets/maps is one area; its file name is its id.
@@ -433,8 +461,20 @@ const VenueDef* Content::FindVenue(const std::string& id) const {
     return it == venues.end() ? nullptr : &it->second;
 }
 
+const SupplierDef* Content::FindSupplier(const std::string& id) const {
+    const auto it = suppliers.find(id);
+    return it == suppliers.end() ? nullptr : &it->second;
+}
+
 const MapDef& Content::StartMap() const {
     return maps.at(start.map);
+}
+
+std::string Content::ChapterTitle(int chapter) const {
+    if (chapter >= 1 && static_cast<std::size_t>(chapter) <= start.chapters.size()) {
+        return start.chapters[static_cast<std::size_t>(chapter - 1)];
+    }
+    return "Chapter " + std::to_string(chapter);
 }
 
 std::string Content::NameOf(const std::string& characterId) const {

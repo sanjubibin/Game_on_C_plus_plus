@@ -1,6 +1,11 @@
 {
   "map": "town",
+  "chapters": ["The Pushcart", "The Corner Shop", "To Be Continued"],
+  "economy": { "savings_interest": 5, "late_fee": 3, "week_length": 7 },
   "stats": {
+    "chapter": 1,
+    "staff.wage": 0,
+    "staff.morale_pct": 100,
     "money": 10,
     "reputation": 30,
     "health": 70,
@@ -16,7 +21,8 @@
     "maya.trust": 55, "maya.fun": 60, "maya.respect": 40,
     "priya.trust": 50, "priya.fun": 60, "priya.respect": 40,
     "leo.trust": 10, "leo.fun": 10, "leo.respect": 10,
-    "kofi.trust": 20, "kofi.fun": 25, "kofi.respect": 20
+    "kofi.trust": 20, "kofi.fun": 25, "kofi.respect": 20,
+    "ama.trust": 30, "ama.fun": 30, "ama.respect": 30
   },
   "party": ["maya"],
   "flags": [],
@@ -33,6 +39,11 @@
     "Working together with a rival can be better than fighting.",
     "Your own work can add value: ingredients for 2, cookies for 5!",
     "Rest is part of the job. Tired people make tired decisions.",
-    "Listen first. Most problems are bigger on the inside."
+    "Listen first. Most problems are bigger on the inside.",
+    "Savings earn interest. Loans cost interest. Same idea, opposite sides!",
+    "An investment costs money now to earn more later. Does it pay for itself?",
+    "Fair pay makes a happy team - and a happy team works harder.",
+    "Competing on price is a race to the bottom. Compete on quality instead.",
+    "Buying straight from the farm cuts out the middleman - but it's a long walk."
   ]
 }

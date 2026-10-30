@@ -18,6 +18,8 @@
       "id": "dad", "name": "Dad", "x": 17, "y": 7, "relationship": true,
       "body": "#3d5a80", "hair": "#2b2b2b", "skin": "#c68e5f",
       "talk": [
+        { "when": { "flag": ["shop_partner", "bank_news"], "not_flag": "fridge", "not_seen": "dad_fridge_plan" }, "event": "dad_fridge_plan" },
+        { "when": { "flag": "shop_partner" }, "event": "dad_partner" },
         { "when": { "flag": "rent_paid" }, "event": "dad_proud" },
         { "when": { "flag": "got_pushcart", "min": { "money": 50 } }, "event": "dad_rent_offer" },
         { "event": "dad_worried" }
@@ -41,6 +43,7 @@
     {
       "id": "maya", "name": "Maya", "x": 4, "y": 7, "relationship": true,
       "body": "#f4a6c0", "hair": "#4a2c1a", "skin": "#e8b98a",
+      "staff": { "efficiency": 0.6 },
       "talk": [
         { "when": { "flag": "maya_upset" }, "event": "maya_makeup" }
       ],
@@ -56,6 +59,7 @@
       "body": "#5fa86b", "hair": "#c9a227", "skin": "#f3d2b3",
       "present_when": { "not_flag": "leo_joined" },
       "bonus": { "customers": 0.15, "text": "Leo's bright sign brought extra customers!" },
+      "staff": { "efficiency": 0.7 },
       "talk": [
         { "when": { "flag": "today.leo_tried", "not_flag": "leo_joined" }, "event": "leo_tomorrow" },
         { "when": { "not_seen": "leo_meet", "not_flag": "leo_joined" }, "event": "leo_meet" },
@@ -72,6 +76,7 @@
       "body": "#9b5de5", "hair": "#1f1f1f", "skin": "#b77a4f",
       "present_when": { "not_flag": "priya_joined" },
       "bonus": { "customers": 0.1, "text": "Priya's cheerful shouting drew a crowd!" },
+      "staff": { "efficiency": 0.85 },
       "talk": [
         { "when": { "flag": "first_sale", "day_min": 2, "not_seen": "priya_arcade" }, "event": "priya_arcade" },
         { "when": { "flag": "first_sale", "day_min": 4, "not_seen": "priya_join_offer" }, "event": "priya_join_offer" },
@@ -164,6 +169,33 @@
       "body": "#e64980", "hair": "#212529", "skin": "#8d5524",
       "present_when": { "flag": "today.festival" },
       "idle": [ "The music starts at noon!", "I'm spending all my pocket money today. Okay, maybe not ALL of it." ]
+    },
+
+    {
+      "id": "adeyemi", "name": "Ms. Adeyemi", "map": "market", "x": 26, "y": 17,
+      "body": "#1864ab", "hair": "#212529", "skin": "#7d4a2a",
+      "talk": [
+        { "when": { "not_seen": "adeyemi_intro" }, "event": "adeyemi_intro" },
+        { "event": "adeyemi_menu" }
+      ]
+    },
+    {
+      "id": "ama", "name": "Farmer Ama", "map": "farm", "x": 21, "y": 7, "relationship": true,
+      "body": "#2b8a3e", "hair": "#343a40", "skin": "#8d5524",
+      "talk": [
+        { "when": { "not_seen": "ama_intro" }, "event": "ama_intro" },
+        { "when": { "not_flag": "today.helped_ama" }, "event": "ama_harvest" }
+      ],
+      "idle": [
+        "A strawberry picked this morning tastes nothing like one that travelled for a week.",
+        "Mrs. Lin buys from farms like mine and adds a bit for her work. That's fair - she saves you the walk.",
+        "Rain is good for the strawberries. Too much rain, though..."
+      ]
+    },
+    {
+      "id": "daisy", "name": "Daisy the Cow", "map": "farm", "x": 8, "y": 10,
+      "body": "#f8f9fa", "hair": "#212529", "skin": "#f8f9fa",
+      "idle": [ "Mooooo.", "Moo? (She seems to want a strawberry.)", "MOOO! (Daisy is very happy to see you.)" ]
     }
   ]
 }

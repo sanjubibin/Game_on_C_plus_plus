@@ -124,6 +124,37 @@
         { "id": "leave", "label": "Ignore him", "leaves": true,
           "text": "You turn back to your stall. Kofi glares at you all afternoon." }
       ]
+    },
+    {
+      "id": "loan_interview",
+      "title": "Asking for a Loan",
+      "opponent": "adeyemi",
+      "intro": "You want to borrow 80 coins for a fridge. Ms. Adeyemi decides the interest rate. Convince her you're a safe borrower.",
+      "need": "A loan is a promise. Ms. Adeyemi needs a clear plan for how you'll pay it back on time, every single week.",
+      "mood_label": "Confidence in your plan",
+      "win_text": "Ms. Adeyemi trusts your plan!",
+      "lose_text": "Ms. Adeyemi isn't convinced.",
+      "start_mood": 25,
+      "goal": 70,
+      "max_turns": 5,
+      "win": "loan_offer_good",
+      "lose": "loan_offer_standard",
+      "actions": [
+        { "id": "explain", "label": "Explain what the fridge is for", "skill": "communication", "base": 10, "per_skill": 3,
+          "text": "\"Cold drinks sell better and last longer. The fridge will pay for itself!\" She writes something down." },
+        { "id": "ask", "label": "Ask what she needs to know", "skill": "empathy", "base": 6, "per_skill": 2, "reveals": true,
+          "text": "She smiles. \"A loan is a promise. I need to know HOW you'll pay it back.\"" },
+        { "id": "numbers", "label": "Show your sales notebook", "skill": "money_sense", "base": 10, "per_skill": 3,
+          "text": "You show her sales from the pushcart, the stall and the shop. She nods slowly." },
+        { "id": "plan", "label": "Show your weekly repayment plan", "skill": "money_sense",
+          "base": 24, "per_skill": 2, "needs_reveal": true, "base_unrevealed": 3,
+          "text": "You show her: 22 coins a week from shop profits, for 4 weeks. \"Now THAT is a plan.\"",
+          "text_unrevealed": "\"A plan for what, exactly?\" she asks." },
+        { "id": "promise", "label": "Promise you'll be rich one day", "base": -10,
+          "text": "\"Promises don't pay loans,\" she says gently." },
+        { "id": "leave", "label": "Maybe we should save up instead", "leaves": true,
+          "text": "You decide to think about it some more." }
+      ]
     }
   ]
 }

@@ -1,6 +1,13 @@
 {
   "morning": [
     { "when": { "day_min": 14, "day_max": 14 }, "event": "festival_morning" },
+    { "when": { "min": { "chapter": 2 } }, "event": "ch2_start" },
+    { "when": { "min": { "chapter": 2 }, "day_min": 26, "day_max": 27 }, "event": "reopening_soon" },
+    { "when": { "min": { "chapter": 2 }, "day_min": 19, "not_flag": "fridge" }, "event": "price_war_start" },
+    { "when": { "min": { "chapter": 2 }, "day_min": 19, "flag": "fridge", "not_seen": "price_war_start" },
+      "event": "price_war_start_fridge" },
+    { "when": { "min": { "chapter": 2 }, "day_min": 17 }, "event": "staff_pay_talk" },
+    { "when": { "min": { "chapter": 2 }, "day_min": 16 }, "event": "morning_farm_news" },
     { "when": { "day_min": 12, "day_max": 13, "flag": "stall_rented" }, "event": "festival_soon_ready" },
     { "when": { "day_min": 12, "day_max": 13, "flag": "market_news", "not_flag": "stall_rented" }, "event": "festival_soon" },
     { "when": { "day_min": 4, "flag": "first_sale" }, "event": "morning_market_news" },
@@ -9,6 +16,11 @@
     { "when": { "day_min": 3 }, "event": "morning_stranger_rumor" }
   ],
   "evening": [
+    { "when": { "min": { "chapter": 2 }, "day_min": 28 }, "event": "chapter2_end" },
+    { "when": { "flag": "loan_missed" }, "event": "dinner_loan_missed" },
+    { "when": { "flag": "fridge" }, "event": "dinner_fridge" },
+    { "when": { "flag": "has_loan" }, "event": "dinner_loan" },
+    { "when": { "flag": "shop_partner" }, "event": "dinner_partner" },
     { "when": { "day_min": 14, "flag": "stall_festival_sale" }, "event": "chapter1_end_great" },
     { "when": { "day_min": 14, "not_seen": "chapter1_end_great" }, "event": "chapter1_end_ok" },
     { "when": { "day_min": 7, "flag": "rent_paid" }, "event": "week_end_success" },
@@ -83,12 +95,12 @@
         "What you pay me is your COST PRICE. What you charge your customers is your SELLING PRICE.",
         "The difference is your PROFIT - if you get it right!"
       ],
-      "action": "open_supplier"
+      "action": "open_supplier:lin"
     },
     {
       "id": "lin_shop", "speaker": "mrs_lin",
       "lines": [ "Back again? Let's see what you need today." ],
-      "action": "open_supplier"
+      "action": "open_supplier:lin"
     },
 
     {
@@ -761,6 +773,358 @@
         "The festival is over. You can still hear the music from the market square as you walk home.",
         { "speaker": "dad", "text": "We didn't get to sell at the festival this year. That's okay." },
         { "speaker": "grandpa", "text": "Every business has a year like this. What matters is what you learned." }
+      ],
+      "action": "chapter_end"
+    },
+
+    {
+      "id": "ch2_start", "speaker": "",
+      "lines": [
+        "A new week begins. The festival is over, but the whole town is still talking about your stall.",
+        { "speaker": "dad", "text": "I've been thinking. MegaMart keeps raising its prices, and people LOVED what you kids did at the festival." },
+        { "speaker": "dad", "text": "What if we ran the corner shop together? As partners. You choose what to sell - I'll do the boring paperwork." }
+      ],
+      "choices": [
+        { "label": "Partners! Let's do it.", "then": "ch2_partner" },
+        { "label": "Can we really compete with MegaMart?", "then": "ch2_doubt" }
+      ]
+    },
+    {
+      "id": "ch2_doubt", "speaker": "dad",
+      "lines": [ "MegaMart is big. But big isn't everything. We know our customers' names. MegaMart never will." ],
+      "then": "ch2_partner"
+    },
+    {
+      "id": "ch2_partner", "speaker": "dad",
+      "effects": {
+        "set_flag": "shop_partner", "add": { "dad.trust": 10, "dad.respect": 5 },
+        "log": "You became Dad's partner in the corner shop.",
+        "memory": "Became Dad's partner in the corner shop."
+      },
+      "lines": [
+        "Partners it is!",
+        { "speaker": "", "text": "You can now open the Corner Shop and plan upgrades with Dad at its door. Friends on your team can also run a stand for you." }
+      ]
+    },
+    {
+      "id": "shop_door", "speaker": "",
+      "lines": [ "The corner shop: shelves, a till, and the smell of Mom's cookies." ],
+      "choices": [
+        { "label": "Open the shop (3 hours)", "show_when": { "flag": "shop_partner" }, "action": "open_sell:shop" },
+        { "label": "Plan upgrades with Dad", "show_when": { "flag": "shop_partner" }, "then": "upgrade_menu" },
+        { "label": "Just look around.", "show_when": { "not_flag": "shop_partner" }, "then": "shop_inside" },
+        { "label": "Leave.", "show_when": { "flag": "shop_partner" } }
+      ]
+    },
+    {
+      "id": "dad_partner", "speaker": "dad",
+      "lines": [ "Hello, partner! The shop money and the stand money are one family business now. Spend it wisely." ],
+      "choices": [
+        { "label": "Let's plan some upgrades.", "then": "upgrade_menu" },
+        { "label": "Just saying hi!" }
+      ]
+    },
+    {
+      "id": "upgrade_menu", "speaker": "dad",
+      "lines": [ "What should we invest in? An investment costs money now, so we can earn more later." ],
+      "choices": [
+        {
+          "label": "Cold-drinks fridge (80 coins)", "show_when": { "not_flag": "fridge" },
+          "requires": { "min": { "money": 80 } },
+          "effects": {
+            "add": { "money": -80 }, "set_flag": ["fridge", "price_war_over", "upgrade_bought"],
+            "log": "Bought a fridge for the shop (80 coins).", "memory": "Invested in a fridge for cold drinks."
+          },
+          "then": "fridge_bought"
+        },
+        {
+          "label": "Bright new shop sign (30 coins)", "show_when": { "not_flag": "upgrade_sign" },
+          "requires": { "min": { "money": 30 } },
+          "effects": {
+            "add": { "money": -30 }, "set_flag": ["upgrade_sign", "upgrade_bought"],
+            "log": "Put up a bright new shop sign (30 coins).", "memory": "Put up a bright new shop sign."
+          },
+          "then": "sign_bought"
+        },
+        {
+          "label": "Better shelves (40 coins)", "show_when": { "not_flag": "upgrade_shelves" },
+          "requires": { "min": { "money": 40 } },
+          "effects": {
+            "add": { "money": -40 }, "set_flag": ["upgrade_shelves", "upgrade_bought"],
+            "log": "Fitted better shelves in the shop (40 coins)."
+          },
+          "then": "shelves_bought"
+        },
+        { "label": "How could we pay for a fridge?", "show_when": { "not_flag": "fridge", "not_seen": "dad_fridge_plan" },
+          "then": "dad_fridge_plan" },
+        { "label": "Not right now." }
+      ]
+    },
+    {
+      "id": "dad_fridge_plan", "speaker": "dad",
+      "effects": { "set_flag": "bank_news" },
+      "lines": [
+        "A fridge costs 80 coins. That's a lot!",
+        "We could save up, week by week. Or Ms. Adeyemi at the Town Bank could lend us the money.",
+        "Borrowing isn't free, though. You pay back MORE than you borrow. That extra is called interest.",
+        { "speaker": "", "text": "The Town Bank is in the bottom-right corner of the market square." }
+      ]
+    },
+    {
+      "id": "fridge_bought", "speaker": "dad",
+      "lines": [
+        "A fridge! Cold lemonade that stays fresh for 3 days - and iced milkshakes!",
+        { "speaker": "", "text": "Lemonade and sandwiches now keep longer, and Iced Milkshakes are on sale at Lin's Wholesale." }
+      ]
+    },
+    {
+      "id": "sign_bought", "speaker": "dad",
+      "lines": [ "Look at it shine! People will see us from the end of the road." ]
+    },
+    {
+      "id": "shelves_bought", "speaker": "dad",
+      "lines": [ "Everything has its place now. When customers can find things, they buy more." ]
+    },
+
+    {
+      "id": "adeyemi_intro", "speaker": "adeyemi",
+      "effects": { "set_flag": "met_adeyemi" },
+      "lines": [
+        "Welcome to the Town Bank! I'm Ms. Adeyemi.",
+        "Two things happen here. You can SAVE: keep coins in your savings, and every week the bank adds 5% interest.",
+        "Or you can BORROW: a loan gives you money now, and you pay it back - plus interest - a little every week.",
+        "Savers earn interest. Borrowers pay interest. That's how a bank works."
+      ],
+      "then": "adeyemi_menu"
+    },
+    {
+      "id": "adeyemi_menu", "speaker": "adeyemi",
+      "lines": [ "How can I help you today?" ],
+      "choices": [
+        { "label": "Open my bank book.", "action": "open_bank" },
+        { "label": "Ask about a loan for a fridge.", "show_when": { "not_flag": ["fridge", "loan_decided"] },
+          "action": "encounter:loan_interview" },
+        { "label": "Goodbye." }
+      ]
+    },
+    {
+      "id": "loan_offer_good", "speaker": "adeyemi",
+      "lines": [ "You've really thought this through. I can offer you a good rate: 10% interest." ],
+      "choices": [
+        {
+          "label": "Borrow 80 coins (pay back 88: 22 a week for 4 weeks)",
+          "effects": {
+            "take_loan": { "amount": 80, "rate": 10, "weeks": 4 }, "set_flag": ["has_loan", "loan_decided"],
+            "memory": "Took our first loan - with a plan to pay it back."
+          },
+          "then": "loan_taken"
+        },
+        { "label": "No thanks. We'll save up instead.",
+          "effects": { "set_flag": "loan_decided", "add": { "skill.money_sense": 1 } }, "then": "loan_declined" }
+      ]
+    },
+    {
+      "id": "loan_offer_standard", "speaker": "adeyemi",
+      "lines": [ "I'm not sure how you'd pay it back. The best I can offer is 25% interest." ],
+      "choices": [
+        {
+          "label": "Borrow 80 coins (pay back 100: 25 a week for 4 weeks)",
+          "effects": {
+            "take_loan": { "amount": 80, "rate": 25, "weeks": 4 }, "set_flag": ["has_loan", "loan_decided"],
+            "memory": "Took an expensive loan."
+          },
+          "then": "loan_taken"
+        },
+        { "label": "No thanks. We'll save up instead.",
+          "effects": { "set_flag": "loan_decided", "add": { "skill.money_sense": 1 } }, "then": "loan_declined" }
+      ]
+    },
+    {
+      "id": "loan_taken", "speaker": "adeyemi",
+      "lines": [
+        "Done! The coins are yours. The payment comes out at the start of every week - don't miss one, or there's a late fee.",
+        { "speaker": "", "text": "Now buy that fridge: ask Dad at the shop door. Your bank book shows what you still owe." }
+      ]
+    },
+    {
+      "id": "loan_declined", "speaker": "adeyemi",
+      "lines": [ "Saving up takes longer, but it costs nothing extra. That's a wise choice too. Your savings earn interest while you wait." ]
+    },
+
+    {
+      "id": "staff_pay_talk", "speaker": "maya",
+      "lines": [
+        "Um... can I ask something? The team was talking.",
+        "We help at the stands a lot now. Do we get paid?",
+        { "speaker": "", "text": "Your friends work hard for the business. What is fair pay for a day's work?" }
+      ],
+      "choices": [
+        {
+          "label": "1 coin a day each - we have to save money!",
+          "effects": {
+            "set": { "staff.wage": 1, "staff.morale_pct": 75 },
+            "add": { "maya.trust": -6, "leo.trust": -6, "priya.trust": -6, "happiness": -3 },
+            "log": "You set the team's pay at 1 coin a day."
+          },
+          "then": "pay_low"
+        },
+        {
+          "label": "3 coins a day each - that's fair.",
+          "effects": {
+            "set": { "staff.wage": 3, "staff.morale_pct": 100 },
+            "add": { "maya.trust": 5, "leo.trust": 5, "priya.trust": 5 },
+            "log": "You set fair pay for the team: 3 coins a day.", "memory": "Agreed fair pay for the team."
+          },
+          "then": "pay_fair"
+        },
+        {
+          "label": "5 coins a day each - you're the best team ever!",
+          "effects": {
+            "set": { "staff.wage": 5, "staff.morale_pct": 115 },
+            "add": { "maya.trust": 8, "leo.trust": 8, "priya.trust": 8, "maya.fun": 5, "leo.fun": 5, "priya.fun": 5 },
+            "log": "You set generous pay for the team: 5 coins a day."
+          },
+          "then": "pay_high"
+        }
+      ]
+    },
+    {
+      "id": "pay_low", "speaker": "maya",
+      "lines": [
+        "...Oh. Okay.",
+        { "speaker": "", "text": "Maya tries to smile. When people feel underpaid, they stop trying their best. (Your staff will sell less.)" }
+      ]
+    },
+    {
+      "id": "pay_fair", "speaker": "maya",
+      "lines": [
+        "That's fair! We'll work extra hard!",
+        { "speaker": "", "text": "Each time a friend runs a stand for you, you pay them 3 coins." }
+      ]
+    },
+    {
+      "id": "pay_high", "speaker": "maya",
+      "lines": [
+        "Five?! WOW!",
+        { "speaker": "mom", "text": "Generous! Happy staff sell more - but wages are a cost too. Keep an eye on your profit." }
+      ]
+    },
+
+    {
+      "id": "morning_farm_news", "speaker": "grandpa",
+      "effects": { "set_flag": "farm_news" },
+      "lines": [
+        "Did you know Green Hill Farm is just west of town? Walk left along the road.",
+        "Farmer Ama grows strawberries and keeps bees. You can't buy those at Lin's!"
+      ]
+    },
+    {
+      "id": "signpost_farm", "speaker": "",
+      "lines": [ "The signpost says: <- GREEN HILL FARM  (keep walking west along the road)" ]
+    },
+    {
+      "id": "farm_arrival", "speaker": "",
+      "lines": [
+        "Green Hill Farm: rows of strawberries, a red farm shop, and a very curious cow.",
+        { "speaker": "maya", "text": "It smells like summer!" }
+      ]
+    },
+    {
+      "id": "farmhouse", "speaker": "",
+      "lines": [ "The farmhouse door is open and something delicious is baking. Farmer Ama is outside." ]
+    },
+    {
+      "id": "ama_intro", "speaker": "ama",
+      "effects": { "set_flag": "met_ama", "memory": "Met Farmer Ama at Green Hill Farm." },
+      "lines": [
+        "Hello, hello! Welcome to Green Hill Farm. I'm Ama.",
+        "I grow strawberries and keep bees. Most of my fruit goes to wholesalers like Mrs. Lin, and then to shops.",
+        "Every step in that chain adds a little to the price. Buy straight from me and you skip a step - but it's a long walk!",
+        { "speaker": "", "text": "The Farm Shop now sells Strawberries and Farm Honey." }
+      ]
+    },
+    {
+      "id": "ama_harvest", "speaker": "ama",
+      "lines": [ "The strawberries are ripe and I'm short of hands. Could you help me pick for two hours?" ],
+      "choices": [
+        {
+          "label": "Sure, let's pick! (2 hours)",
+          "effects": {
+            "advance_minutes": 120, "add": { "skill.hard_work": 1, "ama.trust": 8, "health": -3 },
+            "buy_stock": { "item": "strawberries", "qty": 6, "unit_cost": 0 },
+            "set_flag": "today.helped_ama",
+            "log": "You helped Farmer Ama pick strawberries and she gave you 6 punnets.",
+            "memory": "Spent a morning picking strawberries on the farm."
+          },
+          "then": "ama_thanks"
+        },
+        { "label": "Not today, sorry." }
+      ]
+    },
+    {
+      "id": "ama_thanks", "speaker": "ama",
+      "lines": [ "Thank you! Here - six punnets for your shop. Hard work has its own kind of pay, doesn't it?" ]
+    },
+
+    {
+      "id": "price_war_start", "speaker": "maya",
+      "effects": { "set_flag": "price_war" },
+      "later": { "event": "price_war_ends", "days": 6 },
+      "lines": [
+        "Did you see?! MegaMart put up a GIANT sign: LEMONADE - ONLY 2 COINS!",
+        { "speaker": "dad", "text": "They can sell at a loss for a while to steal our customers. Then they put prices up again." },
+        { "speaker": "dad", "text": "We can't win by being cheaper. We have to be BETTER. Cold drinks, perhaps?" }
+      ]
+    },
+    {
+      "id": "price_war_start_fridge", "speaker": "maya",
+      "effects": { "set_flag": ["price_war", "price_war_over"] },
+      "later": { "event": "price_war_ends", "days": 6 },
+      "lines": [
+        "Did you see?! MegaMart put up a GIANT sign: LEMONADE - ONLY 2 COINS!",
+        { "speaker": "dad", "text": "Their lemonade is warm. Ours comes out of a fridge. Let's see who people choose!" }
+      ]
+    },
+    {
+      "id": "price_war_ends", "speaker": "dad",
+      "effects": {
+        "clear_flag": "price_war", "set_flag": "price_war_over",
+        "memory": "Survived the MegaMart price war.",
+        "log": "MegaMart's cheap lemonade is gone - back to 4 coins."
+      },
+      "lines": [
+        "MegaMart's lemonade is back to 4 coins. They only cut the price to win customers for a while.",
+        "We kept ours by being better, not cheaper. Remember that."
+      ]
+    },
+    {
+      "id": "reopening_soon", "speaker": "dad",
+      "lines": [ "On Day 28 we'll celebrate one month since you started helping. A Grand Reopening! Let's make the shop shine." ]
+    },
+    {
+      "id": "dinner_partner", "speaker": "dad",
+      "lines": [ "How was business, partner? A good shopkeeper knows what sells - and what doesn't." ]
+    },
+    {
+      "id": "dinner_loan", "speaker": "mom",
+      "lines": [ "Borrowing isn't bad. But every week the loan payment comes out FIRST. Always keep enough coins for bank day." ]
+    },
+    {
+      "id": "dinner_loan_missed", "speaker": "dad",
+      "lines": [ "We missed a loan payment. That late fee is money thrown away. Let's keep enough coins for the start of each week." ]
+    },
+    {
+      "id": "dinner_fridge", "speaker": "maya",
+      "lines": [ "The fridge hums all night. I think it's singing!" ]
+    },
+    {
+      "id": "chapter2_end", "speaker": "",
+      "effects": { "set_flag": "grand_reopening" },
+      "lines": [
+        "Day 28. The corner shop is packed for its Grand Reopening.",
+        { "speaker": "dad", "text": "A month ago this shop was empty. Look at it now." },
+        { "speaker": "mom", "text": "And you didn't just earn money. You learned when to save, when to borrow, and how to treat people fairly." },
+        { "speaker": "grandpa", "text": "Old shop, new ideas. That's how a business lives a long time." }
       ],
       "action": "chapter_end"
     }

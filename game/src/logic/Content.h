@@ -18,18 +18,42 @@ struct Rgb {
     unsigned char b = 255;
 };
 
+// While the condition holds, customers think the item is worth a different amount
+// (e.g. MegaMart's cheap lemonade during a price war).
+struct ValueRule {
+    Json::Value when;
+    int value = 0;
+    std::string reason;
+};
+
 struct ItemDef {
     std::string id;
     std::string name;
     std::string note;
-    int cost = 1;        // price at the wholesaler
+    int cost = 1;        // reference price at Lin's Wholesale
     int value = 2;       // what customers usually think it is worth
     int shelfDays = 30;  // days before it goes off
+    int fridgeShelfDays = 0;  // shelf life once the shop has a fridge (0 = no change)
     float appeal = 1.0f;
     float hotAppeal = 1.0f;  // appeal on hot days
-    std::string unlockFlag;  // only sold at the wholesaler once this flag is set
+    std::string unlockFlag;  // only sold once this flag is set
     std::string hideFlag;    // no longer sold once this flag is set
+    std::vector<ValueRule> valueWhen;
     Rgb color;
+};
+
+struct SupplierItem {
+    std::string item;
+    int cost = 1;
+};
+
+// A place that sells stock: Lin's Wholesale, Green Hill Farm, ...
+struct SupplierDef {
+    std::string id;
+    std::string name;
+    std::string npc;  // shown on the supplier screen
+    std::string intro;
+    std::vector<SupplierItem> items;
 };
 
 struct Line {
@@ -75,6 +99,12 @@ struct PartyBonus {
     std::string text;
 };
 
+// A companion who can run a venue for you for a daily wage.
+struct StaffProfile {
+    bool canWork = false;
+    float efficiency = 0.6f;  // share of your own sales they manage at fair pay
+};
+
 struct NpcDef {
     std::string id;
     std::string name;
@@ -89,6 +119,7 @@ struct NpcDef {
     std::vector<TalkRule> talk;
     std::vector<std::string> idleEvents;  // generated from "idle" lines
     PartyBonus bonus;
+    StaffProfile staff;
 };
 
 struct QuestStep {
@@ -98,6 +129,7 @@ struct QuestStep {
 
 struct QuestDef {
     std::string id;
+    int chapter = 1;
     std::string title;
     std::string summary;
     std::string startFlag;
@@ -203,8 +235,8 @@ struct VenueBonus {
 struct VenueDef {
     std::string id;
     std::string name;
-    std::string backdrop;  // "park" or "market"
-    std::string helper;    // companion who can run it for you
+    std::string backdrop;   // "park", "market" or "shop"
+    bool staffable = true;  // staff can run it for you
     float customers = 1.0f;
     float festivalCustomers = 1.0f;
     int fee = 0;  // paid every time you open
@@ -225,6 +257,14 @@ struct StartDef {
     std::vector<std::string> party;
     std::vector<std::string> events;
     std::vector<std::string> tips;
+    std::vector<std::string> chapters;  // chapter titles, chapter 1 first
+};
+
+// Money rules that are tuned, not authored per event.
+struct EconomyDef {
+    int savingsInterestPercent = 5;  // paid on savings every week
+    int lateFee = 3;                 // added to a loan when a payment is missed
+    int weekLength = 7;
 };
 
 struct Content {
@@ -235,10 +275,12 @@ struct Content {
     std::vector<QuestDef> quests;
     std::map<std::string, EncounterDef> encounters;
     std::map<std::string, VenueDef> venues;
+    std::map<std::string, SupplierDef> suppliers;
     std::vector<TriggerRule> morning;
     std::vector<TriggerRule> evening;
     std::map<std::string, MapDef> maps;
     StartDef start;
+    EconomyDef economy;
 
     // Loads everything under assetsDir. Throws std::runtime_error naming the bad file.
     static Content Load(const std::string& assetsDir);
@@ -249,8 +291,10 @@ struct Content {
     const EncounterDef* FindEncounter(const std::string& id) const;
     const MapDef* FindMap(const std::string& id) const;
     const VenueDef* FindVenue(const std::string& id) const;
+    const SupplierDef* FindSupplier(const std::string& id) const;
     const MapDef& StartMap() const;
     std::string NameOf(const std::string& characterId) const;
+    std::string ChapterTitle(int chapter) const;
 };
 
 }  // namespace game

@@ -1,6 +1,7 @@
 # Game rules with no rendering: state, content loading, rules, shop simulation, saves.
 # Shared by the game and the unit tests.
 add_library(game_logic STATIC
+    src/logic/Bank.cpp
     src/logic/Content.cpp
     src/logic/Encounter.cpp
     src/logic/GameState.cpp
@@ -18,6 +19,7 @@ add_executable(AAAGame
     src/main.cpp
     src/Flow.cpp
     src/Visuals.cpp
+    src/scenes/BankScene.cpp
     src/scenes/ChapterEndScene.cpp
     src/scenes/DaySummaryScene.cpp
     src/scenes/DialogueScene.cpp

@@ -10,8 +10,9 @@
 #include "engine/Scene.h"
 #include "logic/Selling.h"
 
-// Selling at a venue (pushcart, market stall): set prices, watch customers come by, then see
-// revenue, costs, fees and profit.
+// Selling at a venue (pushcart, market stall, corner shop): set prices, then run it yourself
+// or let a team member run it for a wage. Shows customers coming by, then revenue, costs,
+// fees, wages and profit.
 class SellScene : public engine::Scene {
 public:
     SellScene(engine::Application& app, GameSession& session, const game::VenueDef& venue);
@@ -30,18 +31,19 @@ private:
         std::vector<Rectangle> minus;
         std::vector<Rectangle> plus;
         Rectangle open;
-        Rectangle helper;
         Rectangle leave;
+        std::vector<Rectangle> staff;
         Rectangle done;
     };
 
     Layout MakeLayout() const;
-    void Run(bool helperRuns);
+    void Run(const std::string& staffId);
     float CustomerInterval() const;
     std::string Lesson() const;
     Vector2 CounterPos() const;
 
     void DrawBackdrop() const;
+    void DrawShopInterior() const;
     void DrawSetup(const Layout& l) const;
     void DrawRunning() const;
     void DrawResults(const Layout& l) const;
@@ -50,6 +52,7 @@ private:
     const game::VenueDef& venue_;
     Phase phase_ = Phase::Setup;
     std::vector<std::string> items_;
+    std::vector<std::string> staff_;  // team members who could run it
     int row_ = 0;
 
     game::SessionReport report_;

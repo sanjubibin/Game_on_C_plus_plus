@@ -43,6 +43,51 @@
       ]
     },
     {
+      "id": "open_for_business",
+      "chapter": 2,
+      "title": "Partners!",
+      "summary": "You and Dad run the corner shop together now. Make it shine before the Grand Reopening on Day 28.",
+      "start_flag": "shop_partner",
+      "steps": [
+        { "text": "Open the Corner Shop (use its door) and sell something.", "done_flag": "shop_sale" },
+        { "text": "Invest in an upgrade for the shop (ask Dad at the door).", "done_flag": "upgrade_bought" },
+        { "text": "Celebrate the Grand Reopening on Day 28.", "done_flag": "grand_reopening" }
+      ]
+    },
+    {
+      "id": "big_fridge",
+      "chapter": 2,
+      "title": "The Big Fridge",
+      "summary": "Cold drinks sell better and keep longer. But a fridge costs 80 coins.",
+      "start_flag": "shop_partner",
+      "steps": [
+        { "text": "Ask Dad how you could pay for a fridge.", "done_flag": "bank_news" },
+        { "text": "Get the fridge: save up, or borrow from the Town Bank (market square).", "done_flag": "fridge" }
+      ]
+    },
+    {
+      "id": "price_war",
+      "chapter": 2,
+      "title": "Price War",
+      "summary": "MegaMart is selling lemonade for just 2 coins.",
+      "start_flag": "price_war",
+      "steps": [
+        { "text": "Keep your customers without cutting prices (hint: quality, not price).", "done_flag": "price_war_over" }
+      ]
+    },
+    {
+      "id": "farm_fresh",
+      "chapter": 2,
+      "title": "Straight from the Farm",
+      "summary": "Green Hill Farm grows things you can't buy in town.",
+      "start_flag": "farm_news",
+      "steps": [
+        { "text": "Find Green Hill Farm (walk west along the road).", "done_flag": "visited_farm" },
+        { "text": "Meet Farmer Ama.", "done_flag": "met_ama" },
+        { "text": "Buy something at the Farm Shop.", "done_flag": "bought_from_farm" }
+      ]
+    },
+    {
       "id": "new_kid",
       "title": "The New Kid",
       "summary": "A boy sits alone on a park bench every day.",

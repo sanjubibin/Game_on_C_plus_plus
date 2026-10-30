@@ -1,0 +1,40 @@
+{
+  "name": "Green Hill Farm",
+  "legend": {
+    ".": "grass", "f": "flowers", ":": "path", "=": "road", "c": "strawberry field",
+    "~": "pond (solid)", "T": "tree (solid)"
+  },
+  "enter_flag": "visited_farm",
+  "enter_event": "farm_arrival",
+  "tiles": [
+    "TTTTTTTTTTTTTTTTTTTTTTTTTTTT",
+    "T..f.....f.....f.....f.....T",
+    "T..cccccccccc..............T",
+    "T..cccccccccc..............T",
+    "T..cccccccccc..............T",
+    "T..cccccccccc..............T",
+    "T..cccccccccc..............T",
+    "T..........................T",
+    "T............:::::::::::::::",
+    "T..~~~.......===============",
+    "T..~~~.......===============",
+    "T............:::::::::::::::",
+    "T..cccccccccc..............T",
+    "T..cccccccccc..............T",
+    "T..cccccccccc..............T",
+    "T..cccccccccc..............T",
+    "T.f.......f.......f.......fT",
+    "TTTTTTTTTTTTTTTTTTTTTTTTTTTT"
+  ],
+  "start": [25, 9],
+  "buildings": [
+    { "id": "farmhouse", "label": "FARMHOUSE", "action": "event:farmhouse",
+      "x": 16, "y": 2, "w": 6, "h": 4, "door_x": 18, "wall": "#fff4e6", "roof": "#a0522d" },
+    { "id": "farm_shop", "label": "FARM SHOP", "action": "open_supplier:farm",
+      "x": 16, "y": 12, "w": 7, "h": 4, "door_x": 19, "wall": "#f8e1c4", "roof": "#c92a2a" }
+  ],
+  "spots": [],
+  "exits": [
+    { "x": 27, "y": 8, "w": 1, "h": 4, "to": "town", "at": [2, 9] }
+  ]
+}

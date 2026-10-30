@@ -5,6 +5,8 @@
 #include <functional>
 #include <set>
 
+#include "logic/Bank.h"
+
 namespace game {
 
 namespace {
@@ -14,8 +16,8 @@ const std::set<std::string> kConditionKeys = {
     "below",    "in_party", "not_in_party", "seen",    "not_seen", "has_stock"};
 
 const std::set<std::string> kEffectKeys = {
-    "add",          "set_flag",        "clear_flag", "join_party", "buy_stock",
-    "remove_dodgy", "advance_minutes", "log",        "memory",     "schedule"};
+    "add",          "set",          "set_flag", "clear_flag", "join_party", "buy_stock",
+    "remove_dodgy", "advance_minutes", "log",   "memory",     "schedule",   "take_loan"};
 
 // Calls fn for a string or for every string in an array.
 template <typename Fn>
@@ -151,6 +153,30 @@ std::string DescribeUnmet(const Json::Value& when, const GameState& state, const
     return "Not possible right now";
 }
 
+void AddMemory(GameState& state, const std::string& text) {
+    const bool known = std::any_of(state.memories.begin(), state.memories.end(),
+                                   [&](const Memory& m) { return m.text == text; });
+    if (!known) {
+        state.memories.push_back({state.day, text});
+    }
+}
+
+int ItemValue(const ItemDef& item, const GameState& state) {
+    for (const ValueRule& rule : item.valueWhen) {
+        if (CheckCondition(rule.when, state)) {
+            return rule.value;
+        }
+    }
+    return item.value;
+}
+
+int ShelfDays(const ItemDef& item, const GameState& state) {
+    if (item.fridgeShelfDays > 0 && state.HasFlag("fridge")) {
+        return item.fridgeShelfDays;
+    }
+    return item.shelfDays;
+}
+
 void Schedule(GameState& state, const Later& later) {
     if (!later.event.empty()) {
         state.scheduled.push_back({state.day + std::max(1, later.days), later.event});
@@ -168,6 +194,13 @@ void ApplyEffects(const Json::Value& effects, GameState& state) {
                 state.Add(stat, delta);
                 return true;
             });
+        } else if (key == "set") {
+            AllMembers(v, [&](const std::string& stat, int value) {
+                state.Set(stat, value);
+                return true;
+            });
+        } else if (key == "take_loan") {
+            TakeLoan(state, v["amount"].asInt(), v["rate"].asInt(), v["weeks"].isInt() ? v["weeks"].asInt() : 4);
         } else if (key == "set_flag") {
             ForEachString(v, [&](const std::string& f) { state.SetFlag(f); });
         } else if (key == "clear_flag") {
@@ -190,12 +223,7 @@ void ApplyEffects(const Json::Value& effects, GameState& state) {
         } else if (key == "log") {
             state.todayLog.push_back(v.asString());
         } else if (key == "memory") {
-            const std::string text = v.asString();
-            const bool known = std::any_of(state.memories.begin(), state.memories.end(),
-                                           [&](const Memory& m) { return m.text == text; });
-            if (!known) {
-                state.memories.push_back({state.day, text});
-            }
+            AddMemory(state, v.asString());
         } else if (key == "schedule") {
             Schedule(state, Later{v["event"].asString(), v["days"].isInt() ? v["days"].asInt() : 1});
         }
@@ -254,6 +282,23 @@ const QuestStep* CurrentStep(const QuestDef& quest, const GameState& state) {
     return nullptr;
 }
 
+const QuestDef* TrackedQuest(const GameState& state, const Content& content) {
+    const int chapter = std::max(1, state.Get("chapter"));
+    const QuestDef* fallback = nullptr;
+    for (const QuestDef& quest : content.quests) {
+        if (GetQuestStatus(quest, state) != QuestStatus::Active) {
+            continue;
+        }
+        if (quest.chapter == chapter) {
+            return &quest;
+        }
+        if (fallback == nullptr) {
+            fallback = &quest;
+        }
+    }
+    return fallback;
+}
+
 bool IsHotDay(const GameState& state) {
     std::uint32_t h = state.seed ^ (static_cast<std::uint32_t>(state.day) * 2654435761u);
     h ^= h >> 13;
@@ -272,7 +317,7 @@ std::vector<std::string> StartDay(GameState& state, const Content& content) {
     std::map<std::string, int> spoiled;
     std::erase_if(state.stock, [&](const StockBatch& batch) {
         const ItemDef* item = content.FindItem(batch.item);
-        const int shelfDays = item ? item->shelfDays : 30;
+        const int shelfDays = item ? ShelfDays(*item, state) : 30;
         if (state.day - batch.dayBought >= shelfDays) {
             spoiled[batch.item] += batch.qty;
             return true;
@@ -290,6 +335,9 @@ std::vector<std::string> StartDay(GameState& state, const Content& content) {
     }
     if (IsTired(state)) {
         state.todayLog.push_back("You woke up tired. Early nights help you recover.");
+    }
+    if (IsWeekStart(state.day, content.economy)) {
+        ProcessWeek(state, content.economy);
     }
 
     std::vector<std::string> events;
@@ -459,11 +507,15 @@ std::vector<std::string> ValidateContent(const Content& content) {
         }
     };
     auto checkAction = [&](const std::string& action, const std::string& where) {
-        if (action.empty() || action == "open_supplier" || action == "end_day" ||
-            action == "home" || action == "chapter_end") {
+        if (action.empty() || action == "end_day" || action == "home" || action == "chapter_end" ||
+            action == "open_bank") {
             return;
         }
-        if (action.starts_with("open_sell:")) {
+        if (action.starts_with("open_supplier:")) {
+            if (!content.FindSupplier(action.substr(14))) {
+                problems.push_back(where + ": unknown supplier '" + action.substr(14) + "'");
+            }
+        } else if (action.starts_with("open_sell:")) {
             if (!content.FindVenue(action.substr(10))) {
                 problems.push_back(where + ": unknown venue '" + action.substr(10) + "'");
             }
@@ -521,11 +573,21 @@ std::vector<std::string> ValidateContent(const Content& content) {
         }
     }
     for (const auto& [id, venue] : content.venues) {
-        if (!venue.helper.empty()) {
-            checkCharacter(venue.helper, "venue " + id + " helper");
-        }
         for (const VenueBonus& bonus : venue.bonuses) {
             checkCondition(bonus.when, "venue " + id + " bonus");
+        }
+    }
+    for (const auto& [id, supplier] : content.suppliers) {
+        checkCharacter(supplier.npc, "supplier " + id);
+        for (const SupplierItem& item : supplier.items) {
+            if (!content.FindItem(item.item)) {
+                problems.push_back("supplier " + id + ": unknown item '" + item.item + "'");
+            }
+        }
+    }
+    for (const auto& [id, item] : content.items) {
+        for (const ValueRule& rule : item.valueWhen) {
+            checkCondition(rule.when, "item " + id + " value_when");
         }
     }
     for (const auto& [id, enc] : content.encounters) {

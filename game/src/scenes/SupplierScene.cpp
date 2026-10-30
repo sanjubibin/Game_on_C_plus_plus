@@ -21,12 +21,23 @@ float F(int value) {
 
 }  // namespace
 
-SupplierScene::SupplierScene(engine::Application& app, GameSession& session) : Scene(app), s_(session) {
-    for (const std::string& id : s_.content.itemOrder) {
-        if (game::ItemAvailable(s_.content.items.at(id), s_.state)) {
-            items_.push_back(id);
+SupplierScene::SupplierScene(engine::Application& app, GameSession& session, const game::SupplierDef& supplier)
+    : Scene(app), s_(session), supplier_(supplier) {
+    for (const game::SupplierItem& entry : supplier_.items) {
+        const game::ItemDef* item = s_.content.FindItem(entry.item);
+        if (item != nullptr && game::ItemAvailable(*item, s_.state)) {
+            items_.push_back(entry.item);
         }
     }
+}
+
+int SupplierScene::CostOf(const std::string& item) const {
+    for (const game::SupplierItem& entry : supplier_.items) {
+        if (entry.item == item) {
+            return entry.cost;
+        }
+    }
+    return 1;
 }
 
 SupplierScene::Layout SupplierScene::MakeLayout() const {
@@ -36,11 +47,11 @@ SupplierScene::Layout SupplierScene::MakeLayout() const {
     l.panel = {w / 2.0f - 470.0f, h / 2.0f - 330.0f, 940.0f, 660.0f};
     float y = l.panel.y + 120.0f;
     for (std::size_t i = 0; i < items_.size(); ++i) {
-        const Rectangle row{l.panel.x + 30.0f, y, l.panel.width - 60.0f, 72.0f};
+        const Rectangle row{l.panel.x + 30.0f, y, l.panel.width - 60.0f, 62.0f};
         l.rows.push_back(row);
-        l.minus.push_back({row.x + 560.0f, row.y + 14.0f, 44.0f, 44.0f});
-        l.plus.push_back({row.x + 680.0f, row.y + 14.0f, 44.0f, 44.0f});
-        y += 80.0f;
+        l.minus.push_back({row.x + 560.0f, row.y + 11.0f, 40.0f, 40.0f});
+        l.plus.push_back({row.x + 680.0f, row.y + 11.0f, 40.0f, 40.0f});
+        y += 66.0f;
     }
     l.buy = {l.panel.x + l.panel.width - 470.0f, l.panel.y + l.panel.height - 76.0f, 250.0f, 54.0f};
     l.leave = {l.panel.x + l.panel.width - 200.0f, l.panel.y + l.panel.height - 76.0f, 170.0f, 54.0f};
@@ -50,9 +61,7 @@ SupplierScene::Layout SupplierScene::MakeLayout() const {
 int SupplierScene::Total() const {
     int total = 0;
     for (const auto& [id, qty] : qty_) {
-        if (const game::ItemDef* item = s_.content.FindItem(id)) {
-            total += qty * item->cost;
-        }
+        total += qty * CostOf(id);
     }
     return total;
 }
@@ -70,11 +79,12 @@ void SupplierScene::Buy() {
             continue;
         }
         const game::ItemDef* item = s_.content.FindItem(id);
-        s_.state.AddStock({id, qty, item->cost, s_.state.day, false});
+        s_.state.AddStock({id, qty, CostOf(id), s_.state.day, false});
         bought += (bought.empty() ? "" : ", ") + std::to_string(qty) + " " + item->name;
     }
     s_.state.Add("money", -total);
     s_.state.SetFlag("bought_stock");
+    s_.state.SetFlag("bought_from_" + supplier_.id);
     s_.state.minutes += 30;
     s_.state.todayLog.push_back("Bought " + bought + " for " + std::to_string(total) + " coins.");
     s_.AddToast("Coins -" + std::to_string(total));
@@ -124,11 +134,9 @@ void SupplierScene::Draw(float /*alpha*/) const {
     const Layout l = MakeLayout();
     ui::Panel(l.panel, kPaper, kPanelBorder, 3.0f);
 
-    const game::NpcDef* lin = s_.content.FindNpc("mrs_lin");
-    DrawPortrait({l.panel.x + 64.0f, l.panel.y + 60.0f}, 40.0f, LookOf(lin));
-    ui::Text("Lin's Wholesale", {l.panel.x + 120.0f, l.panel.y + 22.0f}, 32.0f, kInk, true);
-    ui::Text("You buy at COST PRICE here. Sell for more to make a PROFIT.", {l.panel.x + 120.0f, l.panel.y + 64.0f},
-             19.0f, kMuted);
+    DrawPortrait({l.panel.x + 64.0f, l.panel.y + 60.0f}, 40.0f, LookOf(s_.content.FindNpc(supplier_.npc)));
+    ui::Text(supplier_.name, {l.panel.x + 120.0f, l.panel.y + 22.0f}, 32.0f, kInk, true);
+    ui::Text(supplier_.intro, {l.panel.x + 120.0f, l.panel.y + 64.0f}, 19.0f, kMuted);
     DrawCoin({l.panel.x + l.panel.width - 180.0f, l.panel.y + 40.0f}, 11.0f);
     ui::Text(std::to_string(s_.state.Get("money")) + " coins", {l.panel.x + l.panel.width - 160.0f, l.panel.y + 26.0f},
              26.0f, kInk, true);
@@ -141,17 +149,18 @@ void SupplierScene::Draw(float /*alpha*/) const {
         const bool focused = row_ == i;
         ui::Panel(row, focused ? Color{255, 236, 205, 255} : Color{255, 252, 246, 255},
                   focused ? kAccent : Color{220, 200, 180, 255}, focused ? 3.0f : 1.5f);
-        DrawCircleV({row.x + 32.0f, row.y + 36.0f}, 16.0f, ToColor(item.color));
-        ui::Text(item.name, {row.x + 62.0f, row.y + 8.0f}, 24.0f, kInk, true);
-        ui::Text("Cost " + std::to_string(item.cost) + " each", {row.x + 330.0f, row.y + 12.0f}, 20.0f, kInk, true);
-        ui::Text("People usually pay about " + std::to_string(item.value) + " coins", {row.x + 62.0f, row.y + 42.0f},
-                 17.0f, kGood);
+        DrawCircleV({row.x + 32.0f, row.y + 31.0f}, 15.0f, ToColor(item.color));
+        ui::Text(item.name, {row.x + 62.0f, row.y + 6.0f}, 22.0f, kInk, true);
+        const int cost = CostOf(item.id);
+        ui::Text("Cost " + std::to_string(cost) + " each", {row.x + 330.0f, row.y + 9.0f}, 20.0f, kInk, true);
+        ui::Text("People usually pay about " + std::to_string(item.value) + " coins", {row.x + 62.0f, row.y + 36.0f},
+                 16.0f, kGood);
 
         const int qty = qty_.count(item.id) ? qty_.at(item.id) : 0;
         ui::DrawButton(l.minus[idx], "-", false, qty > 0, 28.0f);
-        ui::TextCentered(std::to_string(qty), {row.x + 642.0f, row.y + 36.0f}, 30.0f, kInk, true);
+        ui::TextCentered(std::to_string(qty), {row.x + 642.0f, row.y + 31.0f}, 28.0f, kInk, true);
         ui::DrawButton(l.plus[idx], "+", false, qty < kMaxQty, 28.0f);
-        ui::Text("= " + std::to_string(qty * item.cost), {row.x + 750.0f, row.y + 22.0f}, 24.0f, kInk, true);
+        ui::Text("= " + std::to_string(qty * cost), {row.x + 750.0f, row.y + 18.0f}, 24.0f, kInk, true);
     }
 
     // Notes for the focused item: how long it lasts and anything special.

@@ -8,6 +8,7 @@
 #include "Visuals.h"
 #include "logic/Rules.h"
 #include "logic/SaveGame.h"
+#include "scenes/BankScene.h"
 #include "scenes/ChapterEndScene.h"
 #include "scenes/DaySummaryScene.h"
 #include "scenes/DialogueScene.h"
@@ -60,6 +61,12 @@ bool ContinueGame(engine::Application& app, GameSession& session, std::string* e
     if (!game::LoadGame(session.savePath, session.state, error)) {
         return false;
     }
+    // Saves from before chapters were numbered: finishing chapter 1 means you're in chapter 2.
+    game::GameState& st = session.state;
+    if (st.Get("chapter") < 2 &&
+        (st.seenEvents.contains("chapter1_end_great") || st.seenEvents.contains("chapter1_end_ok"))) {
+        st.Set("chapter", 2);
+    }
     session.toasts.clear();
     const std::vector<std::string> events = game::StartDay(session.state, session.content);
     PlaceAtHome(session);
@@ -91,8 +98,12 @@ void RunAction(engine::Application& app, GameSession& session, const std::string
     if (action.empty()) {
         return;
     }
-    if (action == "open_supplier") {
-        app.Scenes().Push(std::make_unique<SupplierScene>(app, session));
+    if (action.starts_with("open_supplier:")) {
+        if (const game::SupplierDef* supplier = session.content.FindSupplier(action.substr(14))) {
+            app.Scenes().Push(std::make_unique<SupplierScene>(app, session, *supplier));
+        }
+    } else if (action == "open_bank") {
+        app.Scenes().Push(std::make_unique<BankScene>(app, session));
     } else if (action.starts_with("open_sell:")) {
         if (const game::VenueDef* venue = session.content.FindVenue(action.substr(10))) {
             app.Scenes().Push(std::make_unique<SellScene>(app, session, *venue));

@@ -6,10 +6,11 @@ money, work and people really work. Full design: [docs/GAME_DESIGN.md](docs/GAME
 
 C++20, built with the MSYS2 UCRT64 toolchain, raylib and jsoncpp.
 
-**Current state: Phase 2 - Chapter 1 complete.** Two areas (town and market square), a family,
-three friends, a rival and a grumpy customer, seven quests, the pushcart and market stall
-businesses, four encounters, a "Their Side" scene, Festival Day, the Life Wheel and a chapter-end
-screen, day/night cycle with health, and saving. Graphics are drawn in code (no art assets yet).
+**Current state: Phase 3 - Chapters 1 and 2.** Three areas (town, market square, Green Hill
+Farm); the pushcart, market stall and corner shop businesses with upgrades; staff with wages; the
+Town Bank with savings, interest and loans; a MegaMart price war; eleven quests; five encounters;
+a "Their Side" scene; Festival Day; the Life Wheel and chapter-end screens; day/night cycle with
+health; and saving. Graphics are drawn in code (no art assets yet).
 
 ## How to play
 
@@ -22,7 +23,7 @@ screen, day/night cycle with health, and saving. Graphics are drawn in code (no 
 | Esc | Pause menu |
 
 Look for gold **!** markers over people with something new to say. Walk east along the road to
-reach the market square. A day runs from 08:00 to 20:00; go home to have dinner and sleep. Going
+reach the market square, or west to Green Hill Farm. A day runs from 08:00 to 20:00; go home to have dinner and sleep. Going
 home early restores health, staying out until dark costs it. The game saves every night.
 
 ## Layout
@@ -36,16 +37,17 @@ engine/               Static library, genre-agnostic
 game/
   src/logic/          game_logic library - no rendering, unit-tested
                         GameState, Content (JSON loading), Rules (conditions, effects, day cycle,
-                        Life Wheel), ShopSim (customers), Selling (a whole session at a venue),
-                        Encounter (social challenge rules), SaveGame
-  src/scenes/         Title, World, Dialogue, Supplier, Sell, Encounter, Journal, Pause,
+                        Life Wheel), ShopSim (customers), Selling (a session at a venue, staff),
+                        Encounter (social challenge rules), Bank (savings, loans), SaveGame
+  src/scenes/         Title, World, Dialogue, Supplier, Sell, Encounter, Bank, Journal, Pause,
                       DaySummary, ChapterEnd
   src/Flow.*          Glue between scenes: new game, events, actions, day cycle
   src/Visuals.*       Palette and procedural drawing of characters, stalls, Life Wheel
   src/main.cpp        Entry point and developer start options
 assets/
-  data/               All content as JSON: events, characters, quests, items, venues, encounters
-  maps/               One JSON file per area (town, market): tiles, buildings, spots, exits
+  data/               All content as JSON: events, characters, quests, items, venues, suppliers,
+                      encounters, start state and economy settings
+  maps/               One JSON file per area (town, market, farm): tiles, buildings, spots, exits
 tests/                Unit tests for the logic library (plain asserts, run with CTest)
 docs/                 Game design document
 ```
@@ -89,9 +91,10 @@ build/debug/game/AAAGame.exe --start sell --screenshot shot.png --frames 60
 ```
 
 `--start` accepts `town`, `park`, `evening`, `market`, `festival`, `exit-test`, `supplier`,
-`sell`, `sell-run`, `sell-results`, `stall`, `stall-run`, `stall-results`,
-`encounter[:<id>]`, `journal` / `journal:<0-4>`, `summary`, `chapter-end`, `title`,
-`continue`, `dialogue:<event id>` and `choices:<event id>`. Dev starts never write the save file.
+`sell`, `sell-run`, `sell-results`, `stall`, `stall-run`, `stall-results`, `ch2`, `shop`,
+`shop-results`, `bank`, `farm`, `farm-supplier`, `encounter[:<id>]`, `journal` /
+`journal:<0-4>`, `summary`, `chapter-end`, `title`, `continue`, `dialogue:<event id>` and
+`choices:<event id>`. Dev starts never write the save file.
 
 ## Standalone package
 

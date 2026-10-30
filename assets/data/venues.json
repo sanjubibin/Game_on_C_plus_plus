@@ -1,15 +1,26 @@
 {
   "venues": [
     {
-      "id": "pushcart", "name": "Pushcart", "backdrop": "park", "helper": "maya",
+      "id": "pushcart", "name": "Pushcart", "backdrop": "park",
       "customers": 1.0, "festival_customers": 0.4, "fee": 0, "hours": 3
     },
     {
-      "id": "stall", "name": "Market Stall", "backdrop": "market", "helper": "maya",
+      "id": "stall", "name": "Market Stall", "backdrop": "market",
       "customers": 1.7, "festival_customers": 2.5, "fee": 5, "hours": 3,
       "bonuses": [
         { "when": { "flag": "kofi_friend" }, "customers": 0.1, "text": "Kofi sent his fruit customers your way!" },
         { "when": { "flag": "grumble_regular" }, "customers": 0.05, "text": "Mrs. Grumble brought her friends." }
+      ]
+    },
+    {
+      "id": "shop", "name": "Corner Shop", "backdrop": "shop",
+      "customers": 1.4, "festival_customers": 0.6, "fee": 0, "hours": 3,
+      "bonuses": [
+        { "when": { "flag": "upgrade_sign" }, "customers": 0.25, "text": "The bright new sign brings people in!" },
+        { "when": { "flag": "upgrade_shelves" }, "customers": 0.15, "text": "Tidy new shelves help customers find things." },
+        { "when": { "flag": "fridge" }, "customers": 0.15, "text": "People come back for the cold drinks." },
+        { "when": { "flag": "price_war", "not_flag": "fridge" }, "customers": -0.25,
+          "text": "Some customers went to MegaMart for cheap lemonade." }
       ]
     }
   ]

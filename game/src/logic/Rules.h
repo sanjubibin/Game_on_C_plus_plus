@@ -19,10 +19,18 @@ bool CheckCondition(const Json::Value& when, const GameState& state);
 std::string DescribeUnmet(const Json::Value& when, const GameState& state, const Content& content);
 
 // --- Effects ----------------------------------------------------------------------------------
-// Keys: add {stat: delta}, set_flag, clear_flag, join_party, buy_stock {item, qty, unit_cost,
-// dodgy}, remove_dodgy, advance_minutes, log, memory, schedule {event, days}.
+// Keys: add {stat: delta}, set {stat: value}, set_flag, clear_flag, join_party,
+// buy_stock {item, qty, unit_cost, dodgy}, remove_dodgy, advance_minutes, log, memory,
+// schedule {event, days}, take_loan {amount, rate, weeks}.
 void ApplyEffects(const Json::Value& effects, GameState& state);
 void Schedule(GameState& state, const Later& later);
+void AddMemory(GameState& state, const std::string& text);
+
+// --- Items ------------------------------------------------------------------------------------
+// What customers think an item is worth today (value_when rules can change it).
+int ItemValue(const ItemDef& item, const GameState& state);
+// Days before the item goes off (longer once the shop has a fridge).
+int ShelfDays(const ItemDef& item, const GameState& state);
 
 // "skill.money_sense" -> "Money sense", "maya.trust" -> "Maya trust", "money" -> "Coins".
 std::string StatLabel(const std::string& key, const Content& content);
@@ -35,6 +43,8 @@ std::vector<std::string> DiffStats(const std::map<std::string, int>& before,
 enum class QuestStatus { Hidden, Active, Done };
 QuestStatus GetQuestStatus(const QuestDef& quest, const GameState& state);
 const QuestStep* CurrentStep(const QuestDef& quest, const GameState& state);
+// The quest to show on screen: the current chapter's active quests come first.
+const QuestDef* TrackedQuest(const GameState& state, const Content& content);
 
 // --- Day cycle -------------------------------------------------------------------------------
 bool IsHotDay(const GameState& state);

@@ -19,8 +19,8 @@ bool ContinueGame(engine::Application& app, GameSession& session, std::string* e
 // Plays events in order as a dialogue overlay, then calls onDone.
 void PlayEvents(engine::Application& app, GameSession& session, std::vector<std::string> events,
                 std::function<void()> onDone = {});
-// Actions: open_supplier, open_sell:<venue>, end_day, home, chapter_end, event:<id>,
-// encounter:<id>.
+// Actions: open_supplier:<id>, open_sell:<venue>, open_bank, end_day, home, chapter_end,
+// event:<id>, encounter:<id>.
 void RunAction(engine::Application& app, GameSession& session, const std::string& action);
 void TalkTo(engine::Application& app, GameSession& session, const game::NpcDef& npc);
 

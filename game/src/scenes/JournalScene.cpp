@@ -141,8 +141,22 @@ void JournalScene::DrawBag(Rectangle area) const {
     ui::Text("Reputation " + std::to_string(st.Get("reputation")) + " / 100",
              {area.x + 260.0f, area.y + 4.0f}, 22.0f, kMuted);
 
-    float y = area.y + 52.0f;
-    ui::Text("Stock for the pushcart", {area.x, y}, 22.0f, kAccent, true);
+    float y = area.y + 36.0f;
+    if (st.Get("bank.savings") > 0 || st.Get("bank.loan") > 0) {
+        std::string bank = "Bank savings: " + std::to_string(st.Get("bank.savings")) + " coins";
+        if (st.Get("bank.loan") > 0) {
+            bank += "     Loan still owed: " + std::to_string(st.Get("bank.loan")) + " (" +
+                    std::to_string(st.Get("bank.payment")) + " a week)";
+        }
+        ui::Text(bank, {area.x, y}, 19.0f, kInk);
+        y += 26.0f;
+    }
+    if (st.Get("staff.wage") > 0) {
+        ui::Text("Staff pay: " + std::to_string(st.Get("staff.wage")) + " coins a day each", {area.x, y}, 19.0f, kInk);
+        y += 26.0f;
+    }
+    y += 12.0f;
+    ui::Text("Stock", {area.x, y}, 22.0f, kAccent, true);
     y += 34.0f;
     if (st.stock.empty()) {
         ui::Text("Nothing yet. Buy stock at Lin's Wholesale.", {area.x, y}, 20.0f, kMuted);
@@ -151,7 +165,7 @@ void JournalScene::DrawBag(Rectangle area) const {
     for (const game::StockBatch& batch : st.stock) {
         const game::ItemDef* item = s_.content.FindItem(batch.item);
         const std::string name = item ? item->name : batch.item;
-        const int daysLeft = (item ? item->shelfDays : 30) - (st.day - batch.dayBought);
+        const int daysLeft = (item ? game::ShelfDays(*item, st) : 30) - (st.day - batch.dayBought);
         std::string freshness = daysLeft <= 1 ? "goes off tonight"
                                               : "fresh for " + std::to_string(daysLeft) + " more days";
         if (batch.dodgy) {

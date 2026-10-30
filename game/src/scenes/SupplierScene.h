@@ -9,10 +9,11 @@
 #include "GameSession.h"
 #include "engine/Scene.h"
 
-// Lin's Wholesale: buy stock at cost price. Teaches cost vs. selling price and budgeting.
+// A supplier (Lin's Wholesale, the Farm Shop): buy stock at cost price.
+// Teaches cost vs. selling price and budgeting.
 class SupplierScene : public engine::Scene {
 public:
-    SupplierScene(engine::Application& app, GameSession& session);
+    SupplierScene(engine::Application& app, GameSession& session, const game::SupplierDef& supplier);
 
     void Update(float dt) override;
     void Draw(float alpha) const override;
@@ -28,10 +29,12 @@ private:
     };
     Layout MakeLayout() const;
     int Total() const;
+    int CostOf(const std::string& item) const;
     void Buy();
 
     GameSession& s_;
-    std::vector<std::string> items_;  // what Mrs. Lin sells you right now
+    const game::SupplierDef& supplier_;
+    std::vector<std::string> items_;  // what this supplier sells you right now
     std::map<std::string, int> qty_;
     int row_ = 0;  // item rows, then Buy, then Leave
 };

@@ -1,8 +1,12 @@
 {
   "items": [
-    { "id": "lemonade", "name": "Lemonade", "cost": 1, "value": 3, "shelf_days": 1,
+    { "id": "lemonade", "name": "Lemonade", "cost": 1, "value": 3, "shelf_days": 1, "fridge_shelf_days": 3,
       "appeal": 1.2, "hot_appeal": 3.5, "color": "#f5d442",
-      "note": "Made fresh. Unsold cups go flat overnight." },
+      "value_when": [
+        { "when": { "flag": "price_war", "not_flag": "fridge" }, "value": 2,
+          "reason": "MegaMart sells cheap lemonade right now." }
+      ],
+      "note": "Made fresh. Unsold cups go flat overnight - unless you have a fridge." },
     { "id": "apples", "name": "Apples", "cost": 1, "value": 2, "shelf_days": 3,
       "appeal": 1.0, "hot_appeal": 0.8, "color": "#d94a3a", "hide_flag": "kofi_friend",
       "note": "Stay fresh for 3 days." },
@@ -14,6 +18,16 @@
       "note": "You buy the ingredients and bake them with Mom's recipe. Fresh for 2 days." },
     { "id": "sandwiches", "name": "Sandwiches", "cost": 3, "value": 6, "shelf_days": 1,
       "appeal": 1.1, "hot_appeal": 1.0, "color": "#e9c46a", "unlock_flag": "stall_rented",
-      "note": "Lunch for busy market shoppers. Same day only." }
+      "fridge_shelf_days": 2,
+      "note": "Lunch for busy shoppers. Same day only - two days with a fridge." },
+    { "id": "milkshakes", "name": "Iced Milkshakes", "cost": 2, "value": 6, "shelf_days": 1,
+      "appeal": 1.2, "hot_appeal": 3.0, "color": "#f7c6d9", "unlock_flag": "fridge",
+      "note": "Only possible with a fridge. A hot-day favourite." },
+    { "id": "strawberries", "name": "Strawberries", "cost": 2, "value": 6, "shelf_days": 1,
+      "appeal": 1.4, "hot_appeal": 1.7, "color": "#e03131", "unlock_flag": "met_ama",
+      "note": "Picked this morning at Green Hill Farm. Same day only." },
+    { "id": "honey", "name": "Farm Honey", "cost": 3, "value": 7, "shelf_days": 60,
+      "appeal": 0.8, "hot_appeal": 0.6, "color": "#f59f00", "unlock_flag": "met_ama",
+      "note": "A jar keeps for months. Fewer people buy it, but each sale earns more." }
   ]
 }

@@ -32,6 +32,7 @@ ChapterEndScene::ChapterEndScene(engine::Application& app, GameSession& session)
 void ChapterEndScene::Update(float dt) {
     time_ += dt;
     if (time_ > 1.0f && (ui::ConfirmPressed() || ui::Clicked(ContinueButton()))) {
+        s_.state.Set("chapter", std::max(1, s_.state.Get("chapter")) + 1);
         App().Scenes().Pop();
     }
 }
@@ -51,8 +52,11 @@ void ChapterEndScene::Draw(float /*alpha*/) const {
     }
 
     const float appear = std::min(1.0f, time_ * 1.5f);
-    ui::TextCentered("CHAPTER 1 COMPLETE", {w / 2.0f, 54.0f}, 48.0f, Fade(WHITE, appear), true);
-    ui::TextCentered("The Pushcart", {w / 2.0f, 100.0f}, 26.0f, Fade(Color{255, 240, 220, 255}, appear));
+    const int chapter = std::max(1, s_.state.Get("chapter"));
+    ui::TextCentered("CHAPTER " + std::to_string(chapter) + " COMPLETE", {w / 2.0f, 54.0f}, 48.0f, Fade(WHITE, appear),
+                     true);
+    ui::TextCentered(s_.content.ChapterTitle(chapter), {w / 2.0f, 100.0f}, 26.0f,
+                     Fade(Color{255, 240, 220, 255}, appear));
 
     const Rectangle panel{w / 2.0f - 560.0f, 136.0f, 1120.0f, h - 236.0f};
     ui::Panel(panel, Fade(kPaper, 0.96f), kPanelBorder, 3.0f);
@@ -81,7 +85,7 @@ void ChapterEndScene::Draw(float /*alpha*/) const {
     ui::Panel(think, Color{255, 236, 205, 255}, kAccent, 2.0f);
     ui::Text("Think about it", {think.x + 16.0f, think.y + 10.0f}, 18.0f, kAccent, true);
     ui::TextWrapped("Which moment would you do differently next time? Which part of your Life Wheel would you "
-                    "like to grow in Chapter 2?",
+                    "like to grow in Chapter " + std::to_string(chapter + 1) + "?",
                     {think.x + 16.0f, think.y + 36.0f, think.width - 32.0f, 56.0f}, 18.0f, kInk);
 
     ui::DrawButton(ContinueButton(), "Continue", true, time_ > 1.0f, 26.0f);

@@ -42,7 +42,9 @@
     { "id": "toy_stall", "label": "TOYS", "style": "stall",
       "x": 5, "y": 14, "w": 4, "h": 2, "wall": "#f3e3c3", "roof": "#4263eb" },
     { "id": "cheese_stall", "label": "CHEESE", "style": "stall",
-      "x": 17, "y": 14, "w": 4, "h": 2, "wall": "#f3e3c3", "roof": "#f59f00" }
+      "x": 17, "y": 14, "w": 4, "h": 2, "wall": "#f3e3c3", "roof": "#f59f00" },
+    { "id": "bank", "label": "TOWN BANK", "action": "open_bank",
+      "x": 22, "y": 13, "w": 5, "h": 4, "door_x": 24, "wall": "#f1f3f5", "roof": "#1c7ed6" }
   ],
   "spots": [
     { "id": "your_stall", "label": "Open your stall", "action": "open_sell:stall", "draw": "stall",

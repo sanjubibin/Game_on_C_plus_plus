@@ -1,7 +1,7 @@
-# Corner Shop Quest — Game Design (draft v0.3)
+# Corner Shop Quest — Game Design (draft v0.4)
 
 > Working title. Genre: **2D top-down adventure RPG + family business**.
-> Status: **draft v0.3** - Phase 1 and Phase 2 (Chapter 1) built; see the status sections. Items marked *(provisional)* are defaults awaiting a decision — see
+> Status: **draft v0.4** - Phases 1-3 (Chapters 1 and 2) built; see the status sections. Items marked *(provisional)* are defaults awaiting a decision — see
 > [Open decisions](#open-decisions).
 
 ## Vision
@@ -208,8 +208,29 @@ Built on top of Phase 1:
 - **Health:** an early night restores health, staying out until dark costs it; when tired you
   walk slower.
 
-Not yet: art and animation assets, audio, Chapter 2 content (corner shop tier, staff, bank and
-loans, new regions), generations, testing with real kids.
+## Phase 3 status - Chapter 2 "The Corner Shop" (Days 15-28)
+
+- **Partners with Dad:** the corner shop becomes a venue you run (door menu). Upgrades are
+  investments: fridge (80), sign (30), shelves (40). Each adds customers; the fridge keeps
+  lemonade 3 days, sandwiches 2 days, and unlocks Iced Milkshakes.
+- **Town Bank (Ms. Adeyemi, market square):** savings earn 5% every 7 days (a savings tree grows
+  coin fruit); loans are repaid in weekly instalments on bank day, with a late fee if you can't
+  pay; early repayment allowed. A loan-interview encounter rewards a repayment plan with 10%
+  instead of 25% interest. You can also refuse and save up.
+- **Staff and wages:** Maya, Leo and Priya can each run one venue a day for the team wage. The
+  pay talk sets it: 1 coin (staff sell 25% less, trust falls), 3 (fair), or 5 (staff sell 15%
+  more, but it costs). Results show the wage as a cost line.
+- **Price war:** MegaMart sells lemonade for 2 coins for a week - customers value yours less and
+  the shop loses visitors - unless you have the fridge. Lesson: compete on quality, not price.
+- **Green Hill Farm (first village, west of town):** Farmer Ama explains the supply chain
+  (farm -> wholesaler -> shop); the Farm Shop sells strawberries and honey you can't get in town;
+  helping with the harvest trades two hours of hard work for stock.
+- **Engine/data:** suppliers, item value rules, fridge shelf life, staff profiles, venue
+  bonuses (including negative ones), quests tagged by chapter (the HUD tracks the current
+  chapter first), a generic chapter-end screen and chapter titles in data.
+
+Not yet: art and animation assets, audio, Chapter 3 (the bigger store / chain tier, the city),
+generations, testing with real kids.
 
 ## Open decisions
 

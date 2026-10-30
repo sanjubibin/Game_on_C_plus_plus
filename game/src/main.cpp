@@ -26,7 +26,7 @@ namespace {
 // Development options:
 //   --start <continue|town|park|evening|market|festival|supplier|sell|sell-run|sell-results|
 //            stall|stall-run|stall-results|encounter[:id]|journal[:tab]|summary|chapter-end|title|
-//            dialogue:<event>|choices:<event>>
+//            ch2|shop|shop-results|bank|farm|farm-supplier|dialogue:<event>|choices:<event>>
 //   --screenshot <file.png> [--frames N]   save frame N and quit
 struct Options {
     std::string start;
@@ -135,8 +135,62 @@ void DevStart(engine::Application& app, GameSession& session, const std::string&
         session.currentMap = "market";
         session.playerPos = {12.5f * visuals::kTile, 12.5f * visuals::kTile + 8.0f};
     };
+    // Chapter 2 underway: partners in the shop, a loan, a fridge, fair pay, a farm visit.
+    auto chapterTwo = [&session, &midChapter]() {
+        game::GameState& st = session.state;
+        midChapter();
+        st.day = 20;
+        st.Set("chapter", 2);
+        for (const char* flag : {"shop_partner", "bank_news", "met_adeyemi", "has_loan", "loan_decided", "fridge",
+                                 "upgrade_bought", "upgrade_sign", "farm_news", "visited_farm", "met_ama", "kofi_friend",
+                                 "price_war", "price_war_over"}) {
+            st.SetFlag(flag);
+        }
+        for (const char* event : {"ch2_start", "adeyemi_intro", "ama_intro", "staff_pay_talk", "farm_arrival"}) {
+            st.seenEvents.insert(event);
+        }
+        st.Set("staff.wage", 3);
+        st.Set("bank.savings", 35);
+        st.Set("bank.interest_earned", 2);
+        st.Set("bank.loan", 66);
+        st.Set("bank.payment", 22);
+        st.Set("money", 58);
+        st.AddStock({"milkshakes", 10, 2, st.day, false});
+        st.AddStock({"strawberries", 6, 2, st.day, false});
+        st.memories.push_back({15, "Became Dad's partner in the corner shop."});
+        st.memories.push_back({18, "Took our first loan - with a plan to pay it back."});
+        st.memories.push_back({18, "Invested in a fridge for cold drinks."});
+    };
 
     if (what == "town") {
+        return;
+    }
+    if (what == "ch2") {
+        chapterTwo();
+        return;
+    }
+    if (what == "shop" || what == "shop-results") {
+        chapterTwo();
+        auto scene = std::make_unique<SellScene>(app, session, *session.content.FindVenue("shop"));
+        if (what == "shop-results") {
+            scene->DevAutoRun(1000.0f);
+        }
+        app.Scenes().Push(std::move(scene));
+        return;
+    }
+    if (what == "bank") {
+        chapterTwo();
+        toMarket();
+        flow::RunAction(app, session, "open_bank");
+        return;
+    }
+    if (what == "farm" || what == "farm-supplier") {
+        chapterTwo();
+        session.currentMap = "farm";
+        session.playerPos = {19.5f * visuals::kTile, 9.5f * visuals::kTile + 8.0f};
+        if (what == "farm-supplier") {
+            flow::RunAction(app, session, "open_supplier:farm");
+        }
         return;
     }
     if (what == "exit-test") {
@@ -171,7 +225,7 @@ void DevStart(engine::Application& app, GameSession& session, const std::string&
         stock();
         session.state.minutes = 19 * 60;
     } else if (what == "supplier") {
-        flow::RunAction(app, session, "open_supplier");
+        flow::RunAction(app, session, "open_supplier:lin");
     } else if (what == "sell") {
         stock();
         app.Scenes().Push(std::make_unique<SellScene>(app, session, *session.content.FindVenue("pushcart")));
