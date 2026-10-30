@@ -44,6 +44,13 @@ int StaffWage(const GameState& state);
 std::string StaffUnavailableReason(const GameState& state, const Content& content, const VenueDef& venue,
                                    const std::string& staffId);
 
+// --- The city shop (branch) ---------------------------------------------------------------------
+// The branch manager is chosen by a story flag "manager_<id>"; empty when there is none.
+std::string BranchManager(const GameState& state);
+// Evening: the manager runs the "branch" venue once if they can. Returns true if it opened;
+// otherwise the reason is written to the day log.
+bool RunBranchDay(GameState& state, const Content& content);
+
 // Runs one session (venue.hours long) and applies money, stock, reputation, time and flags.
 // With a staffId, that team member sells for you (paid their wage up front) and your clock
 // does not move.

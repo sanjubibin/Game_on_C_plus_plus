@@ -6,6 +6,7 @@
 #include "Flow.h"
 #include "Visuals.h"
 #include "engine/Application.h"
+#include "engine/Audio.h"
 #include "logic/Rules.h"
 #include "scenes/DialogueScene.h"
 
@@ -65,6 +66,11 @@ void EncounterScene::Update(float dt) {
         const game::EncounterAction& action = enc_.actions[static_cast<std::size_t>(picked)];
         game::UseAction(enc_, es_, action, s_.state);
         flow::ApplyEffects(s_, action.effects);
+        if (es_.result == game::EncounterResult::Won) {
+            engine::audio::Play("success");
+        } else if (es_.result == game::EncounterResult::Lost) {
+            engine::audio::Play("fail");
+        }
     }
 }
 

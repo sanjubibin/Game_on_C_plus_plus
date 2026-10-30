@@ -300,7 +300,8 @@ void ParseSuppliers(const Json::Value& root, Content& c) {
         supplier.npc = Str(v, "npc");
         supplier.intro = Str(v, "intro");
         for (const Json::Value& item : Field(v, "items")) {
-            supplier.items.push_back({Str(item, "item"), Int(item, "cost", 1)});
+            supplier.items.push_back(
+                {Str(item, "item"), Int(item, "cost", 1), Int(item, "bulk_qty", 0), Int(item, "bulk_cost", 0)});
         }
         c.suppliers[supplier.id] = std::move(supplier);
     }
@@ -392,7 +393,7 @@ char MapDef::TileAt(int x, int y) const {
 }
 
 bool MapDef::IsSolid(char tile) {
-    return tile == 'T' || tile == '~' || tile == '#' || tile == 'b' || tile == 'o' || tile == 'X';
+    return tile == 'T' || tile == '~' || tile == '#' || tile == 'b' || tile == 'o' || tile == 'k' || tile == 'X';
 }
 
 Content Content::Load(const std::string& assetsDir) {

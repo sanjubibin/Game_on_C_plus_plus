@@ -1,6 +1,6 @@
 {
   "map": "town",
-  "chapters": ["The Pushcart", "The Corner Shop", "To Be Continued"],
+  "chapters": ["The Pushcart", "The Corner Shop", "Two Shops", "To Be Continued"],
   "economy": { "savings_interest": 5, "late_fee": 3, "week_length": 7 },
   "stats": {
     "chapter": 1,
@@ -44,6 +44,10 @@
     "An investment costs money now to earn more later. Does it pay for itself?",
     "Fair pay makes a happy team - and a happy team works harder.",
     "Competing on price is a race to the bottom. Compete on quality instead.",
-    "Buying straight from the farm cuts out the middleman - but it's a long walk."
+    "Buying straight from the farm cuts out the middleman - but it's a long walk.",
+    "Buying in bulk lowers the price of each item - if you can sell them all in time.",
+    "Rent is a fixed cost. It comes every week, busy or quiet.",
+    "A good manager is someone you trust when you're not there.",
+    "When you choose one friend, make sure the others still feel valued."
   ]
 }

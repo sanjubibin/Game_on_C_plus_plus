@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include "engine/Audio.h"
+
 namespace engine::ui {
 
 namespace {
@@ -210,16 +212,19 @@ int Menu::Update(const std::vector<Rectangle>& items, const std::vector<bool>& e
         }
         if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && isEnabled(i)) {
             focused = i;
+            audio::Play("click");
             return i;
         }
     }
     for (int i = 0; i < std::min(count, 9); ++i) {
         if (IsKeyPressed(KEY_ONE + i) && isEnabled(i)) {
             focused = i;
+            audio::Play("click");
             return i;
         }
     }
     if (ConfirmPressed() && isEnabled(focused)) {
+        audio::Play("click");
         return focused;
     }
     return -1;

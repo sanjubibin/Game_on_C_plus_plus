@@ -106,7 +106,7 @@ std::string StaffUnavailableReason(const GameState& state, const Content& conten
         return name + " already worked today.";
     }
     if (state.HasFlag(VenueStaffedFlag(venue.id))) {
-        return "Someone already ran the " + venue.name + " today.";
+        return "The " + venue.name + " has already been open today.";
     }
     const std::string closed = CannotOpenReason(state, content, venue);
     if (!closed.empty()) {
@@ -116,6 +116,44 @@ std::string StaffUnavailableReason(const GameState& state, const Content& conten
         return "Not enough coins for the fee and " + name + "'s wage.";
     }
     return {};
+}
+
+std::string BranchManager(const GameState& state) {
+    for (const std::string& flag : state.flags) {
+        if (flag.starts_with("manager_") && flag != "manager_chosen" && flag != "manager_conflict") {
+            return flag.substr(8);
+        }
+    }
+    return {};
+}
+
+bool RunBranchDay(GameState& state, const Content& content) {
+    const VenueDef* branch = content.FindVenue("branch");
+    if (branch == nullptr || !state.HasFlag("branch_open")) {
+        return false;
+    }
+    const std::string manager = BranchManager(state);
+    std::string why;
+    if (manager.empty()) {
+        why = "no manager has been chosen yet";
+    } else if (state.HasFlag(manager + "_upset")) {
+        why = content.NameOf(manager) + " was too upset to work";
+    } else if (state.HasFlag(StaffFlag(manager))) {
+        why = content.NameOf(manager) + " was busy at another stand today";
+    } else if (state.HasFlag(VenueStaffedFlag(branch->id))) {
+        return false;  // you ran it yourself today
+    } else if (ItemsInStock(state, content).empty()) {
+        why = "there was no stock left to sell";
+    } else if (state.Get("money") < branch->fee + StaffWage(state)) {
+        why = "there weren't enough coins for " + content.NameOf(manager) + "'s wage";
+    }
+    if (!why.empty()) {
+        state.todayLog.push_back("The " + branch->name + " stayed closed this evening: " + why + ".");
+        return false;
+    }
+    // Evening trade: the session must not move your clock, and it counts as staffed.
+    RunSellSession(state, content, *branch, manager);
+    return true;
 }
 
 SessionReport RunSellSession(GameState& state, const Content& content, const VenueDef& venue,
@@ -179,10 +217,10 @@ SessionReport RunSellSession(GameState& state, const Content& content, const Ven
 
     if (byStaff) {
         state.SetFlag(StaffFlag(staffId));
-        state.SetFlag(VenueStaffedFlag(venue.id));
     } else {
         state.minutes += venue.hours * 60;
     }
+    state.SetFlag(VenueStaffedFlag(venue.id));
     if (report.sales.TotalSold() > 0) {
         if (!state.HasFlag("first_sale")) {
             AddMemory(state, "Made our very first sale!");

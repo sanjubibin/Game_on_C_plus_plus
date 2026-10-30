@@ -29,7 +29,9 @@ private:
     };
     Layout MakeLayout() const;
     int Total() const;
-    int CostOf(const std::string& item) const;
+    // Price per item for this quantity (bulk prices kick in at the supplier's threshold).
+    int CostOf(const std::string& item, int qty = 1) const;
+    const game::SupplierItem* Entry(const std::string& item) const;
     void Buy();
 
     GameSession& s_;

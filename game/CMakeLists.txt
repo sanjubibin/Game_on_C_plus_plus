@@ -18,6 +18,7 @@ fun_set_warnings(game_logic)
 add_executable(AAAGame
     src/main.cpp
     src/Flow.cpp
+    src/GameAudio.cpp
     src/Visuals.cpp
     src/scenes/BankScene.cpp
     src/scenes/ChapterEndScene.cpp

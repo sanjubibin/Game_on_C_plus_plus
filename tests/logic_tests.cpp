@@ -395,6 +395,173 @@ void TestChapterTwoWiring() {
     CHECK(game::PickEveningEvent(s, content) == "chapter2_end");
 }
 
+void TestChainTier() {
+    // Bulk prices kick in at the threshold.
+    const game::SupplierItem sandwiches{"sandwiches", 3, 20, 2};
+    CHECK(sandwiches.UnitCostFor(19) == 3 && sandwiches.UnitCostFor(20) == 2 && sandwiches.UnitCostFor(50) == 2);
+    const game::SupplierItem plain{"lemonade", 1, 0, 0};
+    CHECK(!plain.HasBulkPrice() && plain.UnitCostFor(100) == 1);
+
+    // Rent comes out on bank day: pocket first, then savings, else it's late.
+    game::EconomyDef economy;
+    game::GameState s;
+    s.SetFlag("branch_open");
+    s.Set("branch.rent", 20);
+    s.Set("money", 30);
+    game::ProcessWeek(s, economy);
+    CHECK(s.Get("money") == 10);
+    s.Set("bank.savings", 15);
+    game::ProcessWeek(s, economy);  // 10 from pocket, 10 from savings (savings earn 1 first)
+    CHECK(s.Get("money") == 0 && s.Get("bank.savings") == 6 && !s.HasFlag("rent_late"));
+    s.Set("reputation", 50);
+    game::ProcessWeek(s, economy);  // 0 + 6 isn't enough
+    CHECK(s.HasFlag("rent_late") && s.Get("reputation") == 45 && s.Get("bank.savings") == 6);
+
+    // The manager runs the city shop in the evening, for the team wage.
+    game::Content content;
+    game::ItemDef pretzels;
+    pretzels.id = "pretzels";
+    pretzels.name = "Pretzels";
+    pretzels.value = 5;
+    content.items["pretzels"] = pretzels;
+    content.itemOrder = {"pretzels"};
+    game::NpcDef priya;
+    priya.id = "priya";
+    priya.name = "Priya";
+    priya.staff = {true, 0.85f};
+    content.npcs.push_back(priya);
+    game::VenueDef branch;
+    branch.id = "branch";
+    branch.name = "City Shop";
+    branch.customers = 1.8f;
+    content.venues["branch"] = branch;
+
+    game::GameState day;
+    day.Set("money", 20);
+    day.Set("staff.wage", 3);
+    day.SetFlag("branch_open");
+    CHECK(game::BranchManager(day).empty());
+    CHECK(!game::RunBranchDay(day, content));  // no manager yet
+    CHECK(day.todayLog.size() == 1);
+    day.SetFlag("manager_chosen");
+    day.SetFlag("manager_priya");
+    CHECK(game::BranchManager(day) == "priya");
+    CHECK(!game::RunBranchDay(day, content));  // no stock
+    day.AddStock({"pretzels", 40, 1, 1, false});
+    day.prices["pretzels"] = 4;
+    const int minutes = day.minutes;
+    CHECK(game::RunBranchDay(day, content));
+    CHECK(day.minutes == minutes && day.HasFlag("today.staff_priya") && day.StockOf("pretzels") < 40);
+    CHECK(!game::RunBranchDay(day, content));  // only once a day
+    game::GameState upset = day;
+    upset.flags.erase("today.staff_priya");
+    upset.flags.erase("today.staffed_branch");
+    upset.SetFlag("priya_upset");
+    CHECK(!game::RunBranchDay(upset, content));
+
+    // Travel actions.
+    game::TravelTarget target;
+    CHECK(game::ParseTravel("travel:city:4:12", target) && target.map == "city" && target.x == 4 && target.y == 12);
+    CHECK(!game::ParseTravel("travel:city:4", target) && !game::ParseTravel("event:x", target));
+}
+
+void TestChapterThreeWiring() {
+    game::Content content;
+    try {
+        content = game::Content::Load(FUN_ASSETS_DIR);
+    } catch (const std::exception&) {
+        CHECK(false);
+        return;
+    }
+    auto talk = [&](const game::GameState& s, const std::string& npc) {
+        const game::NpcDef* def = content.FindNpc(npc);
+        return def ? game::PickTalkEvent(*def, s) : std::string("<missing>");
+    };
+    auto visibleChoices = [&](const game::GameState& s, const std::string& event) {
+        std::vector<std::string> labels;
+        for (const game::ChoiceDef& c : content.FindEvent(event)->choices) {
+            if (game::CheckCondition(c.showWhen, s)) {
+                labels.push_back(c.label);
+            }
+        }
+        return labels;
+    };
+    auto play = [&](game::GameState& s, const std::string& event, int choice = -1) {
+        const game::EventDef* def = content.FindEvent(event);
+        if (def == nullptr) {
+            CHECK(false);
+            return;
+        }
+        s.seenEvents.insert(event);
+        game::ApplyEffects(def->effects, s);
+        if (choice >= 0) {
+            game::ApplyEffects(def->choices[static_cast<std::size_t>(choice)].effects, s);
+        }
+    };
+
+    CHECK(content.ChapterTitle(3) == "Two Shops");
+    CHECK(content.FindMap("city") != nullptr && content.FindSupplier("city") != nullptr);
+
+    game::GameState s;
+    s.Set("chapter", 3);
+    s.day = 28;
+    s.seenEvents = {"ch2_start", "morning_farm_news", "staff_pay_talk", "price_war_start", "price_war_start_fridge",
+                    "morning_day2", "morning_stranger_rumor", "morning_market_news"};
+    game::EndDay(s);
+    std::vector<std::string> morning = game::StartDay(s, content);
+    CHECK(morning.size() == 1 && morning[0] == "ch3_start");
+    play(s, "ch3_start");
+    CHECK(s.HasFlag("city_news"));
+    const game::QuestDef* tracked = game::TrackedQuest(s, content);
+    CHECK(tracked != nullptr && tracked->id == "two_shops");
+
+    // The bus costs coins; walking home is free but slow.
+    s.Set("money", 1);
+    const game::EventDef* bus = content.FindEvent("bus_stop_city");
+    CHECK(!game::CheckCondition(bus->choices[0].requirement, s));
+    CHECK(game::CheckCondition(bus->choices[1].requirement, s));
+
+    // Mrs. Osei: the discount swaps which rent option you see.
+    s.Set("money", 100);
+    CHECK(talk(s, "osei") == "osei_intro");
+    s.seenEvents.insert("osei_intro");
+    CHECK(visibleChoices(s, "osei_offer").size() == 3);
+    play(s, "osei_discount");
+    std::vector<std::string> offer = visibleChoices(s, "osei_offer");
+    CHECK(offer.size() == 2 && offer[0] == "Take the shop (40 deposit, 15 a week)");
+    play(s, "osei_offer", 2);
+    CHECK(s.HasFlag("branch_open") && s.Get("branch.rent") == 15 && s.Get("money") == 60);
+
+    // Choosing Priya when Leo is on the team hurts Leo's feelings - and he won't work.
+    s.party = {"maya", "leo", "priya"};
+    std::vector<std::string> managers = visibleChoices(s, "choose_manager");
+    CHECK(managers.size() == 3);  // Priya, Leo, Grandpa
+    play(s, "choose_manager", 1);
+    CHECK(game::BranchManager(s) == "priya" && s.HasFlag("leo_upset"));
+    CHECK(talk(s, "leo") == "leo_hurt");
+    play(s, "leo_valued");
+    CHECK(!s.HasFlag("leo_upset") && s.HasFlag("head_of_design"));
+    CHECK(!talk(s, "leo").starts_with("leo_hurt"));
+
+    // The City Market has bulk prices; pretzels unlock after meeting Mr. Haddad.
+    const game::SupplierDef* city = content.FindSupplier("city");
+    bool anyBulk = false;
+    for (const game::SupplierItem& item : city->items) {
+        anyBulk = anyBulk || item.HasBulkPrice();
+    }
+    CHECK(anyBulk);
+    CHECK(!game::ItemAvailable(content.items.at("pretzels"), s));
+    play(s, "haddad_intro");
+    CHECK(game::ItemAvailable(content.items.at("pretzels"), s));
+
+    // Day 42 ends the chapter - with or without a second shop.
+    s.day = 42;
+    CHECK(game::PickEveningEvent(s, content) == "chapter3_end_branch");
+    game::GameState noBranch = s;
+    noBranch.ClearFlag("branch_open");
+    CHECK(game::PickEveningEvent(noBranch, content) == "chapter3_end_small");
+}
+
 void TestSellingSession() {
     game::Content content;
     game::ItemDef lemonade;
@@ -737,9 +904,11 @@ int main() {
     TestStoryWiring();
     TestChapterOneWiring();
     TestChapterTwoWiring();
+    TestChapterThreeWiring();
     TestSellingSession();
     TestBank();
     TestItemRules();
+    TestChainTier();
     TestEncounterRules();
     TestLifeWheelAndBedtime();
 

@@ -20,6 +20,17 @@
         { "item": "honey", "cost": 3 },
         { "item": "apples", "cost": 1 }
       ]
+    },
+    {
+      "id": "city", "name": "City Market", "npc": "haddad",
+      "intro": "Buy 20 or more of one thing for the bulk price!",
+      "items": [
+        { "item": "lemonade", "cost": 1 },
+        { "item": "sandwiches", "cost": 3, "bulk_qty": 20, "bulk_cost": 2 },
+        { "item": "biscuits", "cost": 2, "bulk_qty": 20, "bulk_cost": 1 },
+        { "item": "milkshakes", "cost": 2, "bulk_qty": 20, "bulk_cost": 1 },
+        { "item": "pretzels", "cost": 2, "bulk_qty": 20, "bulk_cost": 1 }
+      ]
     }
   ]
 }

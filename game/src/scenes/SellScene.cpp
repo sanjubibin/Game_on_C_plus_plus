@@ -5,6 +5,7 @@
 
 #include "Visuals.h"
 #include "engine/Application.h"
+#include "engine/Audio.h"
 #include "engine/Ui.h"
 #include "logic/Rules.h"
 
@@ -173,6 +174,10 @@ void SellScene::Update(float dt) {
             break;
         }
         case Phase::Results:
+            if (!resultsSounded_) {
+                resultsSounded_ = true;
+                engine::audio::Play(report_.Profit() > 0 ? "coin" : "fail");
+            }
             if (ui::Clicked(l.done) || ui::ConfirmPressed() || IsKeyPressed(KEY_ESCAPE)) {
                 if (report_.skillUp) {
                     s_.AddToast("Money sense +1");

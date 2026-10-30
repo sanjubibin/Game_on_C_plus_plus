@@ -28,6 +28,7 @@
     {
       "id": "grandpa", "name": "Grandpa", "x": 8, "y": 7, "relationship": true,
       "body": "#7a6a53", "hair": "#e6e6e6", "skin": "#f0c8a0",
+      "staff": { "efficiency": 0.6 },
       "talk": [
         { "when": { "flag": "ask_grandpa_scam", "not_flag": "scam_resolved" }, "event": "grandpa_scam_story" },
         { "when": { "not_flag": "got_pushcart" }, "event": "grandpa_pushcart" }
@@ -61,6 +62,8 @@
       "bonus": { "customers": 0.15, "text": "Leo's bright sign brought extra customers!" },
       "staff": { "efficiency": 0.7 },
       "talk": [
+        { "when": { "flag": ["leo_upset", "today.hurt_tried"] }, "event": "hurt_needs_time" },
+        { "when": { "flag": "leo_upset" }, "event": "leo_hurt" },
         { "when": { "flag": "today.leo_tried", "not_flag": "leo_joined" }, "event": "leo_tomorrow" },
         { "when": { "not_seen": "leo_meet", "not_flag": "leo_joined" }, "event": "leo_meet" },
         { "when": { "not_flag": "leo_joined" }, "event": "leo_try_again" }
@@ -78,6 +81,8 @@
       "bonus": { "customers": 0.1, "text": "Priya's cheerful shouting drew a crowd!" },
       "staff": { "efficiency": 0.85 },
       "talk": [
+        { "when": { "flag": ["priya_upset", "today.hurt_tried"] }, "event": "hurt_needs_time" },
+        { "when": { "flag": "priya_upset" }, "event": "priya_hurt" },
         { "when": { "flag": "first_sale", "day_min": 2, "not_seen": "priya_arcade" }, "event": "priya_arcade" },
         { "when": { "flag": "first_sale", "day_min": 4, "not_seen": "priya_join_offer" }, "event": "priya_join_offer" },
         { "when": { "seen": "priya_join_offer", "not_flag": "priya_joined" }, "event": "priya_ask_again" },
@@ -196,6 +201,38 @@
       "id": "daisy", "name": "Daisy the Cow", "map": "farm", "x": 8, "y": 10,
       "body": "#f8f9fa", "hair": "#212529", "skin": "#f8f9fa",
       "idle": [ "Mooooo.", "Moo? (She seems to want a strawberry.)", "MOOO! (Daisy is very happy to see you.)" ]
+    },
+
+    {
+      "id": "osei", "name": "Mrs. Osei", "map": "city", "x": 19, "y": 8,
+      "body": "#ae3ec9", "hair": "#343a40", "skin": "#8d5524",
+      "talk": [
+        { "when": { "not_seen": "osei_intro" }, "event": "osei_intro" },
+        { "when": { "not_flag": "branch_open" }, "event": "osei_offer" }
+      ],
+      "idle": [
+        "Rent day is the start of each week. Don't forget!",
+        "Before you, this shop sold umbrellas. In a heatwave! Where AND when you sell both matter."
+      ]
+    },
+    {
+      "id": "haddad", "name": "Mr. Haddad", "map": "city", "x": 9, "y": 8,
+      "body": "#e67700", "hair": "#495057", "skin": "#c68642",
+      "talk": [
+        { "when": { "not_seen": "haddad_intro" }, "event": "haddad_intro" }
+      ],
+      "idle": [
+        "Bulk is cheaper per item - but only if you can sell it all before it goes off!",
+        "I buy from farms, factories and bakeries. I'm a middleman, like Mrs. Lin - only bigger."
+      ]
+    },
+    {
+      "id": "busker", "name": "Jazz the Busker", "map": "city", "x": 25, "y": 12,
+      "body": "#20c997", "hair": "#fab005", "skin": "#e0ac69",
+      "idle": [
+        "I play for tips. Some days 2 coins, some days 20. So I save on the good days!",
+        "Doing what you love is great. Knowing how to earn a living from it is even better."
+      ]
     }
   ]
 }

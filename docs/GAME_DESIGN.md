@@ -1,7 +1,7 @@
-# Corner Shop Quest — Game Design (draft v0.4)
+# Corner Shop Quest — Game Design (draft v0.5)
 
 > Working title. Genre: **2D top-down adventure RPG + family business**.
-> Status: **draft v0.4** - Phases 1-3 (Chapters 1 and 2) built; see the status sections. Items marked *(provisional)* are defaults awaiting a decision — see
+> Status: **draft v0.5** - Phases 1-4 (Chapters 1 to 3) built; see the status sections. Items marked *(provisional)* are defaults awaiting a decision — see
 > [Open decisions](#open-decisions).
 
 ## Vision
@@ -229,8 +229,31 @@ Built on top of Phase 1:
   bonuses (including negative ones), quests tagged by chapter (the HUD tracks the current
   chapter first), a generic chapter-end screen and chapter titles in data.
 
-Not yet: art and animation assets, audio, Chapter 3 (the bigger store / chain tier, the city),
-generations, testing with real kids.
+## Phase 4 status - Chapter 3 "Two Shops" (Days 29-42) and polish
+
+- **Riverside City:** a new area reached by bus (2 coins and an hour each way - or walk home free
+  in three hours). City Market, Cafe Lucia, MegaMart City (high prices where the small shops
+  closed), a park and a busker who talks about saving on good days.
+- **Bulk buying:** the City Market sells at a lower price per item when you buy 20 or more; city
+  pretzels are only sold there. Lesson: economies of scale - if you can sell it all in time.
+- **Chain tier:** rent a second shop from Mrs. Osei (40 deposit, 20 a week - 15 if you negotiate a
+  year's tenancy). Rent comes out on bank day from your pocket, then savings; late rent costs
+  reputation and customers.
+- **Managers:** choose Priya, Leo or Grandpa to run the city shop. The manager sells there every
+  evening from your shared stock for the team wage - unless they're busy, upset, or there's no
+  stock. Choosing one friend over another leads to a "Hurt Feelings" encounter: listen first,
+  then give them a role of their own (Head of Design / Head of Sales).
+- **Young Business Fair (Day 42):** the chapter ends with a ribbon - or, without a second shop,
+  a lesson that knowing when not to grow is smart too.
+- **Audio:** a small synthesizer in the engine builds sound effects (clicks, coins, success,
+  failure, purchases) and a gentle music loop from notes at start-up - no audio files needed.
+- **Settings:** music, sound effects and fullscreen in the pause menu (M toggles music), saved
+  to settings.json.
+
+## Roadmap after Phase 4
+
+- **Phase 5:** generations (hand the business to the next generation), localization, art and
+  animation assets, more chapters, and testing with real kids.
 
 ## Open decisions
 

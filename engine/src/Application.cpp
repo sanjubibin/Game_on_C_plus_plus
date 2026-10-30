@@ -5,6 +5,8 @@
 
 #include <algorithm>
 
+#include "engine/Audio.h"
+
 namespace engine {
 
 Application::Application(const AppConfig& config) : config_(config) {
@@ -49,6 +51,7 @@ void Application::Run() {
         const float frameTime = std::min(GetFrameTime(), kMaxFrameTime);
         accumulator += frameTime;
 
+        audio::Update();
         scenes_.Update(frameTime);
         while (accumulator >= step) {
             scenes_.FixedUpdate(step);

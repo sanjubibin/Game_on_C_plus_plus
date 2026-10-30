@@ -45,6 +45,11 @@ struct ItemDef {
 struct SupplierItem {
     std::string item;
     int cost = 1;
+    int bulkQty = 0;   // buy at least this many at once...
+    int bulkCost = 0;  // ...and each costs this instead (0 bulkQty = no bulk price)
+
+    bool HasBulkPrice() const { return bulkQty > 0 && bulkCost > 0; }
+    int UnitCostFor(int qty) const { return HasBulkPrice() && qty >= bulkQty ? bulkCost : cost; }
 };
 
 // A place that sells stock: Lin's Wholesale, Green Hill Farm, ...
@@ -221,7 +226,8 @@ struct MapDef {
     std::string decor;       // e.g. "bunting"
 
     char TileAt(int x, int y) const;  // 'X' outside the map
-    // Trees, water, hedges, benches, fountains and the outside of the map block movement.
+    // Trees, water, hedges, benches, fountains, brick walls and the outside of the map block
+    // movement.
     static bool IsSolid(char tile);
 };
 

@@ -22,6 +22,15 @@
         { "when": { "flag": "price_war", "not_flag": "fridge" }, "customers": -0.25,
           "text": "Some customers went to MegaMart for cheap lemonade." }
       ]
+    },
+    {
+      "id": "branch", "name": "City Shop", "backdrop": "shop",
+      "customers": 1.8, "festival_customers": 1.0, "fee": 0, "hours": 3,
+      "bonuses": [
+        { "when": { "flag": "head_of_design" }, "customers": 0.1, "text": "Leo's new displays catch people's eyes!" },
+        { "when": { "flag": "head_of_sales" }, "customers": 0.1, "text": "Priya's special offers bring people in!" },
+        { "when": { "flag": "rent_late" }, "customers": -0.1, "text": "Word got around that the rent was late." }
+      ]
     }
   ]
 }

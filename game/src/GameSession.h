@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include "GameAudio.h"
 #include "logic/Content.h"
 #include "logic/GameState.h"
 
@@ -23,8 +24,11 @@ struct GameSession {
     Vector2 playerPos{0.0f, 0.0f};  // feet position in world pixels
     std::vector<Vector2> trail;     // recent player positions, newest first (for followers)
     std::vector<Toast> toasts;
+    double fadeStart = -100.0;  // when the player last changed area (drives a short fade-in)
 
     std::string savePath = "saves/slot1.json";
+    std::string settingsPath = "settings.json";
+    Settings settings;
     bool devMode = false;  // started with --start; never writes the save file
 
     void AddToast(const std::string& text) { toasts.push_back({text, 3.5f}); }

@@ -48,6 +48,8 @@
       "x": 20, "y": 17, "when": { "flag": "got_pushcart" } },
     { "id": "signpost", "label": "Read the signpost", "action": "event:signpost_market", "draw": "signpost",
       "x": 37, "y": 7 },
+    { "id": "bus_stop", "label": "Take the bus", "action": "event:bus_stop_town", "draw": "bus",
+      "x": 35, "y": 7, "when": { "flag": "city_news" } },
     { "id": "farm_signpost", "label": "Read the signpost", "action": "event:signpost_farm", "draw": "signpost_farm",
       "x": 1, "y": 12 }
   ],

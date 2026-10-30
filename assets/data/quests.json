@@ -88,6 +88,40 @@
       ]
     },
     {
+      "id": "two_shops",
+      "chapter": 3,
+      "title": "Two Shops",
+      "summary": "An empty shop in Riverside City could become your second shop - if you can afford it and find a manager.",
+      "start_flag": "city_news",
+      "steps": [
+        { "text": "Take the bus to Riverside City (bus stop outside MegaMart).", "done_flag": "visited_city" },
+        { "text": "Talk to Mrs. Osei about the empty shop.", "done_flag": "met_osei" },
+        { "text": "Rent the city shop and choose a manager.", "done_flag": "manager_chosen" },
+        { "text": "Show your business at the Young Business Fair (Day 42).", "done_flag": "fair_done" }
+      ]
+    },
+    {
+      "id": "bulk_buying",
+      "chapter": 3,
+      "title": "Buying in Bulk",
+      "summary": "The City Market gives a lower price if you buy 20 or more of one thing.",
+      "start_flag": "bulk_news",
+      "steps": [
+        { "text": "Meet Mr. Haddad at the City Market.", "done_flag": "met_haddad" },
+        { "text": "Buy 20 or more of one item at the bulk price.", "done_flag": "bought_bulk" }
+      ]
+    },
+    {
+      "id": "hurt_feelings",
+      "chapter": 3,
+      "title": "Hurt Feelings",
+      "summary": "A friend who wasn't chosen as manager feels left out.",
+      "start_flag": "manager_conflict",
+      "steps": [
+        { "text": "Talk to your friend and help them feel valued.", "done_flag": "conflict_resolved" }
+      ]
+    },
+    {
       "id": "new_kid",
       "title": "The New Kid",
       "summary": "A boy sits alone on a park bench every day.",

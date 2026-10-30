@@ -74,6 +74,15 @@ struct LifeWheel {
 };
 LifeWheel ComputeLifeWheel(const GameState& state, const Content& content);
 
+// --- Travel ------------------------------------------------------------------------------------
+struct TravelTarget {
+    std::string map;
+    int x = 0;
+    int y = 0;
+};
+// Parses "travel:<map>:<x>:<y>"; false if the action isn't a well-formed travel action.
+bool ParseTravel(const std::string& action, TravelTarget& out);
+
 // --- Content checks --------------------------------------------------------------------------
 // Cross-reference problems (unknown events, characters, items, condition keys). Empty is good.
 std::vector<std::string> ValidateContent(const Content& content);

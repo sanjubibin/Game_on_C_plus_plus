@@ -37,7 +37,6 @@ private:
     Vector2 FollowerPos(std::size_t index) const;
     Camera2D MakeCamera(Vector2 focus) const;
     void CheckExits();
-    void Travel(const game::Exit& exit);
 
     void DrawTiles(const Camera2D& camera) const;
     void DrawBuildings() const;
@@ -53,7 +52,6 @@ private:
     Vector2 prevPos_{};
     float clockAccum_ = 0.0f;
     float walkTime_ = 0.0f;
-    double fadeStart_ = -100.0;  // when we last travelled; drives a short black fade-in
     bool moving_ = false;
     bool eveningQueued_ = false;
     Target target_;

@@ -1,6 +1,9 @@
 {
   "morning": [
     { "when": { "day_min": 14, "day_max": 14 }, "event": "festival_morning" },
+    { "when": { "min": { "chapter": 3 } }, "event": "ch3_start" },
+    { "when": { "min": { "chapter": 3 }, "day_min": 40, "day_max": 41 }, "event": "fair_soon" },
+    { "when": { "min": { "chapter": 3 }, "day_min": 31 }, "event": "ch3_bulk_tip" },
     { "when": { "min": { "chapter": 2 } }, "event": "ch2_start" },
     { "when": { "min": { "chapter": 2 }, "day_min": 26, "day_max": 27 }, "event": "reopening_soon" },
     { "when": { "min": { "chapter": 2 }, "day_min": 19, "not_flag": "fridge" }, "event": "price_war_start" },
@@ -16,6 +19,10 @@
     { "when": { "day_min": 3 }, "event": "morning_stranger_rumor" }
   ],
   "evening": [
+    { "when": { "min": { "chapter": 3 }, "day_min": 42, "flag": "branch_open" }, "event": "chapter3_end_branch" },
+    { "when": { "min": { "chapter": 3 }, "day_min": 42, "not_seen": "chapter3_end_branch" }, "event": "chapter3_end_small" },
+    { "when": { "flag": "rent_late" }, "event": "dinner_rent_late" },
+    { "when": { "flag": "branch_open" }, "event": "dinner_branch" },
     { "when": { "min": { "chapter": 2 }, "day_min": 28 }, "event": "chapter2_end" },
     { "when": { "flag": "loan_missed" }, "event": "dinner_loan_missed" },
     { "when": { "flag": "fridge" }, "event": "dinner_fridge" },
@@ -1125,6 +1132,305 @@
         { "speaker": "dad", "text": "A month ago this shop was empty. Look at it now." },
         { "speaker": "mom", "text": "And you didn't just earn money. You learned when to save, when to borrow, and how to treat people fairly." },
         { "speaker": "grandpa", "text": "Old shop, new ideas. That's how a business lives a long time." }
+      ],
+      "action": "chapter_end"
+    },
+
+    {
+      "id": "ch3_start", "speaker": "",
+      "effects": { "set_flag": "city_news" },
+      "lines": [
+        "Four weeks of hard work. The corner shop is busier than it has been in years.",
+        { "speaker": "dad", "text": "Ms. Adeyemi told me about an empty shop in Riverside City, right by the river. Lots of people walk past it every day." },
+        { "speaker": "dad", "text": "A second shop... a little chain of two! But it costs a lot, and none of us can be in two places at once." },
+        { "speaker": "mom", "text": "You'd need someone you trust to run it for you. A manager." },
+        "A bus stop has appeared outside MegaMart. Buses go to Riverside City every hour."
+      ]
+    },
+    {
+      "id": "ch3_bulk_tip", "speaker": "grandpa",
+      "effects": { "set_flag": "bulk_news" },
+      "lines": [
+        "There's a big wholesale market in the city. Buy a LOT of one thing at once and they lower the price. That's buying in bulk.",
+        "But be careful: a bargain that goes off before you sell it is no bargain at all!"
+      ]
+    },
+    {
+      "id": "fair_soon", "speaker": "mom",
+      "lines": [ "On Day 42 the town holds the Young Business Fair. Let's show everyone what you've built!" ]
+    },
+    {
+      "id": "bus_stop_town", "speaker": "",
+      "lines": [ "The bus to Riverside City leaves every hour. A ticket costs 2 coins and the ride takes an hour." ],
+      "choices": [
+        {
+          "label": "Ride to Riverside City (2 coins, 1 hour)",
+          "requires": { "min": { "money": 2 } },
+          "effects": { "add": { "money": -2 }, "advance_minutes": 60, "log": "Took the bus to Riverside City (2 coins)." },
+          "action": "travel:city:14:12"
+        },
+        { "label": "Not now." }
+      ]
+    },
+    {
+      "id": "bus_stop_city", "speaker": "",
+      "lines": [ "Buses back to town leave every hour. A ticket costs 2 coins - or you could walk, but it takes three hours." ],
+      "choices": [
+        {
+          "label": "Ride home (2 coins, 1 hour)",
+          "requires": { "min": { "money": 2 } },
+          "effects": { "add": { "money": -2 }, "advance_minutes": 60, "log": "Took the bus home (2 coins)." },
+          "action": "travel:town:35:8"
+        },
+        {
+          "label": "Walk home (free, 3 hours)",
+          "effects": { "advance_minutes": 180, "add": { "health": -3 }, "log": "Walked all the way home from the city." },
+          "action": "travel:town:35:8"
+        },
+        { "label": "Not now." }
+      ]
+    },
+    {
+      "id": "city_arrival", "speaker": "",
+      "lines": [
+        "Riverside City! Tall buildings, busy streets, and a river sparkling at the end of the road.",
+        { "speaker": "maya", "text": "There are SO many people. Every single one of them is a possible customer!" }
+      ]
+    },
+    {
+      "id": "megamart_city", "speaker": "",
+      "lines": [
+        "MegaMart City is enormous. A sign says: LEMONADE - 5 COINS.",
+        { "speaker": "maya", "text": "Five?! The little shops round here closed, so now MegaMart can charge whatever it likes." },
+        { "speaker": "maya", "text": "That's why it's good to have more than one shop to choose from." }
+      ]
+    },
+    {
+      "id": "cafe_lucia", "speaker": "",
+      "lines": [ "Cafe Lucia smells of coffee and cinnamon. A sign in the window says: WE BUY LOCAL!" ]
+    },
+
+    {
+      "id": "haddad_intro", "speaker": "haddad",
+      "effects": { "set_flag": "met_haddad" },
+      "lines": [
+        "Welcome to the City Market! Shops come from all over to buy here.",
+        "Buy a few and you pay the normal price. Buy 20 or more of one thing and you get my bulk price!",
+        "Big shops like MegaMart buy thousands at once. That's one reason their prices can be so low."
+      ]
+    },
+
+    {
+      "id": "osei_intro", "speaker": "osei",
+      "effects": { "set_flag": "met_osei" },
+      "lines": [
+        "Hello! I'm Mrs. Osei. I own the empty shop over there.",
+        "The rent is 20 coins every week, taken at the start of each week. Plus a 40 coin deposit before you move in.",
+        "A shop with no customers still pays rent. Make sure you can afford it every single week!"
+      ],
+      "then": "osei_offer"
+    },
+    {
+      "id": "osei_offer", "speaker": "osei",
+      "lines": [ "So - do you want the shop?" ],
+      "choices": [
+        { "label": "Could we talk about the rent?", "show_when": { "not_flag": "rent_negotiated" },
+          "action": "encounter:rent_talk" },
+        {
+          "label": "Take the shop (40 deposit, 20 a week)", "show_when": { "not_flag": "rent_discount" },
+          "requires": { "min": { "money": 40 } },
+          "effects": {
+            "add": { "money": -40 }, "set": { "branch.rent": 20 }, "set_flag": "branch_open",
+            "log": "You rented the city shop: 40 coin deposit, 20 coins a week.",
+            "memory": "Opened our second shop, in Riverside City!"
+          },
+          "then": "osei_keys"
+        },
+        {
+          "label": "Take the shop (40 deposit, 15 a week)", "show_when": { "flag": "rent_discount" },
+          "requires": { "min": { "money": 40 } },
+          "effects": {
+            "add": { "money": -40 }, "set": { "branch.rent": 15 }, "set_flag": "branch_open",
+            "log": "You rented the city shop: 40 coin deposit, 15 coins a week.",
+            "memory": "Opened our second shop, in Riverside City!"
+          },
+          "then": "osei_keys"
+        },
+        { "label": "Not yet." }
+      ]
+    },
+    {
+      "id": "osei_keys", "speaker": "osei",
+      "lines": [
+        "Here are the keys! Rent comes out at the start of every week.",
+        "And find a good manager. A shop can't run itself."
+      ],
+      "then": "choose_manager"
+    },
+    {
+      "id": "osei_discount", "speaker": "osei",
+      "effects": {
+        "set_flag": ["rent_discount", "rent_negotiated"], "add": { "skill.communication": 1 },
+        "memory": "Agreed a fair rent with Mrs. Osei."
+      },
+      "lines": [ "A whole year? Then 15 coins a week it is. I'd rather have a good tenant than an empty shop." ],
+      "then": "osei_offer"
+    },
+    {
+      "id": "osei_no_discount", "speaker": "osei",
+      "effects": { "set_flag": "rent_negotiated" },
+      "lines": [
+        "I'm sorry, the rent stays at 20 coins.",
+        { "speaker": "", "text": "Next time, try to find out what she really worries about first." }
+      ],
+      "then": "osei_offer"
+    },
+    {
+      "id": "choose_manager", "speaker": "dad",
+      "lines": [ "Who should manage the city shop? The manager runs it every evening and earns the team wage." ],
+      "choices": [
+        {
+          "label": "Priya - she's brilliant with customers.", "show_when": { "in_party": "priya", "not_in_party": "leo" },
+          "effects": { "set_flag": ["manager_priya", "manager_chosen"], "add": { "priya.trust": 10, "priya.respect": 10 } },
+          "then": "manager_announced"
+        },
+        {
+          "label": "Priya - she's brilliant with customers.", "show_when": { "in_party": ["priya", "leo"] },
+          "effects": {
+            "set_flag": ["manager_priya", "manager_chosen", "leo_upset", "manager_conflict"],
+            "add": { "priya.trust": 10, "priya.respect": 10, "leo.trust": -10 }
+          },
+          "then": "leo_passed_over"
+        },
+        {
+          "label": "Leo - he's creative and reliable.", "show_when": { "in_party": "leo", "not_in_party": "priya" },
+          "effects": { "set_flag": ["manager_leo", "manager_chosen"], "add": { "leo.trust": 10, "leo.respect": 10 } },
+          "then": "manager_announced"
+        },
+        {
+          "label": "Leo - he's creative and reliable.", "show_when": { "in_party": ["priya", "leo"] },
+          "effects": {
+            "set_flag": ["manager_leo", "manager_chosen", "priya_upset", "manager_conflict"],
+            "add": { "leo.trust": 10, "leo.respect": 10, "priya.trust": -10 }
+          },
+          "then": "priya_passed_over"
+        },
+        {
+          "label": "Grandpa - he's run a business before.",
+          "effects": { "set_flag": ["manager_grandpa", "manager_chosen"], "add": { "grandpa.trust": 10, "grandpa.fun": 10 } },
+          "then": "grandpa_manager"
+        }
+      ]
+    },
+    {
+      "id": "manager_announced", "speaker": "",
+      "lines": [ "Your new manager will run the city shop every evening, as long as there's stock to sell and coins for their wage." ]
+    },
+    {
+      "id": "grandpa_manager", "speaker": "grandpa",
+      "lines": [
+        "Me? Back behind a counter? Oh, I've missed this!",
+        { "speaker": "", "text": "Grandpa is slower than he used to be, but every customer gets a story." }
+      ]
+    },
+    {
+      "id": "leo_passed_over", "speaker": "leo",
+      "lines": [
+        "...Priya? Oh. Okay. Sure.",
+        { "speaker": "", "text": "Leo walks off quickly. He looks hurt. Maybe talk to him later?" }
+      ]
+    },
+    {
+      "id": "priya_passed_over", "speaker": "priya",
+      "lines": [
+        "...Leo? Right. Of course.",
+        { "speaker": "", "text": "Priya won't look at you. She seems really upset. Maybe talk to her later?" }
+      ]
+    },
+    {
+      "id": "leo_hurt", "speaker": "leo",
+      "lines": [ "Oh. Hi." ],
+      "action": "encounter:hurt_leo"
+    },
+    {
+      "id": "priya_hurt", "speaker": "priya",
+      "lines": [ "What is it?" ],
+      "action": "encounter:hurt_priya"
+    },
+    {
+      "id": "hurt_needs_time", "speaker": "",
+      "lines": [ "Your friend needs a little time. Try again tomorrow." ]
+    },
+    {
+      "id": "leo_valued", "speaker": "leo",
+      "effects": {
+        "clear_flag": "leo_upset", "set_flag": ["conflict_resolved", "head_of_design"],
+        "add": { "leo.trust": 15, "leo.fun": 5, "skill.empathy": 1 },
+        "log": "You made sure Leo felt valued. He's your Head of Design now.",
+        "memory": "Made sure Leo felt valued too."
+      },
+      "lines": [
+        "Head of Design? That actually sounds amazing.",
+        "Sorry I walked off. I thought you just liked Priya more."
+      ]
+    },
+    {
+      "id": "priya_valued", "speaker": "priya",
+      "effects": {
+        "clear_flag": "priya_upset", "set_flag": ["conflict_resolved", "head_of_sales"],
+        "add": { "priya.trust": 15, "priya.fun": 5, "skill.empathy": 1 },
+        "log": "You made sure Priya felt valued. She's your Head of Sales now.",
+        "memory": "Made sure Priya felt valued too."
+      },
+      "lines": [
+        "Head of Sales? Okay... I like the sound of that.",
+        "I guess I just wanted someone to notice how hard I work."
+      ]
+    },
+    {
+      "id": "hurt_not_yet", "speaker": "",
+      "effects": { "set_flag": "today.hurt_tried" },
+      "lines": [ "Your friend isn't ready to talk yet. Try again tomorrow - and listen first." ]
+    },
+    {
+      "id": "city_shop_door", "speaker": "",
+      "lines": [ "The city shop. Big windows, a long counter, and a view of the river." ],
+      "choices": [
+        { "label": "Open it yourself (3 hours)", "show_when": { "flag": "branch_open" }, "action": "open_sell:branch" },
+        { "label": "Read the sign.", "show_when": { "not_flag": "branch_open" }, "then": "city_shop_sign" },
+        { "label": "Leave." }
+      ]
+    },
+    {
+      "id": "city_shop_sign", "speaker": "",
+      "lines": [ "SHOP TO LET - ask Mrs. Osei (she's usually outside)." ]
+    },
+    {
+      "id": "dinner_branch", "speaker": "grandpa",
+      "lines": [ "Two shops! My mother started with a basket of eggs, you know. She would be so proud of you." ]
+    },
+    {
+      "id": "dinner_rent_late", "speaker": "dad",
+      "lines": [ "We couldn't pay the city rent this week. Rent is a fixed cost - it comes whether we sell or not. Let's keep enough aside." ]
+    },
+    {
+      "id": "chapter3_end_branch", "speaker": "",
+      "effects": { "set_flag": "fair_done", "memory": "Won a ribbon at the Young Business Fair." },
+      "lines": [
+        "Day 42: the Young Business Fair in the town hall.",
+        { "speaker": "dad", "text": "Two shops, a team, a bank loan paid on time... and every customer still knows your name." },
+        { "speaker": "mom", "text": "Being fair to customers, to your team AND to your rivals. That's a real business." },
+        "The judges pin a ribbon on your shirt: YOUNG ENTREPRENEURS OF THE YEAR."
+      ],
+      "action": "chapter_end"
+    },
+    {
+      "id": "chapter3_end_small", "speaker": "",
+      "effects": { "set_flag": "fair_done", "memory": "Shared our story at the Young Business Fair." },
+      "lines": [
+        "Day 42: the Young Business Fair in the town hall.",
+        { "speaker": "dad", "text": "We didn't open a second shop this time. Growing too fast can sink a business - knowing when to wait is smart too." },
+        { "speaker": "grandpa", "text": "One good shop, well run, beats two shops run badly." }
       ],
       "action": "chapter_end"
     }

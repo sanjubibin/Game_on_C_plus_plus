@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <exception>
 #include <functional>
 #include <set>
 
@@ -456,6 +457,26 @@ LifeWheel ComputeLifeWheel(const GameState& state, const Content& content) {
     return wheel;
 }
 
+bool ParseTravel(const std::string& action, TravelTarget& out) {
+    if (!action.starts_with("travel:")) {
+        return false;
+    }
+    const std::string rest = action.substr(7);
+    const std::size_t a = rest.find(':');
+    const std::size_t b = a == std::string::npos ? std::string::npos : rest.find(':', a + 1);
+    if (a == std::string::npos || b == std::string::npos) {
+        return false;
+    }
+    try {
+        out.map = rest.substr(0, a);
+        out.x = std::stoi(rest.substr(a + 1, b - a - 1));
+        out.y = std::stoi(rest.substr(b + 1));
+    } catch (const std::exception&) {
+        return false;
+    }
+    return !out.map.empty();
+}
+
 std::vector<std::string> ValidateContent(const Content& content) {
     std::vector<std::string> problems;
 
@@ -514,6 +535,14 @@ std::vector<std::string> ValidateContent(const Content& content) {
         if (action.starts_with("open_supplier:")) {
             if (!content.FindSupplier(action.substr(14))) {
                 problems.push_back(where + ": unknown supplier '" + action.substr(14) + "'");
+            }
+        } else if (action.starts_with("travel:")) {
+            TravelTarget target;
+            const MapDef* map = ParseTravel(action, target) ? content.FindMap(target.map) : nullptr;
+            if (map == nullptr) {
+                problems.push_back(where + ": bad travel action '" + action + "'");
+            } else if (MapDef::IsSolid(map->TileAt(target.x, target.y))) {
+                problems.push_back(where + ": travel lands on a blocked tile");
             }
         } else if (action.starts_with("open_sell:")) {
             if (!content.FindVenue(action.substr(10))) {

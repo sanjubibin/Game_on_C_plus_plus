@@ -6,9 +6,11 @@
 #include <string>
 
 #include "Flow.h"
+#include "GameAudio.h"
 #include "GameSession.h"
 #include "Visuals.h"
 #include "engine/Application.h"
+#include "engine/Audio.h"
 #include "engine/Ui.h"
 #include "logic/Rules.h"
 #include "scenes/ChapterEndScene.h"
@@ -26,7 +28,8 @@ namespace {
 // Development options:
 //   --start <continue|town|park|evening|market|festival|supplier|sell|sell-run|sell-results|
 //            stall|stall-run|stall-results|encounter[:id]|journal[:tab]|summary|chapter-end|title|
-//            ch2|shop|shop-results|bank|farm|farm-supplier|dialogue:<event>|choices:<event>>
+//            ch2|shop|shop-results|bank|farm|farm-supplier|ch3|city|city-market|ch3-evening|
+//            dialogue:<event>|choices:<event>>
 //   --screenshot <file.png> [--frames N]   save frame N and quit
 struct Options {
     std::string start;
@@ -165,8 +168,43 @@ void DevStart(engine::Application& app, GameSession& session, const std::string&
     if (what == "town") {
         return;
     }
+    // Chapter 3 underway: the city shop is open with Priya managing it.
+    auto chapterThree = [&session, &chapterTwo]() {
+        game::GameState& st = session.state;
+        chapterTwo();
+        st.day = 33;
+        st.Set("chapter", 3);
+        for (const char* flag : {"city_news", "visited_city", "met_osei", "branch_open", "manager_priya", "manager_chosen",
+                                 "bulk_news", "met_haddad", "priya_joined"}) {
+            st.SetFlag(flag);
+        }
+        for (const char* event : {"ch3_start", "osei_intro", "haddad_intro", "city_arrival", "ch3_bulk_tip"}) {
+            st.seenEvents.insert(event);
+        }
+        st.Set("branch.rent", 15);
+        st.Set("money", 96);
+        st.AddStock({"pretzels", 24, 1, st.day, false});
+        st.memories.push_back({30, "Opened our second shop, in Riverside City!"});
+    };
     if (what == "ch2") {
         chapterTwo();
+        return;
+    }
+    if (what == "ch3" || what == "city" || what == "city-market") {
+        chapterThree();
+        if (what != "ch3") {
+            session.currentMap = "city";
+            session.playerPos = {14.5f * visuals::kTile, 12.5f * visuals::kTile + 8.0f};
+        }
+        if (what == "city-market") {
+            flow::RunAction(app, session, "open_supplier:city");
+        }
+        return;
+    }
+    if (what == "ch3-evening") {
+        chapterThree();
+        session.state.minutes = 18 * 60;
+        flow::StartEvening(app, session, false);
         return;
     }
     if (what == "shop" || what == "shop-results") {
@@ -280,6 +318,18 @@ int main(int argc, char** argv) {
     } fontGuard;
     ui::LoadFonts({"assets/fonts/ui.ttf", "C:/Windows/Fonts/segoeui.ttf"},
                   {"assets/fonts/ui-bold.ttf", "C:/Windows/Fonts/segoeuib.ttf"});
+
+    // Sounds are GPU-free but still need the device closed before the window goes.
+    struct AudioGuard {
+        ~AudioGuard() { engine::audio::Shutdown(); }
+    } audioGuard;
+    const bool screenshotRun = !options.screenshot.empty();
+    if (!screenshotRun) {  // screenshot runs stay silent and windowed
+        engine::audio::Init();
+        LoadGameAudio();
+        session.settings = LoadSettings(session.settingsPath);
+        ApplySettings(session.settings);
+    }
 
     try {
         session.content = game::Content::Load("assets");

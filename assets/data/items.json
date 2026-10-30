@@ -28,6 +28,9 @@
       "note": "Picked this morning at Green Hill Farm. Same day only." },
     { "id": "honey", "name": "Farm Honey", "cost": 3, "value": 7, "shelf_days": 60,
       "appeal": 0.8, "hot_appeal": 0.6, "color": "#f59f00", "unlock_flag": "met_ama",
-      "note": "A jar keeps for months. Fewer people buy it, but each sale earns more." }
+      "note": "A jar keeps for months. Fewer people buy it, but each sale earns more." },
+    { "id": "pretzels", "name": "City Pretzels", "cost": 2, "value": 5, "shelf_days": 2,
+      "appeal": 1.2, "hot_appeal": 0.9, "color": "#c08552", "unlock_flag": "met_haddad",
+      "note": "Only at the City Market. Fresh for 2 days. Cheaper in bulk!" }
   ]
 }

@@ -20,9 +20,12 @@ bool ContinueGame(engine::Application& app, GameSession& session, std::string* e
 void PlayEvents(engine::Application& app, GameSession& session, std::vector<std::string> events,
                 std::function<void()> onDone = {});
 // Actions: open_supplier:<id>, open_sell:<venue>, open_bank, end_day, home, chapter_end,
-// event:<id>, encounter:<id>.
+// event:<id>, encounter:<id>, travel:<map>:<x>:<y>.
 void RunAction(engine::Application& app, GameSession& session, const std::string& action);
 void TalkTo(engine::Application& app, GameSession& session, const game::NpcDef& npc);
+// Moves the player to a tile on another map; the first visit sets its enter flag and plays
+// its enter event.
+void TravelTo(engine::Application& app, GameSession& session, const std::string& map, int x, int y);
 
 // Dinner, then the day summary. late = sent home because it got dark.
 void StartEvening(engine::Application& app, GameSession& session, bool late = false);

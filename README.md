@@ -6,11 +6,12 @@ money, work and people really work. Full design: [docs/GAME_DESIGN.md](docs/GAME
 
 C++20, built with the MSYS2 UCRT64 toolchain, raylib and jsoncpp.
 
-**Current state: Phase 3 - Chapters 1 and 2.** Three areas (town, market square, Green Hill
-Farm); the pushcart, market stall and corner shop businesses with upgrades; staff with wages; the
-Town Bank with savings, interest and loans; a MegaMart price war; eleven quests; five encounters;
-a "Their Side" scene; Festival Day; the Life Wheel and chapter-end screens; day/night cycle with
-health; and saving. Graphics are drawn in code (no art assets yet).
+**Current state: Phase 4 - Chapters 1 to 3.** Four areas (town, market square, Green Hill Farm,
+Riverside City by bus); the pushcart, market stall, corner shop and a second city shop run by a
+manager; staff with wages; the Town Bank with savings, interest and loans; bulk buying; weekly
+rent; a MegaMart price war; fourteen quests; eight encounters; a "Their Side" scene; Festival Day;
+the Life Wheel and chapter-end screens; day/night cycle with health; synthesized music and sound
+effects; settings; and saving. Graphics and audio are generated in code (no asset files yet).
 
 ## How to play
 
@@ -20,10 +21,12 @@ health; and saving. Graphics are drawn in code (no art assets yet).
 | E / Space / Enter | Talk, use doors and the pushcart, advance dialogue |
 | 1-9 or mouse | Pick a choice |
 | J (or Tab) | Journal: quests, bag, skills, people, Life Wheel |
-| Esc | Pause menu |
+| M | Music on / off |
+| Esc | Pause menu (also music, sound effects and fullscreen settings) |
 
 Look for gold **!** markers over people with something new to say. Walk east along the road to
-reach the market square, or west to Green Hill Farm. A day runs from 08:00 to 20:00; go home to have dinner and sleep. Going
+reach the market square, or west to Green Hill Farm. From Chapter 3 a bus outside MegaMart goes
+to Riverside City. A day runs from 08:00 to 20:00; go home to have dinner and sleep. Going
 home early restores health, staying out until dark costs it. The game saves every night.
 
 ## Layout
@@ -33,7 +36,8 @@ CMakeLists.txt        Top level: C++ standard, options, dependencies, subdirecto
 CMakePresets.json     debug / release presets pinned to C:/msys64/ucrt64 (g++, Ninja)
 cmake/                Warning flags, DLL copy script
 engine/               Static library, genre-agnostic
-  include/engine/       Application (fixed-timestep loop), Scene, SceneManager, Ui (widgets)
+  include/engine/       Application (fixed-timestep loop), Scene, SceneManager, Ui (widgets),
+                        Audio (a tiny synthesizer: sounds and music built from notes)
 game/
   src/logic/          game_logic library - no rendering, unit-tested
                         GameState, Content (JSON loading), Rules (conditions, effects, day cycle,
@@ -43,11 +47,13 @@ game/
                       DaySummary, ChapterEnd
   src/Flow.*          Glue between scenes: new game, events, actions, day cycle
   src/Visuals.*       Palette and procedural drawing of characters, stalls, Life Wheel
+  src/GameAudio.*     The game's sound effects, music loop, and settings (settings.json)
   src/main.cpp        Entry point and developer start options
 assets/
   data/               All content as JSON: events, characters, quests, items, venues, suppliers,
                       encounters, start state and economy settings
-  maps/               One JSON file per area (town, market, farm): tiles, buildings, spots, exits
+  maps/               One JSON file per area (town, market, farm, city): tiles, buildings, spots,
+                      exits
 tests/                Unit tests for the logic library (plain asserts, run with CTest)
 docs/                 Game design document
 ```
@@ -92,9 +98,10 @@ build/debug/game/AAAGame.exe --start sell --screenshot shot.png --frames 60
 
 `--start` accepts `town`, `park`, `evening`, `market`, `festival`, `exit-test`, `supplier`,
 `sell`, `sell-run`, `sell-results`, `stall`, `stall-run`, `stall-results`, `ch2`, `shop`,
-`shop-results`, `bank`, `farm`, `farm-supplier`, `encounter[:<id>]`, `journal` /
+`shop-results`, `bank`, `farm`, `farm-supplier`, `ch3`, `city`, `city-market`, `ch3-evening`,
+`encounter[:<id>]`, `journal` /
 `journal:<0-4>`, `summary`, `chapter-end`, `title`, `continue`, `dialogue:<event id>` and
-`choices:<event id>`. Dev starts never write the save file.
+`choices:<event id>`. Dev starts never write the save file, and screenshot runs stay silent.
 
 ## Standalone package
 

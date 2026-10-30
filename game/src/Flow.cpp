@@ -6,8 +6,10 @@
 #include <random>
 
 #include "Visuals.h"
+#include "engine/Audio.h"
 #include "logic/Rules.h"
 #include "logic/SaveGame.h"
+#include "logic/Selling.h"
 #include "scenes/BankScene.h"
 #include "scenes/ChapterEndScene.h"
 #include "scenes/DaySummaryScene.h"
@@ -110,6 +112,11 @@ void RunAction(engine::Application& app, GameSession& session, const std::string
         }
     } else if (action == "chapter_end") {
         app.Scenes().Push(std::make_unique<ChapterEndScene>(app, session));
+    } else if (action.starts_with("travel:")) {
+        game::TravelTarget target;
+        if (game::ParseTravel(action, target)) {
+            TravelTo(app, session, target.map, target.x, target.y);
+        }
     } else if (action == "end_day") {
         StartEvening(app, session);
     } else if (action == "home") {
@@ -136,8 +143,32 @@ void TalkTo(engine::Application& app, GameSession& session, const game::NpcDef& 
     }
 }
 
+void TravelTo(engine::Application& app, GameSession& session, const std::string& mapId, int x, int y) {
+    const game::MapDef* map = session.content.FindMap(mapId);
+    if (map == nullptr) {
+        return;
+    }
+    const QuestSnapshot before = TakeQuestSnapshot(session);
+    session.currentMap = mapId;
+    session.playerPos = {(static_cast<float>(x) + 0.5f) * visuals::kTile,
+                         (static_cast<float>(y) + 0.5f) * visuals::kTile + 8.0f};
+    session.trail.clear();
+    session.fadeStart = GetTime();
+    session.AddToast(map->name);
+
+    const bool firstVisit = !map->enterFlag.empty() && !session.state.HasFlag(map->enterFlag);
+    if (firstVisit) {
+        session.state.SetFlag(map->enterFlag);
+    }
+    ToastQuestChanges(session, before);
+    if (firstVisit && !map->enterEvent.empty()) {
+        PlayEvents(app, session, {map->enterEvent});
+    }
+}
+
 void StartEvening(engine::Application& app, GameSession& session, bool late) {
     game::ApplyBedtime(session.state, late);
+    game::RunBranchDay(session.state, session.content);  // the city shop's evening shift
     PlaceAtHome(session);
     session.state.minutes = std::max(session.state.minutes, 18 * 60);
     auto showSummary = [&app, &session]() {
@@ -168,7 +199,11 @@ void FinishDay(engine::Application& app, GameSession& session) {
 void ApplyEffects(GameSession& session, const Json::Value& effects) {
     const auto statsBefore = session.state.stats;
     const QuestSnapshot questsBefore = TakeQuestSnapshot(session);
+    const int moneyBefore = session.state.Get("money");
     game::ApplyEffects(effects, session.state);
+    if (session.state.Get("money") > moneyBefore) {
+        engine::audio::Play("coin");
+    }
     for (const std::string& change :
          game::DiffStats(statsBefore, session.state.stats, session.content)) {
         session.AddToast(change);
@@ -203,6 +238,7 @@ void ToastQuestChanges(GameSession& session, const QuestSnapshot& before) {
         }
         if (now == total) {
             session.AddToast("Quest complete: " + quest.title);
+            engine::audio::Play("success");
         } else if (was < 0) {
             session.AddToast("New quest: " + quest.title);
         } else if (now > was) {

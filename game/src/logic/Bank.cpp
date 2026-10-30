@@ -54,6 +54,30 @@ void LoanCleared(GameState& state) {
     AddMemory(state, "Paid back our loan in full.");
 }
 
+void PayRent(GameState& state) {
+    const int rent = state.Get("branch.rent");
+    if (!state.HasFlag("branch_open") || rent <= 0) {
+        return;
+    }
+    const int fromPocket = std::min(rent, state.Get("money"));
+    const int fromSavings = std::min(rent - fromPocket, state.Get("bank.savings"));
+    if (fromPocket + fromSavings < rent) {
+        state.SetFlag("rent_late");
+        state.Add("reputation", -5);
+        state.todayLog.push_back("Not enough coins for the city shop's rent (" + std::to_string(rent) +
+                                 ")! Mrs. Osei is not happy. (Reputation -5)");
+        return;
+    }
+    state.Add("money", -fromPocket);
+    state.Add("bank.savings", -fromSavings);
+    state.ClearFlag("rent_late");
+    std::string line = "City shop rent: " + std::to_string(rent) + " coins";
+    if (fromSavings > 0) {
+        line += " (" + std::to_string(fromSavings) + " taken from your savings)";
+    }
+    state.todayLog.push_back(line + ".");
+}
+
 }  // namespace
 
 bool RepayLoan(GameState& state, int amount) {
@@ -90,6 +114,8 @@ void ProcessWeek(GameState& state, const EconomyDef& economy) {
                                      " coins of interest on your savings. Money growing while you sleep!");
         }
     }
+
+    PayRent(state);
 
     const int owed = state.Get("bank.loan");
     if (owed <= 0) {

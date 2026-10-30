@@ -1,0 +1,52 @@
+{
+  "name": "Riverside City",
+  "legend": {
+    ":": "pavement", "=": "road", ".": "grass", "f": "flowers", "b": "bench (solid)",
+    "T": "tree (solid)", "~": "river (solid)", "k": "brick wall (solid)"
+  },
+  "enter_flag": "visited_city",
+  "enter_event": "city_arrival",
+  "decor": "city",
+  "tiles": [
+    "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+    "k::::::::::::::::::::::::::::::::::::::k",
+    "k::::::::::::::::::::::::::::::::::::::k",
+    "k::::::::::::::::::::::::::::::::::::::k",
+    "k::::::::::::::::::::::::::::::::::::::k",
+    "k::::::::::::::::::::::::::::::::::::::k",
+    "k::::::::::::::::::::::::::::::::::::::k",
+    "k::::::::::::::::::::::::::::::::::::::k",
+    "k::::::::::::::::::::::::::::::::::::::k",
+    "k::::::::::::::::::::::::::::::::::::::k",
+    "k======================================k",
+    "k======================================k",
+    "k::::::::::::::::::::::::::::::::::::::k",
+    "k::::::::::::::::::T..f....f..T::::::::k",
+    "k::::::::::::::::::............::::::::k",
+    "k::::::::::::::::::..b......b..::::::::k",
+    "k::::::::::::::::::....f..f....::::::::k",
+    "k::::::::::::::::::............::::::::k",
+    "k::::::::::::::::::T..........T::::::::k",
+    "k::::::::::::::::::::::::::::::::::::::k",
+    "k~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~k",
+    "k~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~k",
+    "k~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~k",
+    "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk"
+  ],
+  "start": [4, 12],
+  "buildings": [
+    { "id": "city_market", "label": "CITY MARKET", "action": "open_supplier:city",
+      "x": 3, "y": 2, "w": 8, "h": 5, "door_x": 7, "wall": "#e9ecef", "roof": "#2b8a3e" },
+    { "id": "city_shop", "label": "CITY SHOP", "action": "event:city_shop_door",
+      "x": 14, "y": 2, "w": 7, "h": 5, "door_x": 17, "wall": "#fff3bf", "roof": "#e8590c" },
+    { "id": "megamart_city", "label": "MEGAMART CITY", "action": "event:megamart_city",
+      "x": 24, "y": 1, "w": 13, "h": 6, "door_x": 30, "wall": "#d0ebff", "roof": "#1864ab" },
+    { "id": "cafe", "label": "CAFE LUCIA", "action": "event:cafe_lucia",
+      "x": 3, "y": 14, "w": 7, "h": 4, "door_x": 6, "wall": "#fff0f6", "roof": "#a61e4d" }
+  ],
+  "spots": [
+    { "id": "bus_stop", "label": "Take the bus", "action": "event:bus_stop_city", "draw": "bus",
+      "x": 12, "y": 12 }
+  ],
+  "exits": []
+}

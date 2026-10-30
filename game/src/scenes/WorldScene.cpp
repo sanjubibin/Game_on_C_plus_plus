@@ -175,32 +175,10 @@ void WorldScene::CheckExits() {
     const int ty = static_cast<int>(std::floor(p.y / kTile));
     for (const game::Exit& exit : Map().exits) {
         if (tx >= exit.x && tx < exit.x + exit.w && ty >= exit.y && ty < exit.y + exit.h) {
-            Travel(exit);
+            flow::TravelTo(App(), s_, exit.to, exit.toX, exit.toY);
+            prevPos_ = s_.playerPos;
             return;
         }
-    }
-}
-
-void WorldScene::Travel(const game::Exit& exit) {
-    const game::MapDef* target = s_.content.FindMap(exit.to);
-    if (target == nullptr) {
-        return;
-    }
-    const flow::QuestSnapshot before = flow::TakeQuestSnapshot(s_);
-    s_.currentMap = exit.to;
-    s_.playerPos = TileFeet(F(exit.toX), F(exit.toY));
-    prevPos_ = s_.playerPos;
-    s_.trail.clear();
-    fadeStart_ = GetTime();
-    s_.AddToast(target->name);
-
-    const bool firstVisit = !target->enterFlag.empty() && !s_.state.HasFlag(target->enterFlag);
-    if (firstVisit) {
-        s_.state.SetFlag(target->enterFlag);
-    }
-    flow::ToastQuestChanges(s_, before);
-    if (firstVisit && !target->enterEvent.empty()) {
-        flow::PlayEvents(App(), s_, {target->enterEvent});
     }
 }
 
@@ -211,6 +189,12 @@ void WorldScene::Update(float dt) {
     if (ui::ConfirmPressed() && target_.kind != TargetKind::None) {
         Interact(target_);
         return;
+    }
+    if (IsKeyPressed(KEY_M)) {
+        s_.settings.music = !s_.settings.music;
+        ApplySettings(s_.settings);
+        SaveSettings(s_.settingsPath, s_.settings);
+        s_.AddToast(s_.settings.music ? "Music on" : "Music off");
     }
     if (IsKeyPressed(KEY_J) || IsKeyPressed(KEY_TAB)) {
         App().Scenes().Push(std::make_unique<JournalScene>(App(), s_));
@@ -383,6 +367,18 @@ void WorldScene::DrawTiles(const Camera2D& camera) const {
                     }
                     break;
                 }
+                case 'k':
+                    // Brick wall.
+                    DrawRectangleRec(r, Color{150, 82, 66, 255});
+                    for (int row = 0; row < 4; ++row) {
+                        const float by = r.y + F(row) * 8.0f;
+                        const float off = row % 2 == 0 ? 0.0f : 8.0f;
+                        DrawLineEx({r.x, by}, {r.x + kTile, by}, 1.0f, Color{120, 64, 52, 255});
+                        DrawLineEx({r.x + off + 8.0f, by}, {r.x + off + 8.0f, by + 8.0f}, 1.0f, Color{120, 64, 52, 255});
+                        DrawLineEx({r.x + off + 24.0f, by}, {r.x + off + 24.0f, by + 8.0f}, 1.0f,
+                                   Color{120, 64, 52, 255});
+                    }
+                    break;
                 case 'p':
                 case 'o':
                     DrawRectangleRec(r, Shade(plaza, static_cast<int>(h % 9) - 4));
@@ -566,6 +562,9 @@ void WorldScene::DrawSpots() const {
             DrawSign({center.x, center.y + 12.0f}, "FOR RENT");
         } else if (spot.draw == "signpost") {
             DrawSign({center.x, center.y + 12.0f}, "MARKET ->");
+        } else if (spot.draw == "bus") {
+            DrawSign({center.x, center.y + 12.0f}, "BUS STOP");
+            DrawCircleV({center.x, center.y - 40.0f}, 7.0f, Color{34, 139, 230, 255});
         } else if (spot.draw == "signpost_farm") {
             DrawSign({center.x + 10.0f, center.y + 12.0f}, "<- FARM");
         }
@@ -690,7 +689,7 @@ void WorldScene::DrawHud() const {
     }
 
     // Controls hint.
-    const std::string hint = Map().name + "      WASD walk   Shift run   E talk / use   J journal   Esc menu";
+    const std::string hint = Map().name + "      WASD walk   Shift run   E talk / use   J journal   M music   Esc menu";
     const Vector2 m = ui::Measure(hint, 18.0f);
     const Rectangle bar{w / 2.0f - m.x / 2.0f - 16.0f, h - 40.0f, m.x + 32.0f, 30.0f};
     DrawRectangleRounded(bar, 1.0f, 8, Color{40, 30, 36, 150});
@@ -724,7 +723,7 @@ void WorldScene::Draw(float alpha) const {
     DrawHud();
     DrawToasts(s_);
     // Time-based so it also fades in while a dialogue (like a first-visit scene) is on top.
-    const float fade = 1.0f - static_cast<float>(GetTime() - fadeStart_) * 2.5f;
+    const float fade = 1.0f - static_cast<float>(GetTime() - s_.fadeStart) * 2.5f;
     if (fade > 0.0f) {
         DrawRectangleRec({0.0f, 0.0f, F(GetScreenWidth()), F(GetScreenHeight())}, Fade(BLACK, fade));
     }

@@ -1,6 +1,7 @@
 # Genre-agnostic engine layer: window, main loop, scene management.
 add_library(engine STATIC
     src/Application.cpp
+    src/Audio.cpp
     src/SceneManager.cpp
     src/Ui.cpp
 )

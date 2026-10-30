@@ -5,6 +5,7 @@
 #include "Flow.h"
 #include "Visuals.h"
 #include "engine/Application.h"
+#include "engine/Audio.h"
 #include "engine/Ui.h"
 #include "logic/Selling.h"
 
@@ -31,13 +32,18 @@ SupplierScene::SupplierScene(engine::Application& app, GameSession& session, con
     }
 }
 
-int SupplierScene::CostOf(const std::string& item) const {
+const game::SupplierItem* SupplierScene::Entry(const std::string& item) const {
     for (const game::SupplierItem& entry : supplier_.items) {
         if (entry.item == item) {
-            return entry.cost;
+            return &entry;
         }
     }
-    return 1;
+    return nullptr;
+}
+
+int SupplierScene::CostOf(const std::string& item, int qty) const {
+    const game::SupplierItem* entry = Entry(item);
+    return entry ? entry->UnitCostFor(qty) : 1;
 }
 
 SupplierScene::Layout SupplierScene::MakeLayout() const {
@@ -61,7 +67,7 @@ SupplierScene::Layout SupplierScene::MakeLayout() const {
 int SupplierScene::Total() const {
     int total = 0;
     for (const auto& [id, qty] : qty_) {
-        total += qty * CostOf(id);
+        total += qty * CostOf(id, qty);
     }
     return total;
 }
@@ -79,7 +85,10 @@ void SupplierScene::Buy() {
             continue;
         }
         const game::ItemDef* item = s_.content.FindItem(id);
-        s_.state.AddStock({id, qty, CostOf(id), s_.state.day, false});
+        s_.state.AddStock({id, qty, CostOf(id, qty), s_.state.day, false});
+        if (const game::SupplierItem* entry = Entry(id); entry && entry->HasBulkPrice() && qty >= entry->bulkQty) {
+            s_.state.SetFlag("bought_bulk");
+        }
         bought += (bought.empty() ? "" : ", ") + std::to_string(qty) + " " + item->name;
     }
     s_.state.Add("money", -total);
@@ -88,6 +97,7 @@ void SupplierScene::Buy() {
     s_.state.minutes += 30;
     s_.state.todayLog.push_back("Bought " + bought + " for " + std::to_string(total) + " coins.");
     s_.AddToast("Coins -" + std::to_string(total));
+    engine::audio::Play("buy");
     flow::ToastQuestChanges(s_, before);
     App().Scenes().Pop();
 }
@@ -151,12 +161,18 @@ void SupplierScene::Draw(float /*alpha*/) const {
                   focused ? kAccent : Color{220, 200, 180, 255}, focused ? 3.0f : 1.5f);
         DrawCircleV({row.x + 32.0f, row.y + 31.0f}, 15.0f, ToColor(item.color));
         ui::Text(item.name, {row.x + 62.0f, row.y + 6.0f}, 22.0f, kInk, true);
-        const int cost = CostOf(item.id);
+        const int qty = qty_.count(item.id) ? qty_.at(item.id) : 0;
+        const int cost = CostOf(item.id, std::max(qty, 1));
         ui::Text("Cost " + std::to_string(cost) + " each", {row.x + 330.0f, row.y + 9.0f}, 20.0f, kInk, true);
         ui::Text("People usually pay about " + std::to_string(item.value) + " coins", {row.x + 62.0f, row.y + 36.0f},
                  16.0f, kGood);
 
-        const int qty = qty_.count(item.id) ? qty_.at(item.id) : 0;
+        if (const game::SupplierItem* entry = Entry(item.id); entry && entry->HasBulkPrice()) {
+            const bool active = qty >= entry->bulkQty;
+            ui::Text(active ? "BULK PRICE: " + std::to_string(entry->bulkCost) + " each!"
+                            : std::to_string(entry->bulkQty) + "+ for " + std::to_string(entry->bulkCost) + " each",
+                     {row.x + 330.0f, row.y + 36.0f}, 16.0f, active ? kAccent : kGood, active);
+        }
         ui::DrawButton(l.minus[idx], "-", false, qty > 0, 28.0f);
         ui::TextCentered(std::to_string(qty), {row.x + 642.0f, row.y + 31.0f}, 28.0f, kInk, true);
         ui::DrawButton(l.plus[idx], "+", false, qty < kMaxQty, 28.0f);

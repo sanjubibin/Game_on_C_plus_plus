@@ -57,5 +57,6 @@ private:
 
     game::SessionReport report_;
     float clock_ = 0.0f;
+    bool resultsSounded_ = false;
     flow::QuestSnapshot questsBefore_;
 };
