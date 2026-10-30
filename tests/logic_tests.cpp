@@ -723,6 +723,212 @@ void TestChapterFourWiring() {
     CHECK(game::PickEveningEvent(s, content) == "g2_end_donated");
 }
 
+void TestChapterFiveWiring() {
+    game::Content content;
+    try {
+        content = game::Content::Load(FUN_ASSETS_DIR);
+    } catch (const std::exception&) {
+        CHECK(false);
+        return;
+    }
+    auto talk = [&](const game::GameState& s, const std::string& npc) {
+        const game::NpcDef* def = content.FindNpc(npc);
+        return def ? game::PickTalkEvent(*def, s) : std::string("<missing>");
+    };
+    auto play = [&](game::GameState& s, const std::string& event, int choice = -1) {
+        const game::EventDef* def = content.FindEvent(event);
+        if (def == nullptr) {
+            CHECK(false);
+            return;
+        }
+        s.seenEvents.insert(event);
+        game::ApplyEffects(def->effects, s);
+        if (choice >= 0) {
+            game::ApplyEffects(def->choices[static_cast<std::size_t>(choice)].effects, s);
+        }
+    };
+    auto nextDay = [&](game::GameState& s) {
+        game::EndDay(s);
+        return game::StartDay(s, content);
+    };
+
+    CHECK(content.ChapterTitle(5) == "Rainy Days");
+    CHECK(content.ChapterTitle(6) == "To Be Continued");
+
+    // No rain before Chapter 5.
+    game::GameState early;
+    early.Set("chapter", 4);
+    for (int day = 1; day <= 60; ++day) {
+        early.day = day;
+        game::StartDay(early, content);
+        CHECK(!early.HasFlag("today.rain"));
+    }
+
+    game::GameState s;
+    s.Set("generation", 2);
+    s.Set("chapter", 5);
+    s.SetFlag("pushcart_sale");
+    s.party = {"nia"};
+    s.day = 14;
+    s.seenEvents = {"g2_project_news", "g2_festival_soon", "g2_festival_morning", "g2_end_donated"};
+    s.SetFlag("g2_festival_done");
+
+    // Day 15: rain, and a plan for bad days.
+    std::vector<std::string> morning = nextDay(s);
+    CHECK(morning.size() == 1 && morning[0] == "ch5_start");
+    play(s, "ch5_start");
+    CHECK(s.HasFlag("today.rain") && !s.HasFlag("today.hot"));
+    const game::QuestDef* tracked = game::TrackedQuest(s, content);
+    CHECK(tracked != nullptr && tracked->id == "rainy_day_fund");
+    CHECK(talk(s, "parent") == "risk_talk");
+    CHECK(talk(s, "leo2") == "eco_offer" || talk(s, "leo2") == "g2_leo_story");
+
+    // Day 16: Baker Rosa's standing order.
+    morning = nextDay(s);
+    CHECK(morning.size() == 1 && morning[0] == "rosa_news");
+    play(s, "rosa_news");
+    CHECK(talk(s, "rosa") == "rosa_order_offer");
+    play(s, "rosa_order_offer", 0);
+    CHECK(s.HasFlag("contract_rosa") && talk(s, "rosa") != "rosa_order_offer");
+
+    // Day 17: delivery day. Without stock you can't deliver; with it, coins in and stock out.
+    morning = nextDay(s);
+    CHECK(morning.size() == 2 && morning[0] == "rosa_delivery_day" && morning[1] == "storm_warning");
+    play(s, "rosa_delivery_day");
+    CHECK(talk(s, "rosa") == "rosa_delivery");
+    const game::EventDef* delivery = content.FindEvent("rosa_delivery");
+    CHECK(delivery != nullptr && delivery->choices.size() == 3);
+    CHECK(!game::CheckCondition(delivery->choices[0].requirement, s));
+    CHECK(game::DescribeUnmet(delivery->choices[0].requirement, s, content) == "Needs 10 Lemonade");
+    CHECK(game::CheckCondition(delivery->choices[0].showWhen, s) &&
+          !game::CheckCondition(delivery->choices[1].showWhen, s));
+    s.AddStock({"lemonade", 10, 1, s.day, false});
+    s.Set("money", 0);
+    play(s, "rosa_delivery", 0);
+    CHECK(s.Get("money") == 30 && s.StockOf("lemonade") == 0 && s.Get("contract.deliveries") == 1);
+    CHECK(game::PickEveningEvent(s, content) != "rosa_missed");
+
+    // Insurance before the storm.
+    play(s, "risk_talk", 0);
+    CHECK(s.HasFlag("insured") && s.Get("bank.premium") == 2 && s.Get("money") == 28);
+    CHECK(talk(s, "parent") != "risk_talk");
+
+    // Days 18-19, then Nia's secret in the evening of Day 19.
+    nextDay(s);
+    nextDay(s);
+    CHECK(game::PickEveningEvent(s, content) == "nia_discount");
+    play(s, "nia_discount", 0);
+    CHECK(s.HasFlag("nia_upset") && talk(s, "nia") == "nia_makeup");
+    play(s, "nia_makeup", 0);
+    play(s, "nia_after", 0);
+    CHECK(s.HasFlag("nia_resolved") && s.HasFlag("pay_what_you_can") && !s.HasFlag("nia_upset"));
+
+    // Day 20: the storm, and a missed delivery.
+    morning = nextDay(s);
+    CHECK(morning.size() == 2 && morning[0] == "rosa_delivery_day" && morning[1] == "storm");
+    play(s, "rosa_delivery_day");
+    const game::EventDef* storm = content.FindEvent("storm");
+    CHECK(storm != nullptr && game::CheckCondition(storm->choices[0].showWhen, s));
+    play(s, "storm", 0);
+    CHECK(s.HasFlag("storm_over") && s.HasFlag("cart_ok") && !s.HasFlag("cart_broken"));
+    CHECK(game::PickEveningEvent(s, content) == "rosa_missed");
+    play(s, "rosa_missed");
+    CHECK(s.Get("contract.misses") == 1 && !s.HasFlag("today.delivery_due"));
+
+    // Day 22 is bank day: the premium is paid. Day 23: a second miss cancels the order.
+    nextDay(s);
+    s.Set("money", 10);
+    nextDay(s);
+    CHECK(s.Get("money") == 8 && s.HasFlag("insured"));
+    morning = nextDay(s);
+    CHECK(!morning.empty() && morning[0] == "rosa_delivery_day");
+    play(s, "rosa_delivery_day");
+    CHECK(game::PickEveningEvent(s, content) == "rosa_cancel");
+    play(s, "rosa_cancel");
+    CHECK(!s.HasFlag("contract_rosa") && talk(s, "rosa") != "rosa_order_offer");
+
+    // Day 28: the chapter ends, once.
+    while (s.day < 28) {
+        nextDay(s);
+    }
+    CHECK(game::PickEveningEvent(s, content) == "ch5_end_good");
+    play(s, "ch5_end_good");
+    s.Set("chapter", 6);
+    CHECK(game::PickEveningEvent(s, content) == "dinner_g2" || game::PickEveningEvent(s, content) == "dinner_rain");
+
+    // Without a plan or coins, the storm breaks the pushcart until you pay for a new wheel.
+    game::GameState broke;
+    broke.Set("generation", 2);
+    broke.Set("chapter", 5);
+    broke.SetFlag("ch5_started");
+    play(broke, "storm", 3);
+    CHECK(broke.HasFlag("cart_broken") && talk(broke, "parent") == "cart_repair");
+    CHECK(talk(broke, "grandpa2") == "g2_grandpa_story");
+    broke.seenEvents.insert("g2_grandpa_story");
+    CHECK(talk(broke, "grandpa2") == "shop_chores");
+    play(broke, "shop_chores", 0);
+    CHECK(broke.Get("money") == 6 && talk(broke, "grandpa2") != "shop_chores");
+    broke.Set("money", 30);
+    play(broke, "cart_repair", 0);
+    CHECK(!broke.HasFlag("cart_broken") && broke.HasFlag("cart_ok") && broke.Get("money") == 0);
+}
+
+void TestRainyDays() {
+    // Rain never falls on a hot day, and roughly one in six days is rainy.
+    game::GameState weather;
+    weather.seed = 1234;
+    int rainy = 0;
+    for (int day = 1; day <= 300; ++day) {
+        weather.day = day;
+        CHECK(!(game::IsRainyDay(weather) && game::IsHotDay(weather)));
+        rainy += game::IsRainyDay(weather) ? 1 : 0;
+    }
+    CHECK(rainy > 20 && rainy < 90);
+
+    // Rain halves the customers at outdoor venues only.
+    game::Content content;
+    game::ItemDef lemonade;
+    lemonade.id = "lemonade";
+    lemonade.value = 3;
+    content.items["lemonade"] = lemonade;
+    content.itemOrder = {"lemonade"};
+    game::VenueDef cart;
+    cart.id = "cart";
+    cart.name = "Cart";
+    game::VenueDef shop = cart;
+    shop.id = "shop";
+    shop.outdoor = false;
+
+    game::GameState dry;
+    dry.Set("reputation", 50);
+    dry.AddStock({"lemonade", 100, 1, 1, false});
+    game::GameState wet = dry;
+    wet.SetFlag("today.rain");
+    const auto customers = [&](game::GameState state, const game::VenueDef& venue) {
+        return static_cast<int>(game::RunSellSession(state, content, venue).sales.customers.size());
+    };
+    CHECK(customers(wet, cart) < customers(dry, cart));
+    CHECK(customers(wet, shop) == customers(dry, shop));
+
+    // Selling stock to a business: stock out, coins in, never more than you have.
+    game::GameState order;
+    order.AddStock({"lemonade", 7, 1, 1, false});
+    game::ApplyEffects(Parse(R"({"sell_stock": {"item": "lemonade", "qty": 10, "price": 3}})"), order);
+    CHECK(order.StockOf("lemonade") == 0 && order.Get("money") == 21);
+
+    // Insurance premiums come out on bank day; if they can't be paid, the cover stops.
+    game::EconomyDef economy;
+    game::GameState insured;
+    insured.SetFlag("insured");
+    insured.Set("bank.premium", 2);
+    insured.Set("money", 5);
+    game::ProcessWeek(insured, economy);
+    CHECK(insured.Get("money") == 3 && insured.HasFlag("insured"));
+    insured.Set("money", 0);
+    game::ProcessWeek(insured, economy);
+    CHECK(!insured.HasFlag("insured"));
+}
+
 void TestSellingSession() {
     game::Content content;
     game::ItemDef lemonade;
@@ -1067,11 +1273,13 @@ int main() {
     TestChapterTwoWiring();
     TestChapterThreeWiring();
     TestChapterFourWiring();
+    TestChapterFiveWiring();
     TestSellingSession();
     TestBank();
     TestItemRules();
     TestChainTier();
     TestGenerations();
+    TestRainyDays();
     TestEncounterRules();
     TestLifeWheelAndBedtime();
 

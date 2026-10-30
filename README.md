@@ -6,10 +6,11 @@ money, work and people really work. Full design: [docs/GAME_DESIGN.md](docs/GAME
 
 C++20, built with the MSYS2 UCRT64 toolchain, raylib and jsoncpp.
 
-**Current state: Phase 5 - Chapters 1 to 4, two generations.** Four areas (town, market square,
+**Current state: Chapters 1 to 5, two generations.** Four areas (town, market square,
 Green Hill Farm, Riverside City by bus); the pushcart, market stall, corner shop and a second city
 shop run by a manager; staff with wages; the Town Bank with savings, interest and loans; bulk
-buying; weekly rent; a MegaMart price war; fifteen quests; eight encounters; a "Their Side" scene;
+buying; weekly rent; a MegaMart price war; rainy days, a storm, insurance and an emergency fund;
+a standing order from a business; seventeen quests; eight encounters; "Their Side" scenes;
 Festival Day; the Life Wheel and chapter-end screens; a legacy hand-over to your child, whose
 grown-up family and friends remember what you did; animated characters; synthesized music and
 sound effects; settings; and saving. Graphics and audio are generated in code (no asset files).
@@ -104,7 +105,7 @@ build/debug/game/AAAGame.exe --start sell --screenshot shot.png --frames 60
 `--start` accepts `town`, `park`, `evening`, `market`, `festival`, `exit-test`, `supplier`,
 `sell`, `sell-run`, `sell-results`, `stall`, `stall-run`, `stall-results`, `ch2`, `shop`,
 `shop-results`, `bank`, `farm`, `farm-supplier`, `ch3`, `city`, `city-market`, `ch3-evening`,
-`legacy`, `gen2`, `gen2-market`,
+`legacy`, `gen2`, `gen2-market`, `ch5`, `ch5-cart`, `ch5-storm`, `ch5-journal[:<0-4>]`,
 `encounter[:<id>]`, `journal` /
 `journal:<0-4>`, `summary`, `chapter-end`, `title`, `continue`, `dialogue:<event id>` and
 `choices:<event id>`. Dev starts never write the save file, and screenshot runs stay silent.

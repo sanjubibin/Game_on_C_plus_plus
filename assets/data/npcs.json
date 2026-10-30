@@ -142,6 +142,11 @@
     {
       "id": "rosa", "generation": 0, "name": "Baker Rosa", "map": "market", "x": 19, "y": 5,
       "body": "#f8f9fa", "hair": "#862e9c", "skin": "#e0ac69",
+      "talk": [
+        { "when": { "flag": "today.delivery_due" }, "event": "rosa_delivery" },
+        { "when": { "flag": "contract_offered", "not_flag": ["contract_rosa", "contract_declined", "contract_done"] },
+          "event": "rosa_order_offer" }
+      ],
       "idle": [
         "On busy days I bake more bread. On quiet days, less. That's supply and demand!",
         "Bread that doesn't sell turns stale. I give it to the shelter instead of throwing it away.",
@@ -239,6 +244,8 @@
       "id": "parent", "name": "Mom", "x": 3, "y": 7, "relationship": true, "generation": 2,
       "body": "#f5a623", "hair": "#462d1e", "skin": "#e2b284",
       "talk": [
+        { "when": { "flag": "cart_broken" }, "event": "cart_repair" },
+        { "when": { "flag": "ch5_started", "not_flag": "risk_plan" }, "event": "risk_talk" },
         { "when": { "flag": "g2_project_news", "not_flag": "g2_project_chosen" }, "event": "g2_choose_project" },
         { "when": { "flag": "g2_project_chosen", "not_flag": "g2_donated", "min": { "money": 40 } }, "event": "g2_donate" },
         { "when": { "flag": "g2_project_chosen", "not_flag": "g2_donated" }, "event": "g2_saving_up" }
@@ -262,7 +269,8 @@
       "id": "grandpa2", "name": "Grandpa", "x": 17, "y": 7, "relationship": true, "generation": 2,
       "body": "#3d5a80", "hair": "#dee2e6", "skin": "#c68e5f",
       "talk": [
-        { "when": { "not_seen": "g2_grandpa_story" }, "event": "g2_grandpa_story" }
+        { "when": { "not_seen": "g2_grandpa_story" }, "event": "g2_grandpa_story" },
+        { "when": { "flag": "cart_broken", "not_flag": "today.helped_shop" }, "event": "shop_chores" }
       ],
       "idle": [
         "Your parent saved this shop once, you know. With a pushcart and a lot of lemonade.",
@@ -300,6 +308,9 @@
       "body": "#748ffc", "hair": "#4a2c1a", "skin": "#e8b98a",
       "staff": { "efficiency": 0.7 },
       "bonus": { "customers": 0.1, "text": "Nia's chalk signs pointed people your way!" },
+      "talk": [
+        { "when": { "flag": "nia_upset", "not_flag": "nia_resolved" }, "event": "nia_makeup" }
+      ],
       "idle": [
         "Mum says your parent was the bossiest kid in town. Are you bossy too?",
         "I drew a chalk arrow to the pushcart on the pavement. Is that marketing?",
@@ -311,7 +322,8 @@
       "body": "#5fa86b", "hair": "#c9a227", "skin": "#f3d2b3",
       "talk": [
         { "when": { "flag": "leo_joined", "not_seen": "g2_leo_story_friend" }, "event": "g2_leo_story_friend" },
-        { "when": { "not_flag": "leo_joined", "not_seen": "g2_leo_story" }, "event": "g2_leo_story" }
+        { "when": { "not_flag": "leo_joined", "not_seen": "g2_leo_story" }, "event": "g2_leo_story" },
+        { "when": { "min": { "chapter": 5 }, "not_flag": "eco_cups" }, "event": "eco_offer" }
       ],
       "idle": [
         "This mural? It's the whole history of the market square. Your family is in it!",

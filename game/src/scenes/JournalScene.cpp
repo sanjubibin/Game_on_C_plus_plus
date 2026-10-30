@@ -151,6 +151,11 @@ void JournalScene::DrawBag(Rectangle area) const {
         ui::Text(bank, {area.x, y}, 19.0f, kInk);
         y += 26.0f;
     }
+    if (st.HasFlag("insured")) {
+        ui::Text("Pushcart insurance: " + std::to_string(st.Get("bank.premium")) + " coins a week", {area.x, y}, 19.0f,
+                 kInk);
+        y += 26.0f;
+    }
     if (st.Get("staff.wage") > 0) {
         ui::Text("Staff pay: " + std::to_string(st.Get("staff.wage")) + " coins a day each", {area.x, y}, 19.0f, kInk);
         y += 26.0f;

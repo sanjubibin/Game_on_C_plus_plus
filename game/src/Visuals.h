@@ -57,6 +57,10 @@ void DrawStall(Rectangle rect, Color awning, const std::string& label);
 void DrawSign(Vector2 feet, const std::string& text);  // a wooden board on a post
 void DrawCoin(Vector2 center, float radius);
 void DrawHeart(Vector2 center, float size, Color color);
+// Rain over a screen area: a grey wash and slanted drops falling over time.
+void DrawRain(Rectangle area, float time);
+// A grey cloud with falling drops, for weather icons.
+void DrawRainCloud(Vector2 center, float time);
 void DrawToasts(const GameSession& session);
 
 // Six-sided radar chart of the Life Wheel. Values are 0-100.

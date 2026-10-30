@@ -245,6 +245,7 @@ struct VenueDef {
     std::string name;
     std::string backdrop;   // "park", "market" or "shop"
     bool staffable = true;  // staff can run it for you
+    bool outdoor = true;    // rain keeps customers away from outdoor venues
     float customers = 1.0f;
     float festivalCustomers = 1.0f;
     int fee = 0;  // paid every time you open

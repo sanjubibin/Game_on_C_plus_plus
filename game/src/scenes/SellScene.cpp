@@ -258,9 +258,13 @@ void SellScene::DrawBackdrop() const {
     const bool market = venue_.backdrop == "market";
     const bool shop = venue_.backdrop == "shop";
     const bool festival = s_.state.HasFlag("today.festival");
+    const bool rain = venue_.outdoor && s_.state.HasFlag("today.rain");
 
     if (shop) {
         DrawShopInterior();
+    } else if (rain) {
+        DrawRectangleGradientV(0, 0, GetScreenWidth(), static_cast<int>(horizon), Color{120, 132, 150, 255},
+                               Color{180, 188, 198, 255});
     } else {
         DrawRectangleGradientV(0, 0, GetScreenWidth(), static_cast<int>(horizon), Color{140, 200, 245, 255},
                                Color{215, 238, 250, 255});
@@ -328,6 +332,9 @@ void SellScene::DrawBackdrop() const {
         DrawCharacter({counter.x + 10.0f, counter.y - 10.0f}, sellerLook, 0.0f, 2.2f);
         DrawPushcart(counter, 3.0f, s_.state.InParty("leo"));
     }
+    if (rain) {
+        DrawRain({0.0f, 0.0f, w, h}, static_cast<float>(GetTime()));
+    }
 }
 
 void SellScene::DrawSetup(const Layout& l) const {
@@ -337,12 +344,17 @@ void SellScene::DrawSetup(const Layout& l) const {
     const bool hot = s_.state.HasFlag("today.hot");
     const bool festival = s_.state.HasFlag("today.festival");
     std::string weather = hot ? "Hot day: drinks will be popular!" : "Mild day: not very thirsty weather.";
+    Color weatherColor = hot ? Color{200, 100, 20, 255} : kMuted;
+    if (s_.state.HasFlag("today.rain")) {
+        weather = venue_.outdoor ? "Rainy day: most people are staying at home." : "Rainy outside - but dry in here!";
+        weatherColor = Color{50, 95, 160, 255};
+    }
     if (festival) {
         weather = venue_.festivalCustomers > 1.0f ? "FESTIVAL DAY: the whole town is here!"
                                                   : "Festival Day: everyone is at the market today...";
+        weatherColor = Color{200, 100, 20, 255};
     }
-    ui::Text(weather, {l.panel.x + 24.0f, l.panel.y + 56.0f}, 19.0f, hot || festival ? Color{200, 100, 20, 255} : kMuted,
-             festival);
+    ui::Text(weather, {l.panel.x + 24.0f, l.panel.y + 56.0f}, 19.0f, weatherColor, festival);
 
     // One status line: why you can't open, or what it costs.
     std::string status = game::CannotOpenReason(s_.state, s_.content, venue_);

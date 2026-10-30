@@ -21,7 +21,8 @@ std::string DescribeUnmet(const Json::Value& when, const GameState& state, const
 // --- Effects ----------------------------------------------------------------------------------
 // Keys: add {stat: delta}, set {stat: value}, set_flag, clear_flag, join_party,
 // buy_stock {item, qty, unit_cost, dodgy}, remove_dodgy, advance_minutes, log, memory,
-// schedule {event, days}, take_loan {amount, rate, weeks}, name {character: display name}.
+// schedule {event, days}, take_loan {amount, rate, weeks}, name {character: display name},
+// sell_stock {item, qty, price} (an order for a business: stock out, coins in).
 void ApplyEffects(const Json::Value& effects, GameState& state);
 void Schedule(GameState& state, const Later& later);
 void AddMemory(GameState& state, const std::string& text);
@@ -48,6 +49,8 @@ const QuestDef* TrackedQuest(const GameState& state, const Content& content);
 
 // --- Day cycle -------------------------------------------------------------------------------
 bool IsHotDay(const GameState& state);
+// Some of the other days are rainy (never on a hot day).
+bool IsRainyDay(const GameState& state);
 // Morning: resets the clock and daily flags, spoils old stock, and returns events to play.
 std::vector<std::string> StartDay(GameState& state, const Content& content);
 void EndDay(GameState& state);

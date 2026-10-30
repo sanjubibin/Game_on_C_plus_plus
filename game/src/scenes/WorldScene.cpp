@@ -674,8 +674,11 @@ void WorldScene::DrawHud() const {
         ui::Text("Gen " + std::to_string(game::CurrentGeneration(st)), {244.0f, 30.0f}, 16.0f, kAccent, true);
     }
     const bool hot = st.HasFlag("today.hot");
+    const bool rain = st.HasFlag("today.rain");
     const bool festival = st.HasFlag("today.festival");
-    if (hot) {
+    if (rain) {
+        DrawRainCloud({42.0f, 72.0f}, static_cast<float>(GetTime()));
+    } else if (hot) {
         DrawCircleV({42.0f, 72.0f}, 9.0f, Color{255, 170, 40, 255});
         for (int i = 0; i < 8; ++i) {
             const float a = F(i) * PI / 4.0f;
@@ -687,10 +690,16 @@ void WorldScene::DrawHud() const {
         DrawCircleV({47.0f, 71.0f}, 9.0f, Color{200, 205, 215, 255});
     }
     std::string weather = hot ? "Hot day - lemonade weather!" : "Mild day";
+    Color weatherColor = hot ? Color{200, 100, 20, 255} : kMuted;
+    if (rain) {
+        weather = "Rainy day - quiet outdoors";
+        weatherColor = Color{50, 95, 160, 255};
+    }
     if (festival) {
         weather = "FESTIVAL DAY!";
+        weatherColor = Color{200, 100, 20, 255};
     }
-    ui::Text(weather, {62.0f, 61.0f}, 20.0f, hot || festival ? Color{200, 100, 20, 255} : kMuted, festival);
+    ui::Text(weather, {62.0f, 61.0f}, 20.0f, weatherColor, festival);
     DrawCoin({42.0f, 101.0f}, 9.0f);
     ui::Text(std::to_string(st.Get("money")) + " coins", {62.0f, 89.0f}, 22.0f, kInk, true);
     ui::Text("Reputation " + std::to_string(st.Get("reputation")), {170.0f, 91.0f}, 18.0f, kMuted);
@@ -736,6 +745,10 @@ void WorldScene::Draw(float alpha) const {
     DrawCharacters(player);
     DrawBunting();
     EndMode2D();
+
+    if (s_.state.HasFlag("today.rain")) {
+        DrawRain({0.0f, 0.0f, F(GetScreenWidth()), F(GetScreenHeight())}, static_cast<float>(GetTime()));
+    }
 
     // Evening light: from 17:00 the world slowly turns orange, then dusky purple.
     const float evening = std::clamp((F(s_.state.minutes) - 17.0f * 60.0f) / 180.0f, 0.0f, 1.0f);

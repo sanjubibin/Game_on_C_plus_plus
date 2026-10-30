@@ -1,5 +1,10 @@
 {
   "morning": [
+    { "when": { "min": { "chapter": 5 } }, "event": "ch5_start", "generation": 2 },
+    { "when": { "min": { "chapter": 5 }, "day_min": 20 }, "event": "storm", "generation": 2 },
+    { "when": { "min": { "chapter": 5 }, "day_min": 26, "day_max": 27 }, "event": "ch5_end_soon", "generation": 2 },
+    { "when": { "min": { "chapter": 5 }, "day_min": 17 }, "event": "storm_warning", "generation": 2 },
+    { "when": { "min": { "chapter": 5 }, "day_min": 16 }, "event": "rosa_news", "generation": 2 },
     { "when": { "day_min": 14, "day_max": 14 }, "event": "festival_morning" },
     { "when": { "min": { "chapter": 4 } }, "event": "generation_turn" },
     { "when": { "day_min": 14, "day_max": 14 }, "event": "g2_festival_morning", "generation": 2 },
@@ -23,11 +28,22 @@
     { "when": { "day_min": 3 }, "event": "morning_stranger_rumor" }
   ],
   "evening": [
-    { "when": { "day_min": 14, "flag": "g2_donated" }, "event": "g2_end_donated", "generation": 2 },
-    { "when": { "day_min": 14, "not_seen": "g2_end_donated" }, "event": "g2_end_saving", "generation": 2 },
+    { "when": { "min": { "chapter": 5 }, "day_min": 28, "flag": "cart_ok", "not_flag": "ch5_done" },
+      "event": "ch5_end_good", "generation": 2 },
+    { "when": { "min": { "chapter": 5 }, "day_min": 28, "not_flag": "ch5_done" }, "event": "ch5_end_rough", "generation": 2 },
+    { "when": { "flag": "today.delivery_due", "min": { "contract.misses": 1 } }, "event": "rosa_cancel", "generation": 2 },
+    { "when": { "flag": "today.delivery_due" }, "event": "rosa_missed", "repeat": true, "generation": 2 },
+    { "when": { "min": { "chapter": 5 }, "day_min": 19, "flag": "pushcart_sale" }, "event": "nia_discount", "generation": 2 },
+    { "when": { "flag": "cart_broken" }, "event": "dinner_cart_broken", "repeat": true, "generation": 2 },
+    { "when": { "flag": "today.rain" }, "event": "dinner_rain", "repeat": true, "generation": 2 },
+    { "when": { "day_min": 14, "flag": "g2_donated", "not_flag": "g2_festival_done" }, "event": "g2_end_donated",
+      "generation": 2 },
+    { "when": { "day_min": 14, "not_flag": "g2_festival_done" }, "event": "g2_end_saving", "generation": 2 },
     { "event": "dinner_g2", "repeat": true, "generation": 2 },
-    { "when": { "min": { "chapter": 3 }, "day_min": 42, "flag": "branch_open" }, "event": "chapter3_end_branch" },
-    { "when": { "min": { "chapter": 3 }, "day_min": 42, "not_seen": "chapter3_end_branch" }, "event": "chapter3_end_small" },
+    { "when": { "min": { "chapter": 3 }, "below": { "chapter": 4 }, "day_min": 42, "flag": "branch_open" },
+      "event": "chapter3_end_branch" },
+    { "when": { "min": { "chapter": 3 }, "below": { "chapter": 4 }, "day_min": 42, "not_seen": "chapter3_end_branch" },
+      "event": "chapter3_end_small" },
     { "when": { "flag": "rent_late" }, "event": "dinner_rent_late" },
     { "when": { "flag": "branch_open" }, "event": "dinner_branch" },
     { "when": { "min": { "chapter": 2 }, "day_min": 28 }, "event": "chapter2_end" },
@@ -1680,6 +1696,507 @@
         "It's the 100th Summer Festival! Bunting everywhere, music from the market square, and the whole town is out.",
         { "speaker": "nia", "text": "The park will be empty today - everyone's at the market!" }
       ]
+    },
+    {
+      "id": "ch5_start", "speaker": "",
+      "effects": { "set_flag": ["ch5_started", "today.rain"], "clear_flag": "today.hot" },
+      "lines": [
+        "Day 15. The festival bunting comes down, and grey clouds roll in over the town.",
+        "Drip... drip... drip. It's raining!",
+        { "speaker": "parent", "text": "Rainy days are quiet days for an outdoor business. People stay at home, and the pushcart sells less." },
+        { "speaker": "parent", "text": "Inside a shop, the rain hardly matters. Keep an eye on the sky at the top of the screen." },
+        { "speaker": "nia", "text": "Rain, rain, go away! Come again when we've sold our lemonade!" },
+        { "speaker": "parent", "text": "Bad days come to every business. Come and talk to me - let's make a plan for them." }
+      ]
+    },
+    {
+      "id": "rosa_news", "speaker": "nia",
+      "effects": { "set_flag": "contract_offered" },
+      "lines": [
+        "Guess what! Baker Rosa at the market asked for you. She wants to talk about lemonade - LOTS of lemonade!",
+        { "speaker": "", "text": "Baker Rosa's bakery is at the top of the market square." }
+      ]
+    },
+    {
+      "id": "rosa_order_offer", "speaker": "rosa",
+      "lines": [
+        "There you are! My customers keep asking for lemonade with their buns. I'd like to order from you.",
+        "Every three days, you bring me 10 lemonade. I pay 3 coins each - that's 30 coins every delivery.",
+        "It's less than you'd charge at the cart, I know. But it's a sale you can count on - rain or shine.",
+        "Three deliveries. But if you promise, I'll be counting on you. Deal?"
+      ],
+      "choices": [
+        {
+          "label": "Deal! 10 lemonade every three days.",
+          "effects": {
+            "set_flag": "contract_rosa",
+            "schedule": { "event": "rosa_delivery_day", "days": 1 },
+            "log": "You agreed to deliver 10 lemonade to Baker Rosa every three days.",
+            "memory": "Made my first business deal, with Baker Rosa."
+          },
+          "then": "rosa_deal_reply"
+        },
+        {
+          "label": "No thanks - I can't promise that.",
+          "effects": { "set_flag": "contract_declined", "log": "You said no to Baker Rosa's order." },
+          "then": "rosa_declined_reply"
+        }
+      ]
+    },
+    {
+      "id": "rosa_deal_reply", "speaker": "rosa",
+      "lines": [
+        "Wonderful! The first delivery is tomorrow. Bring the lemonade here to me.",
+        { "speaker": "nia", "text": "A real business order! We'd better buy extra lemonade from Mrs. Lin before every delivery day." }
+      ]
+    },
+    {
+      "id": "rosa_declined_reply", "speaker": "rosa",
+      "lines": [ "That's honest. Better to say no than to make a promise you can't keep." ]
+    },
+    {
+      "id": "rosa_delivery_day", "speaker": "",
+      "effects": { "set_flag": "today.delivery_due" },
+      "lines": [ "Delivery day! Baker Rosa is expecting 10 lemonade at the market before the evening." ]
+    },
+    {
+      "id": "rosa_delivery", "speaker": "rosa",
+      "lines": [ "Is that my lemonade? 10 bottles at 3 coins each." ],
+      "choices": [
+        {
+          "label": "Here you are - 10 lemonade. (Earn 30 coins)",
+          "show_when": { "below": { "contract.deliveries": 2 } },
+          "requires": { "has_stock": { "lemonade": 10 } },
+          "effects": {
+            "sell_stock": { "item": "lemonade", "qty": 10, "price": 3 },
+            "add": { "contract.deliveries": 1, "reputation": 2 },
+            "clear_flag": "today.delivery_due",
+            "schedule": { "event": "rosa_delivery_day", "days": 3 },
+            "log": "You delivered 10 lemonade to Baker Rosa for 30 coins."
+          },
+          "then": "rosa_delivery_thanks"
+        },
+        {
+          "label": "Here's the last delivery - 10 lemonade. (Earn 30 coins)",
+          "show_when": { "min": { "contract.deliveries": 2 } },
+          "requires": { "has_stock": { "lemonade": 10 } },
+          "effects": {
+            "sell_stock": { "item": "lemonade", "qty": 10, "price": 3 },
+            "add": { "contract.deliveries": 1 },
+            "clear_flag": "today.delivery_due",
+            "log": "You delivered 10 lemonade to Baker Rosa for 30 coins."
+          },
+          "then": "rosa_contract_complete"
+        },
+        { "label": "I don't have 10 lemonade yet. I'll come back later!" }
+      ]
+    },
+    {
+      "id": "rosa_delivery_thanks", "speaker": "rosa",
+      "lines": [ "Right on time! See you in three days." ]
+    },
+    {
+      "id": "rosa_contract_complete", "speaker": "rosa",
+      "effects": {
+        "set_flag": "contract_done",
+        "add": { "reputation": 8, "skill.money_sense": 1, "happiness": 5 },
+        "log": "Baker Rosa's order is complete. She tells everyone you're reliable!",
+        "memory": "Kept my promise to Baker Rosa: three deliveries of lemonade."
+      },
+      "lines": [
+        "Three deliveries! You kept your promise.",
+        "I'll be telling all my customers about you. A good name is worth more than 30 coins.",
+        { "speaker": "nia", "text": "We did it! Our first real business order!" }
+      ]
+    },
+    {
+      "id": "rosa_missed", "speaker": "",
+      "effects": {
+        "add": { "contract.misses": 1, "reputation": -3 },
+        "clear_flag": "today.delivery_due",
+        "schedule": { "event": "rosa_delivery_day", "days": 3 },
+        "log": "You missed Baker Rosa's delivery."
+      },
+      "lines": [
+        "Oh no - you never took Baker Rosa her lemonade today!",
+        { "speaker": "nia", "text": "Her customers will have asked for it all afternoon... I hope she gives us another chance." },
+        { "speaker": "parent", "text": "When you make a promise to a customer, they plan around it. Miss again, and she may cancel the order." }
+      ]
+    },
+    {
+      "id": "rosa_cancel", "speaker": "",
+      "effects": {
+        "set_flag": ["contract_done", "contract_lost"],
+        "clear_flag": ["contract_rosa", "today.delivery_due"],
+        "add": { "reputation": -5 },
+        "log": "Baker Rosa cancelled her order.",
+        "memory": "Lost Baker Rosa's order by missing deliveries."
+      },
+      "lines": [
+        "A note from Baker Rosa is waiting at home.",
+        "It says: I'm sorry, but I need lemonade I can count on. I've found another supplier. - Rosa",
+        { "speaker": "parent", "text": "That stings, doesn't it? Next time, only promise what you're sure you can deliver - and plan ahead so you can." }
+      ]
+    },
+    {
+      "id": "risk_talk", "speaker": "parent",
+      "lines": [
+        "Every business has bad days. A storm, a broken wheel, a week of rain. The question is: who pays when it happens?",
+        "If the pushcart broke, the repair would cost about 30 coins. There are three ways to plan for that.",
+        "Insurance: you pay a little every week - 2 coins - and if the pushcart breaks, the insurance company pays for the repair.",
+        "An emergency fund: you keep 30 coins in your savings at the Town Bank, and you only touch them if something goes wrong.",
+        "Or you do nothing, and hope. Lots of people do. What do you think?"
+      ],
+      "choices": [
+        {
+          "label": "Insurance - 2 coins a week, starting now.",
+          "requires": { "min": { "money": 2 } },
+          "effects": {
+            "add": { "money": -2, "skill.money_sense": 1 },
+            "set_flag": ["risk_plan", "insured"],
+            "set": { "bank.premium": 2 },
+            "log": "You insured the pushcart: 2 coins now, then 2 coins every bank day.",
+            "memory": "Bought insurance for the pushcart."
+          },
+          "then": "risk_insured_reply"
+        },
+        {
+          "label": "An emergency fund - 30 coins in my savings.",
+          "effects": {
+            "add": { "skill.money_sense": 1 },
+            "set_flag": ["risk_plan", "emergency_fund"],
+            "log": "Your plan: keep 30 coins in savings at the Town Bank for emergencies.",
+            "memory": "Started an emergency fund."
+          },
+          "then": "risk_fund_reply"
+        },
+        {
+          "label": "Nothing will go wrong. Let's not worry.",
+          "effects": { "set_flag": ["risk_plan", "no_plan"], "log": "You decided not to plan for bad days." },
+          "then": "risk_none_reply"
+        }
+      ]
+    },
+    {
+      "id": "risk_insured_reply", "speaker": "parent",
+      "lines": [
+        "Good. You'll pay those 2 coins every week, even when nothing breaks. That's the deal with insurance.",
+        "Most weeks it feels like money for nothing. Then one day, it's worth every coin."
+      ]
+    },
+    {
+      "id": "risk_fund_reply", "speaker": "parent",
+      "lines": [
+        "Good. But an emergency fund only works if the money is really there. The Town Bank is in the market square.",
+        "And if nothing goes wrong, the money is still yours - and it earns interest!"
+      ]
+    },
+    {
+      "id": "risk_none_reply", "speaker": "parent",
+      "lines": [
+        "Hmm. Maybe nothing will happen. But if it does, you'll need 30 coins all at once.",
+        { "speaker": "nia", "text": "Fingers crossed..." }
+      ]
+    },
+    {
+      "id": "storm_warning", "speaker": "parent",
+      "lines": [
+        "The radio says a big storm is coming in the next few days. Storms knock over market stalls and break pushcarts.",
+        "If you haven't made a plan for bad days yet, now's the time."
+      ]
+    },
+    {
+      "id": "storm", "speaker": "",
+      "effects": { "set_flag": ["today.rain", "storm_hit"], "clear_flag": "today.hot", "add": { "happiness": -5 } },
+      "lines": [
+        "CRASH! A huge storm blew through the town last night.",
+        "Branches are down, the gutters are overflowing... and the old pushcart has been blown over. One wheel is badly bent.",
+        { "speaker": "parent", "text": "Oh no. The repair shop says a new wheel will cost 30 coins." },
+        { "speaker": "nia", "text": "What do we do?" }
+      ],
+      "choices": [
+        {
+          "label": "We have insurance! They'll pay for the repair.",
+          "show_when": { "flag": "insured" },
+          "effects": {
+            "set_flag": ["storm_over", "cart_ok"],
+            "log": "The insurance paid for the pushcart's new wheel.",
+            "memory": "The storm broke the pushcart. Insurance paid for the repair."
+          },
+          "then": "storm_insured"
+        },
+        {
+          "label": "Pay 30 coins from my savings account.",
+          "requires": { "min": { "bank.savings": 30 } },
+          "effects": {
+            "add": { "bank.savings": -30 },
+            "set_flag": ["storm_over", "cart_ok"],
+            "log": "You paid 30 coins from your savings to fix the pushcart.",
+            "memory": "The storm broke the pushcart. My savings paid for the repair."
+          },
+          "then": "storm_savings"
+        },
+        {
+          "label": "Pay 30 coins from my pocket.",
+          "requires": { "min": { "money": 30 } },
+          "effects": {
+            "add": { "money": -30 },
+            "set_flag": ["storm_over", "cart_ok"],
+            "log": "You paid 30 coins to fix the pushcart."
+          },
+          "then": "storm_paid"
+        },
+        {
+          "label": "I can't pay for it right now...",
+          "effects": {
+            "set_flag": ["storm_over", "cart_broken"],
+            "log": "The pushcart is broken until you can pay 30 coins for a new wheel."
+          },
+          "then": "storm_broken"
+        }
+      ]
+    },
+    {
+      "id": "storm_insured", "speaker": "parent",
+      "lines": [
+        "This is exactly why we paid those coins every week. The insurance company pays for the wheel - it'll be fixed by lunchtime.",
+        { "speaker": "nia", "text": "Insurance is like an umbrella for money!" }
+      ]
+    },
+    {
+      "id": "storm_savings", "speaker": "parent",
+      "lines": [
+        "That's what an emergency fund is for. It hurts to see your savings go down - but the pushcart is fixed and you didn't have to borrow.",
+        "Now fill the fund up again, a little at a time."
+      ]
+    },
+    {
+      "id": "storm_paid", "speaker": "parent",
+      "lines": [
+        "Ouch - 30 coins all at once. You could afford it this time.",
+        "But imagine if the storm had come the day after you'd spent it all on stock..."
+      ]
+    },
+    {
+      "id": "storm_broken", "speaker": "parent",
+      "lines": [
+        "Then the pushcart stays broken until you can pay. That's why people plan for bad days.",
+        "Save up 30 coins and come and talk to me. Grandpa might have some paid jobs at the shop in the meantime.",
+        { "speaker": "nia", "text": "No pushcart... but we've still got each other. And Rosa's bakery, and the market!" }
+      ]
+    },
+    {
+      "id": "cart_broken_look", "speaker": "",
+      "lines": [ "The pushcart leans on its bent wheel. A new wheel costs 30 coins - talk to your parent when you have enough." ]
+    },
+    {
+      "id": "cart_repair", "speaker": "parent",
+      "lines": [ "Ready to fix the pushcart? The new wheel costs 30 coins." ],
+      "choices": [
+        {
+          "label": "Pay 30 coins from my pocket.",
+          "requires": { "min": { "money": 30 } },
+          "effects": {
+            "add": { "money": -30 },
+            "clear_flag": "cart_broken",
+            "set_flag": "cart_ok",
+            "log": "The pushcart is fixed!",
+            "memory": "Saved up and fixed the pushcart after the storm."
+          },
+          "then": "cart_fixed"
+        },
+        {
+          "label": "Pay 30 coins from my savings.",
+          "requires": { "min": { "bank.savings": 30 } },
+          "effects": {
+            "add": { "bank.savings": -30 },
+            "clear_flag": "cart_broken",
+            "set_flag": "cart_ok",
+            "log": "The pushcart is fixed!",
+            "memory": "Fixed the pushcart after the storm with my savings."
+          },
+          "then": "cart_fixed"
+        },
+        { "label": "Not yet - I'm still saving." }
+      ]
+    },
+    {
+      "id": "cart_fixed", "speaker": "parent",
+      "lines": [ "Good as new! Well... good as old. Next time, let's have a plan before the storm comes." ]
+    },
+    {
+      "id": "shop_chores", "speaker": "grandpa2",
+      "lines": [ "No pushcart, eh? I could use a hand stacking shelves this afternoon. 6 coins for three hours' work." ],
+      "choices": [
+        {
+          "label": "I'll do it! (3 hours, earn 6 coins)",
+          "effects": {
+            "add": { "money": 6 },
+            "advance_minutes": 180,
+            "set_flag": "today.helped_shop",
+            "log": "You stacked shelves at the shop for 6 coins."
+          },
+          "then": "shop_chores_done"
+        },
+        { "label": "Not today, thanks." }
+      ]
+    },
+    {
+      "id": "shop_chores_done", "speaker": "grandpa2",
+      "lines": [ "Hard work, honest pay. That's 6 coins well earned." ]
+    },
+    {
+      "id": "nia_discount", "speaker": "",
+      "effects": { "set_flag": "nia_discount_found" },
+      "lines": [
+        "After dinner, you count the coins in the cart tin. Then you count them again.",
+        "It's 6 coins short. And there's a page in Nia's notebook: 3 lemonades - 1 coin. 2 cookies - free.",
+        { "speaker": "nia", "text": "...Okay. I gave some kids lemonade for less. And some cookies for free. I was going to tell you." }
+      ],
+      "choices": [
+        {
+          "label": "Nia! That's OUR money! You can't just give our stock away!",
+          "effects": { "set_flag": "nia_upset", "add": { "nia.trust": -15, "nia.fun": -10 } },
+          "then": "nia_storms_off"
+        },
+        {
+          "label": "Okay. Tell me why.",
+          "effects": { "add": { "nia.trust": 5, "skill.empathy": 1 } },
+          "then": "their_side_nia"
+        }
+      ]
+    },
+    {
+      "id": "nia_storms_off", "speaker": "nia",
+      "lines": [
+        "You didn't even ASK why!",
+        { "speaker": "", "text": "Nia runs upstairs and slams the door. The house is very quiet." },
+        { "speaker": "parent", "text": "Hmm. Sleep on it, and talk to her tomorrow. Remember Aunt Maya's story about the 5 coins?" }
+      ]
+    },
+    {
+      "id": "nia_makeup", "speaker": "nia",
+      "lines": [ "...What do you want?" ],
+      "choices": [
+        {
+          "label": "I'm sorry I shouted. Why did you do it?",
+          "effects": { "clear_flag": "nia_upset", "add": { "nia.trust": 10, "skill.empathy": 1 } },
+          "then": "their_side_nia"
+        },
+        { "label": "Nothing. Never mind." }
+      ]
+    },
+    {
+      "id": "their_side_nia", "speaker": "nia", "style": "their_side",
+      "lines": [
+        "There are two kids from the flats by the park. Every day they stand near the pushcart and just... watch.",
+        "Yesterday I heard them talking. Their dad lost his job when the furniture factory closed. They had 1 coin between them.",
+        "Mum told me that she once took 5 coins from the cart, when she was little. She had a reason too.",
+        "I just wanted those kids to have a normal summer day. Like us."
+      ],
+      "then": "nia_after"
+    },
+    {
+      "id": "nia_after", "speaker": "nia",
+      "lines": [ "I know it's our money. I should have asked you first. Are you still cross?" ],
+      "choices": [
+        {
+          "label": "Let's do it properly: a 'pay what you can' jar on the cart.",
+          "effects": {
+            "set_flag": ["nia_resolved", "pay_what_you_can"],
+            "clear_flag": "nia_upset",
+            "add": { "nia.trust": 10, "nia.fun": 10, "reputation": 5, "happiness": 5 },
+            "log": "You and Nia put a 'pay what you can' jar on the pushcart.",
+            "memory": "Started a 'pay what you can' jar with Nia."
+          },
+          "then": "nia_jar"
+        },
+        {
+          "label": "Being kind is great - but from now on, we decide prices together.",
+          "effects": {
+            "set_flag": ["nia_resolved", "price_rule"],
+            "clear_flag": "nia_upset",
+            "add": { "nia.trust": 5, "nia.respect": 10, "skill.money_sense": 1 },
+            "log": "You and Nia agreed to decide prices together.",
+            "memory": "Agreed with Nia: partners decide prices together."
+          },
+          "then": "nia_agreement"
+        }
+      ]
+    },
+    {
+      "id": "nia_jar", "speaker": "nia",
+      "lines": [
+        "A jar! People who have more can pay a bit extra, and people who have less can pay what they can!",
+        { "speaker": "parent", "text": "Kindness can be part of a business plan - as long as you plan it together." }
+      ]
+    },
+    {
+      "id": "nia_agreement", "speaker": "nia",
+      "lines": [
+        "Deal. Partners decide together. And... maybe we could give the leftover cookies away at the end of the day?",
+        { "speaker": "parent", "text": "That's generous AND fair. Baker Rosa does the same with her old bread." }
+      ]
+    },
+    {
+      "id": "eco_offer", "speaker": "leo2",
+      "lines": [
+        "Have you seen the gutters after the rain? Full of paper cups - lots of them from drink stands.",
+        "I've designed reusable cups with your family's pushcart painted on them. People bring them back for a refill.",
+        "A set costs 15 coins. Customers love a business that looks after the town."
+      ],
+      "choices": [
+        {
+          "label": "Buy the cups. (15 coins)",
+          "requires": { "min": { "money": 15 } },
+          "effects": {
+            "add": { "money": -15, "reputation": 3, "leo2.trust": 5 },
+            "set_flag": "eco_cups",
+            "log": "You bought Leo's reusable cups. Customers like them!",
+            "memory": "Switched to Leo's reusable cups."
+          },
+          "then": "eco_reply"
+        },
+        { "label": "Maybe later." }
+      ]
+    },
+    {
+      "id": "eco_reply", "speaker": "leo2",
+      "lines": [ "Brilliant! Good for the town AND good for business. That's my favourite kind of idea." ]
+    },
+    {
+      "id": "dinner_cart_broken", "speaker": "parent",
+      "lines": [ "The pushcart is still waiting for its new wheel. You need 30 coins - maybe Grandpa has some jobs at the shop?" ]
+    },
+    {
+      "id": "dinner_rain", "speaker": "parent",
+      "lines": [ "Listen to that rain! Quiet days happen. That's why we save a little on the busy ones." ]
+    },
+    {
+      "id": "ch5_end_soon", "speaker": "nia",
+      "lines": [ "Grandpa says the whole family is coming for dinner on Day 28. Let's have a good story to tell them!" ]
+    },
+    {
+      "id": "ch5_end_good", "speaker": "",
+      "effects": { "set_flag": "ch5_done" },
+      "lines": [
+        "Day 28. The rain has finally stopped, and the whole family squeezes around the kitchen table.",
+        { "speaker": "grandpa2", "text": "I hear there was quite a storm. And I hear the pushcart came through it!" },
+        { "speaker": "parent", "text": "Bad days come to every business. The difference is whether you planned for them." },
+        { "speaker": "nia", "text": "And whether you've got a good cousin!" }
+      ],
+      "action": "chapter_end"
+    },
+    {
+      "id": "ch5_end_rough", "speaker": "",
+      "effects": { "set_flag": "ch5_done" },
+      "lines": [
+        "Day 28. The rain has finally stopped, and the whole family squeezes around the kitchen table.",
+        "The old pushcart still waits in the garage with its bent wheel.",
+        { "speaker": "parent", "text": "It's been a hard month. That's what happens when a bad day finds you without a plan." },
+        { "speaker": "grandpa2", "text": "Don't be glum. Every family business has a storm story. Now you know what to do next time." }
+      ],
+      "action": "chapter_end"
     }
   ]
 }

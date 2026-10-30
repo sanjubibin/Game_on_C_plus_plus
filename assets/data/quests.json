@@ -137,6 +137,41 @@
       ]
     },
     {
+      "id": "rainy_day_fund",
+      "chapter": 5,
+      "generation": 2,
+      "title": "Rainy Days",
+      "summary": "Bad days come to every business. Will you be ready when the storm comes?",
+      "start_flag": "ch5_started",
+      "steps": [
+        { "text": "Talk to your parent about planning for bad days.", "done_flag": "risk_plan" },
+        { "text": "Get through the storm.", "done_flag": "storm_over" },
+        { "text": "Get the pushcart working again (the repair costs 30 coins).", "done_flag": "cart_ok" }
+      ]
+    },
+    {
+      "id": "standing_order",
+      "chapter": 5,
+      "generation": 2,
+      "title": "A Standing Order",
+      "summary": "Baker Rosa wants 10 lemonade every three days. A promise is part of your reputation.",
+      "start_flag": "contract_rosa",
+      "steps": [
+        { "text": "Take Baker Rosa 10 lemonade on each delivery day (3 deliveries).", "done_flag": "contract_done" }
+      ]
+    },
+    {
+      "id": "nias_kindness",
+      "chapter": 5,
+      "generation": 2,
+      "title": "Nia's Secret",
+      "summary": "The cart money doesn't add up. Nia has been giving things away.",
+      "start_flag": "nia_discount_found",
+      "steps": [
+        { "text": "Find out why Nia did it, and decide together what to do.", "done_flag": "nia_resolved" }
+      ]
+    },
+    {
       "id": "new_kid",
       "title": "The New Kid",
       "summary": "A boy sits alone on a park bench every day.",

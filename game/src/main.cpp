@@ -31,7 +31,7 @@ namespace {
 //   --start <continue|town|park|evening|market|festival|supplier|sell|sell-run|sell-results|
 //            stall|stall-run|stall-results|encounter[:id]|journal[:tab]|summary|chapter-end|title|
 //            ch2|shop|shop-results|bank|farm|farm-supplier|ch3|city|city-market|ch3-evening|
-//            legacy|gen2|gen2-market|
+//            legacy|gen2|gen2-market|ch5|ch5-cart|ch5-storm|ch5-journal[:tab]|
 //            dialogue:<event>|choices:<event>>
 //   --screenshot <file.png> [--frames N]   save frame N and quit
 struct Options {
@@ -234,6 +234,46 @@ void DevStart(engine::Application& app, GameSession& session, const std::string&
         if (what == "gen2-market") {
             session.currentMap = "market";
             session.playerPos = {13.5f * visuals::kTile, 10.5f * visuals::kTile + 8.0f};
+        }
+        return;
+    }
+    if (what.starts_with("ch5")) {
+        secondGeneration();
+        game::GameState& st = session.state;
+        st.names["parent"] = "Dad";
+        flow::SyncNames(session);
+        for (const char* flag : {"g2_started", "got_pushcart", "g2_project_news", "g2_project_chosen", "g2_donated",
+                                 "g2_festival_done", "pushcart_sale", "ch5_started", "today.rain"}) {
+            st.SetFlag(flag);
+        }
+        for (const char* event : {"g2_intro", "g2_nia_joins", "g2_end_donated", "ch5_start"}) {
+            st.seenEvents.insert(event);
+        }
+        st.Set("chapter", 5);
+        st.day = 15;
+        st.Add("money", 20);
+        st.AddStock({"lemonade", 20, 1, st.day, false});
+        flow::PlaceAtHome(session);
+        if (what == "ch5-cart") {
+            auto scene = std::make_unique<SellScene>(app, session, *session.content.FindVenue("pushcart"));
+            scene->DevAutoRun(5.0f);
+            app.Scenes().Push(std::move(scene));
+        } else if (what == "ch5-storm") {
+            st.SetFlag("insured");
+            st.Set("bank.premium", 2);
+            auto dialogue = std::make_unique<DialogueScene>(app, session, std::vector<std::string>{"storm"},
+                                                            std::function<void()>{});
+            dialogue->DevSkipLines();
+            app.Scenes().Push(std::move(dialogue));
+        } else if (what.starts_with("ch5-journal")) {
+            st.SetFlag("insured");
+            st.Set("bank.premium", 2);
+            st.SetFlag("contract_rosa");
+            auto journal = std::make_unique<JournalScene>(app, session);
+            if (what.size() > 12) {
+                journal->SetTab(std::atoi(what.substr(12).c_str()));
+            }
+            app.Scenes().Push(std::move(journal));
         }
         return;
     }

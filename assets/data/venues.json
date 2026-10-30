@@ -2,34 +2,42 @@
   "venues": [
     {
       "id": "pushcart", "name": "Pushcart", "backdrop": "park",
-      "customers": 1.0, "festival_customers": 0.4, "fee": 0, "hours": 3
+      "customers": 1.0, "festival_customers": 0.4, "fee": 0, "hours": 3,
+      "bonuses": [
+        { "when": { "flag": "eco_cups" }, "customers": 0.05, "text": "People bring Leo's cups back for a refill." },
+        { "when": { "flag": "pay_what_you_can" }, "customers": 0.1,
+          "text": "Families came for the 'pay what you can' jar - and some paid extra to help others." }
+      ]
     },
     {
       "id": "stall", "name": "Market Stall", "backdrop": "market",
       "customers": 1.7, "festival_customers": 2.5, "fee": 5, "hours": 3,
       "bonuses": [
         { "when": { "flag": "kofi_friend" }, "customers": 0.1, "text": "Kofi sent his fruit customers your way!" },
-        { "when": { "flag": "grumble_regular" }, "customers": 0.05, "text": "Mrs. Grumble brought her friends." }
+        { "when": { "flag": "grumble_regular" }, "customers": 0.05, "text": "Mrs. Grumble brought her friends." },
+        { "when": { "flag": "eco_cups" }, "customers": 0.05, "text": "People bring Leo's cups back for a refill." }
       ]
     },
     {
-      "id": "shop", "name": "Corner Shop", "backdrop": "shop",
+      "id": "shop", "name": "Corner Shop", "backdrop": "shop", "outdoor": false,
       "customers": 1.4, "festival_customers": 0.6, "fee": 0, "hours": 3,
       "bonuses": [
         { "when": { "flag": "upgrade_sign" }, "customers": 0.25, "text": "The bright new sign brings people in!" },
         { "when": { "flag": "upgrade_shelves" }, "customers": 0.15, "text": "Tidy new shelves help customers find things." },
         { "when": { "flag": "fridge" }, "customers": 0.15, "text": "People come back for the cold drinks." },
         { "when": { "flag": "price_war", "not_flag": "fridge" }, "customers": -0.25,
-          "text": "Some customers went to MegaMart for cheap lemonade." }
+          "text": "Some customers went to MegaMart for cheap lemonade." },
+        { "when": { "flag": "eco_cups" }, "customers": 0.05, "text": "People bring Leo's cups back for a refill." }
       ]
     },
     {
-      "id": "branch", "name": "City Shop", "backdrop": "shop",
+      "id": "branch", "name": "City Shop", "backdrop": "shop", "outdoor": false,
       "customers": 1.8, "festival_customers": 1.0, "fee": 0, "hours": 3,
       "bonuses": [
         { "when": { "flag": "head_of_design" }, "customers": 0.1, "text": "Leo's new displays catch people's eyes!" },
         { "when": { "flag": "head_of_sales" }, "customers": 0.1, "text": "Priya's special offers bring people in!" },
-        { "when": { "flag": "rent_late" }, "customers": -0.1, "text": "Word got around that the rent was late." }
+        { "when": { "flag": "rent_late" }, "customers": -0.1, "text": "Word got around that the rent was late." },
+        { "when": { "flag": "eco_cups" }, "customers": 0.05, "text": "People bring Leo's cups back for a refill." }
       ]
     }
   ]

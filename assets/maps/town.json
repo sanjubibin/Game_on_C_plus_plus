@@ -45,7 +45,9 @@
   ],
   "spots": [
     { "id": "pushcart", "label": "Use the pushcart", "action": "open_sell:pushcart", "draw": "cart",
-      "x": 20, "y": 17, "when": { "flag": "got_pushcart" } },
+      "x": 20, "y": 17, "when": { "flag": "got_pushcart", "not_flag": "cart_broken" } },
+    { "id": "broken_cart", "label": "Look at the pushcart", "action": "event:cart_broken_look", "draw": "cart",
+      "x": 20, "y": 17, "when": { "flag": "cart_broken" } },
     { "id": "signpost", "label": "Read the signpost", "action": "event:signpost_market", "draw": "signpost",
       "x": 37, "y": 7 },
     { "id": "bus_stop", "label": "Take the bus", "action": "event:bus_stop_town", "draw": "bus",

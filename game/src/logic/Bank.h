@@ -24,7 +24,8 @@ void TakeLoan(GameState& state, int amount, int ratePercent, int weeks);
 
 // Start of each week: interest on savings, then the loan payment - or a late fee if there
 // isn't enough money - then the city shop's rent (stat branch.rent) once it is open: from your
-// pocket first, then from savings; if both fall short the rent is late. Everything is logged.
+// pocket first, then from savings; if both fall short the rent is late. Then the insurance
+// premium (stat bank.premium): if it can't be paid, the cover stops. Everything is logged.
 void ProcessWeek(GameState& state, const EconomyDef& economy);
 
 }  // namespace game

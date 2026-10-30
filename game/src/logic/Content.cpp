@@ -284,6 +284,7 @@ void ParseVenues(const Json::Value& root, Content& c) {
         venue.name = Str(v, "name", venue.id);
         venue.backdrop = Str(v, "backdrop", "park");
         venue.staffable = Bool(v, "staffable", true);
+        venue.outdoor = Bool(v, "outdoor", true);
         venue.customers = Float(v, "customers", 1.0f);
         venue.festivalCustomers = Float(v, "festival_customers", 1.0f);
         venue.fee = Int(v, "fee", 0);

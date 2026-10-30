@@ -176,6 +176,40 @@ void DrawHeart(Vector2 center, float size, Color color) {
                  {center.x + size * 0.53f, center.y}, color);
 }
 
+void DrawRain(Rectangle area, float time) {
+    DrawRectangleRec(area, Color{40, 60, 90, 55});
+    const Color drop{205, 220, 240, 150};
+    const int drops = static_cast<int>(area.width * area.height / 7000.0f);
+    const float fall = area.height + 40.0f;
+    for (int i = 0; i < drops; ++i) {
+        // Each drop has its own column, start height and speed, and wraps around the area.
+        const float n = static_cast<float>(i);
+        const float column = std::fmod(n * 0.618034f, 1.0f);
+        const float start = std::fmod(n * 0.754878f, 1.0f);
+        const float speed = 620.0f + 260.0f * std::fmod(n * 0.414214f, 1.0f);
+        const float t = std::fmod(start * fall + time * speed, fall);
+        float x = area.x + column * area.width - t * 0.2f;
+        if (x < area.x) {
+            x += area.width;
+        }
+        const float y = area.y - 20.0f + t;
+        DrawLineEx({x, y}, {x - 3.0f, y + 14.0f}, 1.5f, drop);
+    }
+}
+
+void DrawRainCloud(Vector2 center, float time) {
+    const Color drop{70, 130, 210, 255};
+    for (int i = 0; i < 3; ++i) {
+        const float x = center.x - 7.0f + static_cast<float>(i) * 7.0f;
+        const float y = center.y + 6.0f + std::fmod(time * 14.0f + static_cast<float>(i) * 4.0f, 9.0f);
+        DrawLineEx({x, y}, {x - 1.5f, y + 4.0f}, 2.0f, drop);
+    }
+    const Color cloud{150, 160, 175, 255};
+    DrawCircleV({center.x - 5.0f, center.y + 1.0f}, 7.0f, cloud);
+    DrawCircleV({center.x + 4.0f, center.y - 2.0f}, 9.0f, cloud);
+    DrawRectangleRec({center.x - 5.0f, center.y + 1.0f, 12.0f, 7.0f}, cloud);
+}
+
 void DrawLifeWheel(Vector2 center, float radius, const game::LifeWheel& wheel, bool labels) {
     const std::array<std::pair<const char*, int>, 6> axes = {{{"Money", wheel.money},
                                                               {"Health", wheel.health},

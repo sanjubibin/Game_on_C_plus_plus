@@ -19,7 +19,7 @@ const std::set<std::string> kConditionKeys = {
 const std::set<std::string> kEffectKeys = {
     "add",          "set",          "set_flag", "clear_flag", "join_party", "buy_stock",
     "remove_dodgy", "advance_minutes", "log",   "memory",     "schedule",   "take_loan",
-    "name"};
+    "name",         "sell_stock"};
 
 // Calls fn for a string or for every string in an array.
 template <typename Fn>
@@ -152,6 +152,16 @@ std::string DescribeUnmet(const Json::Value& when, const GameState& state, const
     if (party.isString() && !state.InParty(party.asString())) {
         return "Needs " + content.NameOf(party.asString()) + " with you";
     }
+    const Json::Value& stock = when["has_stock"];
+    if (stock.isObject()) {
+        for (const std::string& id : stock.getMemberNames()) {
+            const int needed = stock[id].asInt();
+            if (state.StockOf(id) < needed) {
+                const ItemDef* item = content.FindItem(id);
+                return "Needs " + std::to_string(needed) + " " + (item ? item->name : id);
+            }
+        }
+    }
     return "Not possible right now";
 }
 
@@ -224,6 +234,11 @@ void ApplyEffects(const Json::Value& effects, GameState& state) {
             state.minutes += v.asInt();
         } else if (key == "log") {
             state.todayLog.push_back(v.asString());
+        } else if (key == "sell_stock") {
+            const std::string item = v["item"].asString();
+            const int qty = std::min(v["qty"].asInt(), state.StockOf(item));
+            state.TakeStock(item, qty);
+            state.Add("money", qty * v["price"].asInt());
         } else if (key == "name") {
             for (const std::string& id : v.getMemberNames()) {
                 state.names[id] = v[id].asString();
@@ -324,6 +339,20 @@ bool IsHotDay(const GameState& state) {
     return h % 3 == 0;
 }
 
+bool IsRainyDay(const GameState& state) {
+    if (IsHotDay(state)) {
+        return false;
+    }
+    std::uint32_t h = (state.seed + 0x9e3779b9u) ^ (static_cast<std::uint32_t>(state.day) * 2246822519u);
+    h ^= h >> 15;
+    h *= 0x2c1b3c6du;
+    h ^= h >> 12;
+    return h % 4 == 0;
+}
+
+// Rain arrives with Chapter 5, "Rainy Days".
+constexpr int kFirstRainyChapter = 5;
+
 std::vector<std::string> StartDay(GameState& state, const Content& content) {
     state.minutes = 8 * 60;
     std::erase_if(state.flags, [](const std::string& f) { return f.starts_with("today."); });
@@ -349,6 +378,8 @@ std::vector<std::string> StartDay(GameState& state, const Content& content) {
 
     if (IsHotDay(state)) {
         state.SetFlag("today.hot");
+    } else if (state.Get("chapter") >= kFirstRainyChapter && IsRainyDay(state)) {
+        state.SetFlag("today.rain");
     }
     if (IsTired(state)) {
         state.todayLog.push_back("You woke up tired. Early nights help you recover.");
@@ -539,6 +570,10 @@ std::vector<std::string> ValidateContent(const Content& content) {
         if (effects["buy_stock"].isObject() &&
             !content.FindItem(effects["buy_stock"]["item"].asString())) {
             problems.push_back(where + ": buy_stock has an unknown item");
+        }
+        if (effects["sell_stock"].isObject() &&
+            !content.FindItem(effects["sell_stock"]["item"].asString())) {
+            problems.push_back(where + ": sell_stock has an unknown item");
         }
         ForEachString(effects["join_party"],
                       [&](const std::string& id) { checkCharacter(id, where + " join_party"); });

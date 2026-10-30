@@ -181,7 +181,12 @@ SessionReport RunSellSession(GameState& state, const Content& content, const Ven
         const int morale = state.stats.contains("staff.morale_pct") ? state.Get("staff.morale_pct") : 100;
         skill = efficiency * static_cast<float>(morale) / 100.0f;
     }
-    params.efficiency = skill * venue.customers * (festival ? venue.festivalCustomers : 1.0f);
+    const bool rainedOff = venue.outdoor && state.HasFlag("today.rain");
+    params.efficiency = skill * venue.customers * (festival ? venue.festivalCustomers : 1.0f) *
+                        (rainedOff ? 0.5f : 1.0f);
+    if (rainedOff) {
+        report.bonusTexts.push_back("Rain kept most people at home.");
+    }
 
     for (const std::string& member : state.party) {
         const NpcDef* npc = content.FindNpc(member);

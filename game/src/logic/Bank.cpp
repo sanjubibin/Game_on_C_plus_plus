@@ -78,6 +78,23 @@ void PayRent(GameState& state) {
     state.todayLog.push_back(line + ".");
 }
 
+void PayPremium(GameState& state) {
+    const int premium = state.Get("bank.premium");
+    if (!state.HasFlag("insured") || premium <= 0) {
+        return;
+    }
+    if (state.Get("money") >= premium) {
+        state.Add("money", -premium);
+        state.todayLog.push_back("Insurance: " + std::to_string(premium) + " coins. Your pushcart is covered.");
+    } else if (state.Get("bank.savings") >= premium) {
+        state.Add("bank.savings", -premium);
+        state.todayLog.push_back("Insurance: " + std::to_string(premium) + " coins (from savings).");
+    } else {
+        state.ClearFlag("insured");
+        state.todayLog.push_back("You couldn't pay the insurance, so your pushcart is no longer covered!");
+    }
+}
+
 }  // namespace
 
 bool RepayLoan(GameState& state, int amount) {
@@ -116,6 +133,7 @@ void ProcessWeek(GameState& state, const EconomyDef& economy) {
     }
 
     PayRent(state);
+    PayPremium(state);
 
     const int owed = state.Get("bank.loan");
     if (owed <= 0) {

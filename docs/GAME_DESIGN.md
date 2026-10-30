@@ -1,7 +1,7 @@
-# Corner Shop Quest — Game Design (draft v0.6)
+# Corner Shop Quest — Game Design (draft v0.7)
 
 > Working title. Genre: **2D top-down adventure RPG + family business**.
-> Status: **draft v0.6** - Phases 1-5 (Chapters 1 to 4, two generations) built; see the status
+> Status: **draft v0.7** - Chapters 1 to 5 (two generations) built; see the status
 > sections. Items marked *(provisional)* are defaults awaiting a decision — see
 > [Open decisions](#open-decisions).
 
@@ -272,7 +272,29 @@ Built on top of Phase 1:
 - **Animation:** walking legs and arms, characters face the way they move, people turn towards
   you, and everyone blinks.
 
-## Roadmap after Phase 5
+## Chapter 5 status - "Rainy Days" (second generation, Days 15-28)
+
+- **Weather risk:** from Chapter 5 some days are rainy (never on a hot day). Rain halves the
+  customers at outdoor venues (pushcart, market stall); shops are indoors and don't mind. The
+  HUD and the selling screen show the weather, and the world and park backdrop get rain.
+- **Planning for bad days:** your parent explains three plans - insurance (2 coins now, then 2
+  every bank day; if a premium can't be paid the cover stops), an emergency fund (30 coins kept in
+  savings) or no plan. On Day 20 a storm bends the pushcart's wheel: insurance pays, or you pay 30
+  coins from savings or your pocket - or the cart stays broken until you can. Grandpa offers paid
+  shelf-stacking at the shop meanwhile.
+- **A standing order:** Baker Rosa orders 10 lemonade every three days at 3 coins each - less
+  than the cart price, but a sale you can count on. Three deliveries complete it; a missed
+  delivery costs reputation, and a second miss cancels the order. Lesson: a promise is part of
+  your reputation.
+- **Nia's secret:** the cart money is short because Nia gave lemonade to kids whose dad lost his
+  job. Shout and she storms off (make up the next day), or ask why first - then hear her side and
+  decide together: a "pay what you can" jar (more families come) or deciding prices together.
+- **Leo's reusable cups:** 15 coins for cups customers bring back - a small boost at every venue.
+- **Engine/data:** venue `outdoor` flag, `today.rain`, a `sell_stock` effect (selling stock to a
+  business), the weekly insurance premium in bank day, and clearer "Needs 10 Lemonade" hints.
+  Chapter endings now play once even if their condition comes true again later.
+
+## Roadmap
 
 - **Language:** English only (decided). No translation is planned.
 - **Art and audio assets:** replace the code-drawn placeholders with drawn sprites and recorded

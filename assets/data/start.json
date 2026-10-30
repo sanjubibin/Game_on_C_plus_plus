@@ -1,6 +1,6 @@
 {
   "map": "town",
-  "chapters": ["The Pushcart", "The Corner Shop", "Two Shops", "Roots & Wings", "To Be Continued"],
+  "chapters": ["The Pushcart", "The Corner Shop", "Two Shops", "Roots & Wings", "Rainy Days", "To Be Continued"],
   "economy": { "savings_interest": 5, "late_fee": 3, "week_length": 7 },
   "stats": {
     "chapter": 1,
@@ -50,6 +50,12 @@
     "A good manager is someone you trust when you're not there.",
     "When you choose one friend, make sure the others still feel valued.",
     "Giving back isn't about having a lot. It's about deciding what matters.",
-    "Debts belong to the person who borrowed. A good name is something a family shares."
+    "Debts belong to the person who borrowed. A good name is something a family shares.",
+    "Rainy days are quiet days outdoors. Inside a shop, the rain hardly matters.",
+    "Insurance: pay a little every week, so one bad day doesn't cost you a lot.",
+    "An emergency fund is savings you don't touch - until you really need it.",
+    "A business order pays less per item, but it's a sale you can count on.",
+    "A promise to a customer is part of your reputation. Only promise what you can deliver.",
+    "Kindness can be part of a business plan - if you plan it together."
   ]
 }
