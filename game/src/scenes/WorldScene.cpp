@@ -126,6 +126,11 @@ void WorldScene::FixedUpdate(float dt) {
     if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) dir.x += 1.0f;
     const float length = std::hypot(dir.x, dir.y);
     moving_ = length > 0.0f;
+    if (dir.x != 0.0f) {
+        facing_ = dir.x > 0.0f ? 1.0f : -1.0f;
+    } else if (dir.y > 0.0f) {
+        facing_ = 0.0f;  // walking towards the camera
+    }
     if (moving_) {
         const bool run = IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT);
         const float tired = game::IsTired(st) ? kTiredSpeedFactor : 1.0f;
@@ -204,7 +209,7 @@ void WorldScene::Update(float dt) {
 }
 
 bool WorldScene::NpcPresent(const game::NpcDef& npc) const {
-    return npc.map == s_.currentMap && !s_.state.InParty(npc.id) &&
+    return npc.map == s_.currentMap && game::InGeneration(npc.generation, s_.state) && !s_.state.InParty(npc.id) &&
            game::CheckCondition(npc.presentWhen, s_.state);
 }
 
@@ -575,28 +580,46 @@ void WorldScene::DrawCharacters(Vector2 player) const {
     struct Entry {
         Vector2 feet;
         Look look;
-        float bob;
+        Pose pose;
     };
     std::vector<Entry> entries;
     const float time = static_cast<float>(GetTime());
+    const float step = walkTime_ * 14.0f;
 
     for (const game::NpcDef& npc : s_.content.npcs) {
         if (NpcPresent(npc)) {
-            const float bob = std::sin(time * 2.0f + npc.x) * 0.8f;
-            entries.push_back({TileFeet(npc.x, npc.y), LookOf(&npc), bob});
+            const Vector2 feet = TileFeet(npc.x, npc.y);
+            Pose pose;
+            pose.bob = std::sin(time * 2.0f + npc.x) * 0.8f;
+            pose.seed = npc.x * 3.1f + npc.y;
+            // People turn to look at you as you come close.
+            if (Distance(player, feet) < 140.0f && std::fabs(player.x - feet.x) > 6.0f) {
+                pose.facing = player.x > feet.x ? 1.0f : -1.0f;
+            }
+            entries.push_back({feet, LookOf(&npc), pose});
         }
     }
     for (std::size_t i = 0; i < s_.state.party.size(); ++i) {
         const game::NpcDef* npc = s_.content.FindNpc(s_.state.party[i]);
-        const float bob = moving_ ? std::sin(walkTime_ * 14.0f + F(static_cast<int>(i))) * 1.5f : 0.0f;
-        entries.push_back({FollowerPos(i), LookOf(npc), bob});
+        const Vector2 feet = FollowerPos(i);
+        Pose pose;
+        pose.walking = moving_;
+        pose.step = step + F(static_cast<int>(i) + 1) * 1.3f;
+        pose.bob = moving_ ? std::sin(pose.step) * 1.5f : 0.0f;
+        pose.seed = F(static_cast<int>(i) + 7);
+        pose.facing = std::fabs(player.x - feet.x) > 6.0f ? (player.x > feet.x ? 1.0f : -1.0f) : facing_;
+        entries.push_back({feet, LookOf(npc), pose});
     }
-    const float playerBob = moving_ ? std::sin(walkTime_ * 14.0f) * 1.5f : 0.0f;
-    entries.push_back({player, PlayerLook(), playerBob});
+    Pose me;
+    me.walking = moving_;
+    me.step = step;
+    me.bob = moving_ ? std::sin(step) * 1.5f : 0.0f;
+    me.facing = facing_;
+    entries.push_back({player, PlayerLook(game::CurrentGeneration(s_.state)), me});
 
     std::sort(entries.begin(), entries.end(), [](const Entry& a, const Entry& b) { return a.feet.y < b.feet.y; });
     for (const Entry& e : entries) {
-        DrawCharacter(e.feet, e.look, e.bob);
+        DrawCharacter(e.feet, e.look, e.pose);
     }
 }
 
@@ -647,6 +670,9 @@ void WorldScene::DrawHud() const {
     const Rectangle info{16.0f, 16.0f, 290.0f, 134.0f};
     ui::Panel(info, kPanel, kPanelBorder);
     ui::Text("Day " + std::to_string(st.day) + "   " + st.ClockText(), {32.0f, 24.0f}, 28.0f, kInk, true);
+    if (game::CurrentGeneration(st) > 1) {
+        ui::Text("Gen " + std::to_string(game::CurrentGeneration(st)), {244.0f, 30.0f}, 16.0f, kAccent, true);
+    }
     const bool hot = st.HasFlag("today.hot");
     const bool festival = st.HasFlag("today.festival");
     if (hot) {

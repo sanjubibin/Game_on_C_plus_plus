@@ -32,6 +32,10 @@ void StartEvening(engine::Application& app, GameSession& session, bool late = fa
 // Called by the day summary: advance the day, save, and play the next morning.
 void FinishDay(engine::Application& app, GameSession& session);
 void PlaceAtHome(GameSession& session);
+// Applies the save's display-name overrides (e.g. "Mom" or "Dad") to the characters.
+void SyncNames(GameSession& session);
+// Ends this generation: legacy screen, then the child's first morning.
+void NewGeneration(engine::Application& app, GameSession& session);
 
 // Applies effects and shows toasts for stat and quest changes.
 void ApplyEffects(GameSession& session, const Json::Value& effects);

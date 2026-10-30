@@ -1,6 +1,10 @@
 {
   "morning": [
     { "when": { "day_min": 14, "day_max": 14 }, "event": "festival_morning" },
+    { "when": { "min": { "chapter": 4 } }, "event": "generation_turn" },
+    { "when": { "day_min": 14, "day_max": 14 }, "event": "g2_festival_morning", "generation": 2 },
+    { "when": { "day_min": 12, "day_max": 13 }, "event": "g2_festival_soon", "generation": 2 },
+    { "when": { "day_min": 3 }, "event": "g2_project_news", "generation": 2 },
     { "when": { "min": { "chapter": 3 } }, "event": "ch3_start" },
     { "when": { "min": { "chapter": 3 }, "day_min": 40, "day_max": 41 }, "event": "fair_soon" },
     { "when": { "min": { "chapter": 3 }, "day_min": 31 }, "event": "ch3_bulk_tip" },
@@ -19,6 +23,9 @@
     { "when": { "day_min": 3 }, "event": "morning_stranger_rumor" }
   ],
   "evening": [
+    { "when": { "day_min": 14, "flag": "g2_donated" }, "event": "g2_end_donated", "generation": 2 },
+    { "when": { "day_min": 14, "not_seen": "g2_end_donated" }, "event": "g2_end_saving", "generation": 2 },
+    { "event": "dinner_g2", "repeat": true, "generation": 2 },
     { "when": { "min": { "chapter": 3 }, "day_min": 42, "flag": "branch_open" }, "event": "chapter3_end_branch" },
     { "when": { "min": { "chapter": 3 }, "day_min": 42, "not_seen": "chapter3_end_branch" }, "event": "chapter3_end_small" },
     { "when": { "flag": "rent_late" }, "event": "dinner_rent_late" },
@@ -819,7 +826,9 @@
       "choices": [
         { "label": "Open the shop (3 hours)", "show_when": { "flag": "shop_partner" }, "action": "open_sell:shop" },
         { "label": "Plan upgrades with Dad", "show_when": { "flag": "shop_partner" }, "then": "upgrade_menu" },
-        { "label": "Just look around.", "show_when": { "not_flag": "shop_partner" }, "then": "shop_inside" },
+        { "label": "Just look around.", "show_when": { "not_flag": ["shop_partner", "next_generation"] },
+          "then": "shop_inside" },
+        { "label": "Help Grandpa in the shop.", "show_when": { "flag": "next_generation" }, "then": "g2_shop_visit" },
         { "label": "Leave.", "show_when": { "flag": "shop_partner" } }
       ]
     },
@@ -1397,7 +1406,8 @@
       "lines": [ "The city shop. Big windows, a long counter, and a view of the river." ],
       "choices": [
         { "label": "Open it yourself (3 hours)", "show_when": { "flag": "branch_open" }, "action": "open_sell:branch" },
-        { "label": "Read the sign.", "show_when": { "not_flag": "branch_open" }, "then": "city_shop_sign" },
+        { "label": "Read the sign.", "show_when": { "not_flag": ["branch_open", "legacy_branch"] }, "then": "city_shop_sign" },
+        { "label": "Visit Aunt Maya's shop.", "show_when": { "flag": "legacy_branch" }, "then": "g2_maya_city_shop" },
         { "label": "Leave." }
       ]
     },
@@ -1433,6 +1443,243 @@
         { "speaker": "grandpa", "text": "One good shop, well run, beats two shops run badly." }
       ],
       "action": "chapter_end"
+    },
+
+    {
+      "id": "generation_turn", "speaker": "",
+      "lines": [ "Your summer of business is coming to an end. One day this story will belong to the next generation..." ],
+      "choices": [
+        { "label": "Jump twenty years ahead and meet your child.", "then": "generation_years_pass" },
+        { "label": "Not yet - keep playing this summer for another week.",
+          "later": { "event": "generation_turn", "days": 7 } }
+      ]
+    },
+    {
+      "id": "generation_years_pass", "speaker": "",
+      "lines": [
+        "The summers pass. The pushcart gets a fresh coat of paint, then another.",
+        "The children grow up. The shops change. The town grows around them.",
+        "Twenty years go by..."
+      ],
+      "action": "new_generation"
+    },
+    {
+      "id": "g2_intro", "speaker": "",
+      "effects": { "set_flag": ["g2_started", "got_pushcart"] },
+      "lines": [
+        "It's the first morning of the summer holidays. You are ten years old.",
+        "Your parent runs the corner shop now - the same shop they once saved with an old pushcart.",
+        { "speaker": "parent", "text": "Happy first day of summer! I've got something for you." },
+        { "speaker": "parent", "text": "This pushcart was your great-grandpa's. Then it was mine. Now it's yours." },
+        { "speaker": "parent", "text": "And I've put a little money from the family fund in your pocket - plus a savings account at the Town Bank. Use them wisely." }
+      ],
+      "choices": [
+        { "label": "Thanks, Mom!", "effects": { "name": { "parent": "Mom" } }, "then": "g2_nia_joins" },
+        { "label": "Thanks, Dad!", "effects": { "name": { "parent": "Dad" } }, "then": "g2_nia_joins" }
+      ]
+    },
+    {
+      "id": "g2_nia_joins", "speaker": "nia",
+      "effects": { "join_party": "nia", "memory": "Got the old family pushcart - with cousin Nia." },
+      "lines": [
+        "Hi cousin! Mum - Aunt Maya to you - says I can help with the pushcart!",
+        "I've already drawn a chalk arrow on the pavement. Let's GO!",
+        { "speaker": "", "text": "Cousin Nia joined your team. The family's friends are all grown up now - go and say hello around town." }
+      ]
+    },
+    {
+      "id": "g2_project_news", "speaker": "parent",
+      "effects": { "set_flag": "g2_project_news" },
+      "lines": [
+        "Big news: the 100th Summer Festival is on Day 14! The town council wants every family to give something back to the town.",
+        "Come and talk to me about which project our family should support."
+      ]
+    },
+    {
+      "id": "g2_festival_soon", "speaker": "nia",
+      "lines": [ "Only a couple of days until the 100th Festival! Have we saved enough for our project?" ]
+    },
+    {
+      "id": "g2_choose_project", "speaker": "parent",
+      "lines": [
+        "The council has three projects. Each one needs 40 coins from a family.",
+        "This is YOUR money to give, from your own business. Which one matters most to you?"
+      ],
+      "choices": [
+        { "label": "Fix the playground swings in the park",
+          "effects": { "set_flag": ["g2_project_chosen", "g2_project_playground"], "log": "You chose to help fix the playground." },
+          "then": "g2_project_reply" },
+        { "label": "New books for the town library",
+          "effects": { "set_flag": ["g2_project_chosen", "g2_project_library"], "log": "You chose to buy books for the library." },
+          "then": "g2_project_reply" },
+        { "label": "Plant trees along the river",
+          "effects": { "set_flag": ["g2_project_chosen", "g2_project_trees"], "log": "You chose to plant trees by the river." },
+          "then": "g2_project_reply" }
+      ]
+    },
+    {
+      "id": "g2_project_reply", "speaker": "parent",
+      "lines": [
+        "Good choice. Now you need to earn 40 coins and decide to give them. That's the hard part!",
+        "Giving isn't about having a lot. It's about deciding what matters."
+      ]
+    },
+    {
+      "id": "g2_saving_up", "speaker": "parent",
+      "lines": [ "How's the saving going? You need 40 coins for your project before the festival on Day 14." ]
+    },
+    {
+      "id": "g2_donate", "speaker": "parent",
+      "lines": [ "You've got 40 coins! Do you want to give them to your festival project now?" ],
+      "choices": [
+        {
+          "label": "Yes - give 40 coins to the project.",
+          "effects": {
+            "add": { "money": -40, "reputation": 15, "happiness": 10, "parent.trust": 10, "parent.respect": 15 },
+            "set_flag": "g2_donated",
+            "log": "You gave 40 coins to the town's festival project.",
+            "memory": "Gave 40 coins to make the town better."
+          },
+          "then": "g2_donated_reply"
+        },
+        { "label": "Not yet - I need the coins for stock first." }
+      ]
+    },
+    {
+      "id": "g2_donated_reply", "speaker": "parent",
+      "lines": [
+        "I'm so proud of you. You earned that money - and you chose to share it.",
+        { "speaker": "nia", "text": "Everyone at the festival is going to see it!" }
+      ]
+    },
+    {
+      "id": "g2_grandpa_story", "speaker": "grandpa2",
+      "effects": { "set_flag": "g2_grandpa_story" },
+      "lines": [
+        "There's my favourite grandchild! Don't tell the others.",
+        "When your parent was your age, MegaMart nearly closed this shop. Then one day they turned up with your great-grandpa's pushcart...",
+        "Business is a long story. You're writing the next chapter."
+      ]
+    },
+    {
+      "id": "g2_gg_story", "speaker": "great_grandpa",
+      "effects": { "set_flag": "g2_gg_visit", "add": { "skill.hard_work": 1 }, "memory": "Visited Great-Grandpa at the farm." },
+      "lines": [
+        "Well, well! Another one with that pushcart!",
+        "I'll tell you what I told your parent: buy for less, sell for more - and always be fair to your customers.",
+        "And one more thing I learned too late: the money is never the best part. The people are."
+      ]
+    },
+    {
+      "id": "g2_maya_story_forgiven", "speaker": "aunt_maya",
+      "effects": { "set_flag": "g2_maya_story", "add": { "aunt_maya.trust": 10, "skill.empathy": 1 } },
+      "lines": [
+        "Has your parent ever told you about the 5 coins? When I was little, I took 5 coins from the cart money.",
+        "The big kids were teasing me. Your parent could have shouted - but they asked me WHY instead.",
+        "I've never forgotten that. Always ask why, kiddo."
+      ]
+    },
+    {
+      "id": "g2_maya_story_payback", "speaker": "aunt_maya",
+      "effects": { "set_flag": "g2_maya_story", "add": { "aunt_maya.trust": 5, "skill.money_sense": 1 } },
+      "lines": [
+        "When I was little I took 5 coins from the cart money. Your parent made me pay back every coin.",
+        "I was SO cross. But it taught me that business money isn't pocket money. Fair is fair."
+      ]
+    },
+    {
+      "id": "g2_maya_story", "speaker": "aunt_maya",
+      "effects": { "set_flag": "g2_maya_story" },
+      "lines": [
+        "Your parent and I spent every summer at that pushcart. We argued about EVERYTHING.",
+        "But we always came back to the cart the next morning. That's what family is."
+      ]
+    },
+    {
+      "id": "g2_leo_story_friend", "speaker": "leo2",
+      "effects": { "add": { "leo2.trust": 10, "skill.creativity": 1 } },
+      "lines": [
+        "You look just like your parent! They asked me to join the pushcart when I was the new kid in town.",
+        "I painted my first sign for it. Now I paint murals. I owe that to one kind invitation."
+      ]
+    },
+    {
+      "id": "g2_leo_story", "speaker": "leo2",
+      "lines": [
+        "I was the new kid once, sitting alone on a park bench. Nobody came to say hello for a long time.",
+        "If you ever see someone sitting alone... go and say hi. It changes everything."
+      ]
+    },
+    {
+      "id": "g2_priya_story_friend", "speaker": "priya2",
+      "effects": { "add": { "priya2.trust": 10, "skill.communication": 1 } },
+      "lines": [
+        "Your parent's pushcart was my first job! I used to shout LEMONADE at everyone in the park.",
+        "Now I run a company that helps shops find customers. Same idea - just a bit less shouting."
+      ]
+    },
+    {
+      "id": "g2_priya_story", "speaker": "priya2",
+      "lines": [
+        "I almost joined your parent's pushcart team once. I wish I had - they had so much fun.",
+        "If someone asks you to be part of something good, say yes!"
+      ]
+    },
+    {
+      "id": "g2_kofi_story_friend", "speaker": "kofi2",
+      "effects": { "add": { "kofi2.trust": 10 } },
+      "lines": [
+        "Your parent and I made a deal right here, twenty years ago: no fruit from them, no drinks from me.",
+        "We're STILL partners. Tell your parent the fruit for their shop is on me this week."
+      ]
+    },
+    {
+      "id": "g2_kofi_story", "speaker": "kofi2",
+      "lines": [
+        "Your parent and I were rivals once. We spent a whole summer stealing each other's customers.",
+        "Looking back, we'd both have done better as friends."
+      ]
+    },
+    {
+      "id": "g2_shop_visit", "speaker": "grandpa2",
+      "lines": [ "Come to help? The shelves need stacking and the customers need smiling at. Both are important jobs!" ]
+    },
+    {
+      "id": "g2_maya_city_shop", "speaker": "",
+      "lines": [ "Aunt Maya's city shop is busy. A sign in the window says: FAMILY BUSINESS SINCE THE PUSHCART." ]
+    },
+    {
+      "id": "dinner_g2", "speaker": "parent",
+      "lines": [ "How was the pushcart today? You know, I used to come home from the park with sticky lemonade hands too." ]
+    },
+    {
+      "id": "g2_end_donated", "speaker": "",
+      "effects": { "set_flag": "g2_festival_done" },
+      "lines": [
+        "Day 14: the 100th Summer Festival. The whole town fills the market square.",
+        "The mayor reads out the names of every family who gave something back. Yours is one of them.",
+        { "speaker": "parent", "text": "Three generations and one old pushcart. Your great-grandpa would say: the people are the best part." },
+        { "speaker": "nia", "text": "Same time next summer, cousin?" }
+      ],
+      "action": "chapter_end"
+    },
+    {
+      "id": "g2_end_saving", "speaker": "",
+      "effects": { "set_flag": "g2_festival_done" },
+      "lines": [
+        "Day 14: the 100th Summer Festival. The whole town fills the market square.",
+        { "speaker": "parent", "text": "You didn't quite make your project this time - but you know how to save for a goal now. There's always next summer." },
+        { "speaker": "nia", "text": "Next year we'll do it. Pinky promise!" }
+      ],
+      "action": "chapter_end"
+    },
+    {
+      "id": "g2_festival_morning", "speaker": "",
+      "effects": { "set_flag": "today.festival", "add": { "happiness": 5 } },
+      "lines": [
+        "It's the 100th Summer Festival! Bunting everywhere, music from the market square, and the whole town is out.",
+        { "speaker": "nia", "text": "The park will be empty today - everyone's at the market!" }
+      ]
     }
   ]
 }

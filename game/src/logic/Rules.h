@@ -21,7 +21,7 @@ std::string DescribeUnmet(const Json::Value& when, const GameState& state, const
 // --- Effects ----------------------------------------------------------------------------------
 // Keys: add {stat: delta}, set {stat: value}, set_flag, clear_flag, join_party,
 // buy_stock {item, qty, unit_cost, dodgy}, remove_dodgy, advance_minutes, log, memory,
-// schedule {event, days}, take_loan {amount, rate, weeks}.
+// schedule {event, days}, take_loan {amount, rate, weeks}, name {character: display name}.
 void ApplyEffects(const Json::Value& effects, GameState& state);
 void Schedule(GameState& state, const Later& later);
 void AddMemory(GameState& state, const std::string& text);
@@ -58,6 +58,12 @@ bool IsTired(const GameState& state);
 std::string PickEveningEvent(const GameState& state, const Content& content);
 // First talk event whose condition holds, else an idle line (rotating by day).
 std::string PickTalkEvent(const NpcDef& npc, const GameState& state);
+
+// --- Generations ------------------------------------------------------------------------------
+// The family generation you are playing (1 = the first child, 2 = their child, ...).
+int CurrentGeneration(const GameState& state);
+// Content tagged with generation g belongs to that generation; 0 means every generation.
+bool InGeneration(int generation, const GameState& state);
 
 // --- People and the Life Wheel ---------------------------------------------------------------
 // True once the player has been in a scene with this character (or they are on the team).

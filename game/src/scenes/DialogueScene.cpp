@@ -220,7 +220,7 @@ void DialogueScene::Draw(float /*alpha*/) const {
     float textX = box.x + 36.0f;
     if (!narration) {
         const game::NpcDef* npc = s_.content.FindNpc(line->speaker);
-        const Look look = line->speaker == "you" ? PlayerLook() : LookOf(npc);
+        const Look look = line->speaker == "you" ? PlayerLook(game::CurrentGeneration(s_.state)) : LookOf(npc);
         DrawPortrait({box.x + 96.0f, box.y + box.height / 2.0f}, 66.0f, look);
         textX = box.x + 190.0f;
 

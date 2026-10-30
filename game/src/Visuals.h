@@ -34,9 +34,21 @@ struct Look {
 };
 
 Look LookOf(const game::NpcDef* npc);
-Look PlayerLook();
+// Each generation's child looks different; the grown-up first child keeps the first look.
+Look PlayerLook(int generation = 1);
 
-// Feet position in world pixels. bob is a small vertical offset for walking/idle animation.
+struct Pose {
+    bool walking = false;
+    float step = 0.0f;    // walk-cycle phase in radians
+    float facing = 0.0f;  // -1 looking left, 0 towards you, 1 looking right
+    float bob = 0.0f;     // small vertical offset
+    float seed = 0.0f;    // so characters don't all blink at once
+};
+
+// Feet position in world pixels: swinging legs and arms when walking, eyes that look the way
+// the character faces, and the odd blink.
+void DrawCharacter(Vector2 feet, const Look& look, const Pose& pose, float scale = 1.0f);
+// Shorthand: walking whenever bob is non-zero, facing the camera.
 void DrawCharacter(Vector2 feet, const Look& look, float bob, float scale = 1.0f);
 void DrawPortrait(Vector2 center, float radius, const Look& look);
 void DrawPushcart(Vector2 center, float scale, bool fancySign);

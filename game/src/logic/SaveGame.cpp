@@ -84,6 +84,12 @@ bool SaveGame(const std::string& path, const GameState& state, std::string* erro
     }
     root["memories"] = memories;
 
+    Json::Value names(Json::objectValue);
+    for (const auto& [id, name] : state.names) {
+        names[id] = name;
+    }
+    root["names"] = names;
+
     try {
         const std::filesystem::path file(path);
         if (file.has_parent_path()) {
@@ -155,6 +161,9 @@ bool LoadGame(const std::string& path, GameState& state, std::string* error) {
         }
         for (const Json::Value& m : root["memories"]) {
             loaded.memories.push_back({m["day"].asInt(), m["text"].asString()});
+        }
+        for (const std::string& id : root["names"].getMemberNames()) {
+            loaded.names[id] = root["names"][id].asString();
         }
         state = std::move(loaded);
         return true;

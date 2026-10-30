@@ -311,7 +311,8 @@ void SellScene::DrawBackdrop() const {
         DrawCharacter({x, counter.y + 30.0f}, LookOf(s_.content.FindNpc(member)), 0.0f, 2.0f);
         x += 60.0f;
     }
-    const Look sellerLook = seller.empty() ? PlayerLook() : LookOf(s_.content.FindNpc(seller));
+    const Look sellerLook =
+        seller.empty() ? PlayerLook(game::CurrentGeneration(s_.state)) : LookOf(s_.content.FindNpc(seller));
     if (market) {
         // Tall stall: the seller's face shows between the awning and the counter.
         DrawCharacter({counter.x + 10.0f, counter.y + 8.0f}, sellerLook, 0.0f, 2.2f);

@@ -52,6 +52,7 @@ private:
     Vector2 prevPos_{};
     float clockAccum_ = 0.0f;
     float walkTime_ = 0.0f;
+    float facing_ = 0.0f;  // -1 left, 1 right, 0 towards the camera
     bool moving_ = false;
     bool eveningQueued_ = false;
     Target target_;

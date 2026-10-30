@@ -12,11 +12,13 @@
 #include "engine/Application.h"
 #include "engine/Audio.h"
 #include "engine/Ui.h"
+#include "logic/Legacy.h"
 #include "logic/Rules.h"
 #include "scenes/ChapterEndScene.h"
 #include "scenes/DaySummaryScene.h"
 #include "scenes/DialogueScene.h"
 #include "scenes/JournalScene.h"
+#include "scenes/LegacyScene.h"
 #include "scenes/SellScene.h"
 #include "scenes/TitleScene.h"
 #include "scenes/WorldScene.h"
@@ -29,6 +31,7 @@ namespace {
 //   --start <continue|town|park|evening|market|festival|supplier|sell|sell-run|sell-results|
 //            stall|stall-run|stall-results|encounter[:id]|journal[:tab]|summary|chapter-end|title|
 //            ch2|shop|shop-results|bank|farm|farm-supplier|ch3|city|city-market|ch3-evening|
+//            legacy|gen2|gen2-market|
 //            dialogue:<event>|choices:<event>>
 //   --screenshot <file.png> [--frames N]   save frame N and quit
 struct Options {
@@ -198,6 +201,39 @@ void DevStart(engine::Application& app, GameSession& session, const std::string&
         }
         if (what == "city-market") {
             flow::RunAction(app, session, "open_supplier:city");
+        }
+        return;
+    }
+    // The second generation: chapter 3 finished, then twenty years later.
+    auto secondGeneration = [&session, &chapterThree]() {
+        chapterThree();
+        game::GameState& st = session.state;
+        st.day = 43;
+        st.Set("chapter", 4);
+        for (const char* flag : {"leo_joined", "kofi_friend", "maya_forgiven", "fair_done"}) {
+            st.SetFlag(flag);
+        }
+        return game::StartNextGeneration(st, session.content);
+    };
+    if (what == "legacy") {
+        game::LegacyReport report = secondGeneration();
+        app.Scenes().Push(std::make_unique<LegacyScene>(app, session, std::move(report), std::function<void()>{}));
+        return;
+    }
+    if (what == "gen2" || what == "gen2-market") {
+        secondGeneration();
+        game::GameState& st = session.state;
+        st.names["parent"] = "Dad";
+        flow::SyncNames(session);
+        for (const char* flag : {"g2_started", "got_pushcart", "g2_project_news"}) {
+            st.SetFlag(flag);
+        }
+        st.seenEvents.insert("g2_intro");
+        st.day = 4;
+        flow::PlaceAtHome(session);
+        if (what == "gen2-market") {
+            session.currentMap = "market";
+            session.playerPos = {13.5f * visuals::kTile, 10.5f * visuals::kTile + 8.0f};
         }
         return;
     }

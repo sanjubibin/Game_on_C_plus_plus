@@ -5,6 +5,7 @@ add_library(game_logic STATIC
     src/logic/Content.cpp
     src/logic/Encounter.cpp
     src/logic/GameState.cpp
+    src/logic/Legacy.cpp
     src/logic/Rules.cpp
     src/logic/SaveGame.cpp
     src/logic/Selling.cpp
@@ -26,6 +27,7 @@ add_executable(AAAGame
     src/scenes/DialogueScene.cpp
     src/scenes/EncounterScene.cpp
     src/scenes/JournalScene.cpp
+    src/scenes/LegacyScene.cpp
     src/scenes/PauseScene.cpp
     src/scenes/SellScene.cpp
     src/scenes/SupplierScene.cpp

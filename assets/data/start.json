@@ -1,6 +1,6 @@
 {
   "map": "town",
-  "chapters": ["The Pushcart", "The Corner Shop", "Two Shops", "To Be Continued"],
+  "chapters": ["The Pushcart", "The Corner Shop", "Two Shops", "Roots & Wings", "To Be Continued"],
   "economy": { "savings_interest": 5, "late_fee": 3, "week_length": 7 },
   "stats": {
     "chapter": 1,
@@ -48,6 +48,8 @@
     "Buying in bulk lowers the price of each item - if you can sell them all in time.",
     "Rent is a fixed cost. It comes every week, busy or quiet.",
     "A good manager is someone you trust when you're not there.",
-    "When you choose one friend, make sure the others still feel valued."
+    "When you choose one friend, make sure the others still feel valued.",
+    "Giving back isn't about having a lot. It's about deciding what matters.",
+    "Debts belong to the person who borrowed. A good name is something a family shares."
   ]
 }

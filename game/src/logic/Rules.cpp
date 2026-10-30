@@ -18,7 +18,8 @@ const std::set<std::string> kConditionKeys = {
 
 const std::set<std::string> kEffectKeys = {
     "add",          "set",          "set_flag", "clear_flag", "join_party", "buy_stock",
-    "remove_dodgy", "advance_minutes", "log",   "memory",     "schedule",   "take_loan"};
+    "remove_dodgy", "advance_minutes", "log",   "memory",     "schedule",   "take_loan",
+    "name"};
 
 // Calls fn for a string or for every string in an array.
 template <typename Fn>
@@ -223,6 +224,10 @@ void ApplyEffects(const Json::Value& effects, GameState& state) {
             state.minutes += v.asInt();
         } else if (key == "log") {
             state.todayLog.push_back(v.asString());
+        } else if (key == "name") {
+            for (const std::string& id : v.getMemberNames()) {
+                state.names[id] = v[id].asString();
+            }
         } else if (key == "memory") {
             AddMemory(state, v.asString());
         } else if (key == "schedule") {
@@ -267,7 +272,18 @@ std::vector<std::string> DiffStats(const std::map<std::string, int>& before,
     return out;
 }
 
+int CurrentGeneration(const GameState& state) {
+    return std::max(1, state.Get("generation"));
+}
+
+bool InGeneration(int generation, const GameState& state) {
+    return generation == 0 || generation == CurrentGeneration(state);
+}
+
 QuestStatus GetQuestStatus(const QuestDef& quest, const GameState& state) {
+    if (!InGeneration(quest.generation, state)) {
+        return QuestStatus::Hidden;
+    }
     if (!quest.startFlag.empty() && !state.HasFlag(quest.startFlag)) {
         return QuestStatus::Hidden;
     }
@@ -352,7 +368,7 @@ std::vector<std::string> StartDay(GameState& state, const Content& content) {
         return false;
     });
     for (const TriggerRule& rule : content.morning) {
-        if ((rule.repeat || !state.seenEvents.contains(rule.event)) &&
+        if (InGeneration(rule.generation, state) && (rule.repeat || !state.seenEvents.contains(rule.event)) &&
             CheckCondition(rule.when, state)) {
             events.push_back(rule.event);
             break;
@@ -383,7 +399,7 @@ bool IsTired(const GameState& state) {
 
 std::string PickEveningEvent(const GameState& state, const Content& content) {
     for (const TriggerRule& rule : content.evening) {
-        if ((rule.repeat || !state.seenEvents.contains(rule.event)) &&
+        if (InGeneration(rule.generation, state) && (rule.repeat || !state.seenEvents.contains(rule.event)) &&
             CheckCondition(rule.when, state)) {
             return rule.event;
         }
@@ -406,6 +422,9 @@ std::string PickTalkEvent(const NpcDef& npc, const GameState& state) {
 }
 
 bool HasMet(const NpcDef& npc, const GameState& state, const Content& content) {
+    if (!InGeneration(npc.generation, state)) {
+        return false;
+    }
     if (state.InParty(npc.id)) {
         return true;
     }
@@ -529,7 +548,7 @@ std::vector<std::string> ValidateContent(const Content& content) {
     };
     auto checkAction = [&](const std::string& action, const std::string& where) {
         if (action.empty() || action == "end_day" || action == "home" || action == "chapter_end" ||
-            action == "open_bank") {
+            action == "open_bank" || action == "new_generation") {
             return;
         }
         if (action.starts_with("open_supplier:")) {

@@ -1,7 +1,8 @@
-# Corner Shop Quest — Game Design (draft v0.5)
+# Corner Shop Quest — Game Design (draft v0.6)
 
 > Working title. Genre: **2D top-down adventure RPG + family business**.
-> Status: **draft v0.5** - Phases 1-4 (Chapters 1 to 3) built; see the status sections. Items marked *(provisional)* are defaults awaiting a decision — see
+> Status: **draft v0.6** - Phases 1-5 (Chapters 1 to 4, two generations) built; see the status
+> sections. Items marked *(provisional)* are defaults awaiting a decision — see
 > [Open decisions](#open-decisions).
 
 ## Vision
@@ -250,10 +251,34 @@ Built on top of Phase 1:
 - **Settings:** music, sound effects and fullscreen in the pause menu (M toggles music), saved
   to settings.json.
 
-## Roadmap after Phase 4
+## Phase 5 status - Generations: Chapter 4 "Roots & Wings"
 
-- **Phase 5:** generations (hand the business to the next generation), localization, art and
-  animation assets, more chapters, and testing with real kids.
+- **The hand-over:** after Chapter 3 the player chooses when to jump twenty years ahead (or plays
+  another week first). A legacy screen shows the Life Wheel of the life lived, what became of the
+  business and every friend, and how the child starts.
+- **Inheritance rules:** the child gets a fifth of the family fund as pocket money (10-40) and a
+  quarter in a savings account, half the family reputation, fresh skills plus one family talent
+  (the parent's best skill). Debts stay with the parent who borrowed.
+- **The town remembers:** world history (story flags, seen events, memories) carries over, so the
+  grown-ups tell different stories depending on what you did - Aunt Maya remembers whether you
+  listened to her side, Kofi whether you made peace, Leo and Priya whether you invited them in.
+- **Second generation:** your child (new look), cousin Nia (on the team, can work a stand),
+  Mom or Dad (the grown-up first child - the player chooses what to call them), Grandma, Grandpa
+  at the shop, Great-Grandpa at the farm, and Clover the cow.
+- **Giving back:** for the town's 100th festival (Day 14) the child chooses a community project
+  (playground, library books or trees) and must earn and then choose to give 40 coins.
+- **Engine/data:** generation tags on characters, quests and triggers; display-name overrides;
+  a family-generation-aware Life Wheel and People page.
+- **Animation:** walking legs and arms, characters face the way they move, people turn towards
+  you, and everyone blinks.
+
+## Roadmap after Phase 5
+
+- **Localization:** the text lives in JSON, so translations can be added per language - pick the
+  language(s) first.
+- **Art and audio assets:** replace the code-drawn placeholders with drawn sprites and recorded
+  sound once assets are chosen.
+- **More chapters and generations,** and **testing with real kids** to tune difficulty and text.
 
 ## Open decisions
 

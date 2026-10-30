@@ -3,6 +3,7 @@
 #include <raylib.h>
 
 #include <algorithm>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -28,6 +29,7 @@ struct GameSession {
 
     std::string savePath = "saves/slot1.json";
     std::string settingsPath = "settings.json";
+    std::map<std::string, std::string> baseNames;  // character names as authored, before overrides
     Settings settings;
     bool devMode = false;  // started with --start; never writes the save file
 

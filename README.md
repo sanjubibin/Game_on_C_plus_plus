@@ -6,12 +6,13 @@ money, work and people really work. Full design: [docs/GAME_DESIGN.md](docs/GAME
 
 C++20, built with the MSYS2 UCRT64 toolchain, raylib and jsoncpp.
 
-**Current state: Phase 4 - Chapters 1 to 3.** Four areas (town, market square, Green Hill Farm,
-Riverside City by bus); the pushcart, market stall, corner shop and a second city shop run by a
-manager; staff with wages; the Town Bank with savings, interest and loans; bulk buying; weekly
-rent; a MegaMart price war; fourteen quests; eight encounters; a "Their Side" scene; Festival Day;
-the Life Wheel and chapter-end screens; day/night cycle with health; synthesized music and sound
-effects; settings; and saving. Graphics and audio are generated in code (no asset files yet).
+**Current state: Phase 5 - Chapters 1 to 4, two generations.** Four areas (town, market square,
+Green Hill Farm, Riverside City by bus); the pushcart, market stall, corner shop and a second city
+shop run by a manager; staff with wages; the Town Bank with savings, interest and loans; bulk
+buying; weekly rent; a MegaMart price war; fifteen quests; eight encounters; a "Their Side" scene;
+Festival Day; the Life Wheel and chapter-end screens; a legacy hand-over to your child, whose
+grown-up family and friends remember what you did; animated characters; synthesized music and
+sound effects; settings; and saving. Graphics and audio are generated in code (no asset files).
 
 ## How to play
 
@@ -41,10 +42,12 @@ engine/               Static library, genre-agnostic
 game/
   src/logic/          game_logic library - no rendering, unit-tested
                         GameState, Content (JSON loading), Rules (conditions, effects, day cycle,
-                        Life Wheel), ShopSim (customers), Selling (a session at a venue, staff),
-                        Encounter (social challenge rules), Bank (savings, loans), SaveGame
+                        Life Wheel, generations), ShopSim (customers), Selling (a session at a
+                        venue, staff, the branch), Encounter (social challenge rules), Bank
+                        (savings, loans, rent), Legacy (handing over to the next generation),
+                        SaveGame
   src/scenes/         Title, World, Dialogue, Supplier, Sell, Encounter, Bank, Journal, Pause,
-                      DaySummary, ChapterEnd
+                      DaySummary, ChapterEnd, Legacy
   src/Flow.*          Glue between scenes: new game, events, actions, day cycle
   src/Visuals.*       Palette and procedural drawing of characters, stalls, Life Wheel
   src/GameAudio.*     The game's sound effects, music loop, and settings (settings.json)
@@ -60,7 +63,9 @@ docs/                 Game design document
 
 ### Writing content
 
-Story content needs no C++: edit the JSON in `assets/data/` and `assets/maps/`. Events have
+Story content needs no C++: edit the JSON in `assets/data/` and `assets/maps/`. Characters,
+quests and morning/evening triggers belong to a family generation (`"generation"`, default 1;
+0 means every generation). Events have
 lines, choices, conditions (`when`, `requires`, `show_when`), effects, follow-ups (`then`),
 delayed consequences (`later`) and memories. New areas are new map files connected by `exits`.
 The unit tests load the real content and report broken references, so run them after editing.
@@ -99,6 +104,7 @@ build/debug/game/AAAGame.exe --start sell --screenshot shot.png --frames 60
 `--start` accepts `town`, `park`, `evening`, `market`, `festival`, `exit-test`, `supplier`,
 `sell`, `sell-run`, `sell-results`, `stall`, `stall-run`, `stall-results`, `ch2`, `shop`,
 `shop-results`, `bank`, `farm`, `farm-supplier`, `ch3`, `city`, `city-market`, `ch3-evening`,
+`legacy`, `gen2`, `gen2-market`,
 `encounter[:<id>]`, `journal` /
 `journal:<0-4>`, `summary`, `chapter-end`, `title`, `continue`, `dialogue:<event id>` and
 `choices:<event id>`. Dev starts never write the save file, and screenshot runs stay silent.

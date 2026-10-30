@@ -122,6 +122,21 @@
       ]
     },
     {
+      "id": "roots_and_wings",
+      "chapter": 4,
+      "generation": 2,
+      "title": "Roots & Wings",
+      "summary": "A new generation, an old pushcart. Learn the family's story and give something back to the town.",
+      "start_flag": "g2_started",
+      "steps": [
+        { "text": "Sell something at the old pushcart with Nia.", "done_flag": "pushcart_sale" },
+        { "text": "Hear Aunt Maya's story (market square).", "done_flag": "g2_maya_story" },
+        { "text": "Visit Great-Grandpa at Green Hill Farm.", "done_flag": "g2_gg_visit" },
+        { "text": "Choose a festival project with your parent.", "done_flag": "g2_project_chosen" },
+        { "text": "Give 40 coins to your project before the 100th Festival (Day 14).", "done_flag": "g2_donated" }
+      ]
+    },
+    {
       "id": "new_kid",
       "title": "The New Kid",
       "summary": "A boy sits alone on a park bench every day.",

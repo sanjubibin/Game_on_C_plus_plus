@@ -41,6 +41,7 @@ struct GameState {
     std::map<std::string, int> prices;  // last selling price chosen per item
     std::vector<ScheduledEvent> scheduled;
     std::vector<Memory> memories;
+    std::map<std::string, std::string> names;  // display-name overrides, e.g. what your child calls you
 
     int moneyAtDayStart = 0;
     std::vector<std::string> todayLog;  // shown on the end-of-day summary

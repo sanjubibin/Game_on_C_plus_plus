@@ -17,28 +17,63 @@ Look LookOf(const game::NpcDef* npc) {
     return {ToColor(npc->body), ToColor(npc->hair), ToColor(npc->skin)};
 }
 
-Look PlayerLook() {
+Look PlayerLook(int generation) {
+    if (generation >= 2) {
+        return {Color{64, 192, 87, 255}, Color{43, 43, 43, 255}, Color{198, 142, 95, 255}};
+    }
     return {Color{245, 166, 35, 255}, Color{70, 45, 30, 255}, Color{226, 178, 132, 255}};
 }
 
-void DrawCharacter(Vector2 feet, const Look& look, float bob, float scale) {
+void DrawCharacter(Vector2 feet, const Look& look, const Pose& pose, float scale) {
     const float s = scale;
-    DrawEllipse(static_cast<int>(feet.x), static_cast<int>(feet.y), 9.0f * s, 3.5f * s,
-                Color{0, 0, 0, 60});
+    DrawEllipse(static_cast<int>(feet.x), static_cast<int>(feet.y), 9.0f * s, 3.5f * s, Color{0, 0, 0, 60});
 
-    const float top = feet.y - 6.0f * s + bob;
-    // Legs
-    DrawRectangleRec({feet.x - 5.0f * s, top - 2.0f * s, 4.0f * s, 8.0f * s}, Color{60, 60, 80, 255});
-    DrawRectangleRec({feet.x + 1.0f * s, top - 2.0f * s, 4.0f * s, 8.0f * s}, Color{60, 60, 80, 255});
+    const float top = feet.y - 6.0f * s + pose.bob;
+    const float swing = pose.walking ? std::sin(pose.step) : 0.0f;
+    const Color legs{60, 60, 80, 255};
+    const Color sleeve = ColorLerp(look.body, BLACK, 0.15f);
+
+    // Legs step forwards and back; the lifted leg is a little shorter.
+    const float leftLift = std::max(0.0f, swing) * 2.0f * s;
+    const float rightLift = std::max(0.0f, -swing) * 2.0f * s;
+    DrawRectangleRec({feet.x - 5.0f * s + swing * 1.5f * s, top - 2.0f * s, 4.0f * s, 8.0f * s - leftLift}, legs);
+    DrawRectangleRec({feet.x + 1.0f * s - swing * 1.5f * s, top - 2.0f * s, 4.0f * s, 8.0f * s - rightLift}, legs);
+
+    // Arms swing opposite to the legs.
+    const Rectangle leftArm{feet.x - 10.5f * s, top - 14.0f * s - swing * 1.5f * s, 3.5f * s, 10.0f * s};
+    const Rectangle rightArm{feet.x + 7.0f * s, top - 14.0f * s + swing * 1.5f * s, 3.5f * s, 10.0f * s};
+    DrawRectangleRounded(leftArm, 1.0f, 4, sleeve);
+    DrawRectangleRounded(rightArm, 1.0f, 4, sleeve);
+    DrawCircleV({leftArm.x + 1.75f * s, leftArm.y + leftArm.height}, 1.8f * s, look.skin);
+    DrawCircleV({rightArm.x + 1.75f * s, rightArm.y + rightArm.height}, 1.8f * s, look.skin);
+
     // Body
     const Rectangle body{feet.x - 8.0f * s, top - 16.0f * s, 16.0f * s, 16.0f * s};
     DrawRectangleRounded(body, 0.5f, 6, look.body);
-    // Head
+
+    // Head: eyes look the way the character faces, and blink every few seconds.
     const Vector2 head{feet.x, top - 22.0f * s};
     DrawCircleV(head, 8.0f * s, look.skin);
     DrawCircleSector(head, 8.5f * s, 180.0f, 360.0f, 12, look.hair);
-    DrawCircleV({head.x - 3.0f * s, head.y + 1.0f * s}, 1.2f * s, kInk);
-    DrawCircleV({head.x + 3.0f * s, head.y + 1.0f * s}, 1.2f * s, kInk);
+    const float lookX = pose.facing * 2.2f * s;
+    const bool blinking = std::fmod(static_cast<float>(GetTime()) + pose.seed * 1.37f, 4.2f) < 0.13f;
+    for (const float side : {-3.0f, 3.0f}) {
+        const Vector2 eye{head.x + side * s + lookX, head.y + 1.0f * s};
+        if (blinking) {
+            DrawRectangleRec({eye.x - 1.4f * s, eye.y - 0.3f * s, 2.8f * s, 0.8f * s}, kInk);
+        } else {
+            DrawCircleV(eye, 1.2f * s, kInk);
+        }
+    }
+}
+
+void DrawCharacter(Vector2 feet, const Look& look, float bob, float scale) {
+    Pose pose;
+    pose.walking = bob != 0.0f;
+    pose.step = static_cast<float>(GetTime()) * 14.0f;
+    pose.bob = bob;
+    pose.seed = feet.x * 0.37f;
+    DrawCharacter(feet, look, pose, scale);
 }
 
 void DrawPortrait(Vector2 center, float radius, const Look& look) {

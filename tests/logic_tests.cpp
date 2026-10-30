@@ -11,6 +11,7 @@
 #include "logic/Content.h"
 #include "logic/Encounter.h"
 #include "logic/GameState.h"
+#include "logic/Legacy.h"
 #include "logic/Rules.h"
 #include "logic/SaveGame.h"
 #include "logic/Selling.h"
@@ -562,6 +563,166 @@ void TestChapterThreeWiring() {
     CHECK(game::PickEveningEvent(noBranch, content) == "chapter3_end_small");
 }
 
+void TestGenerations() {
+    game::Content content;
+    game::NpcDef leo;
+    leo.id = "leo";
+    leo.name = "Leo";
+    leo.relationship = true;
+    content.npcs.push_back(leo);
+    game::NpcDef nia;
+    nia.id = "nia";
+    nia.name = "Nia";
+    nia.relationship = true;
+    nia.generation = 2;
+    content.npcs.push_back(nia);
+    content.morning.push_back({Json::Value(), "first_gen_morning", false, 1});
+    content.morning.push_back({Json::Value(), "second_gen_morning", false, 2});
+    content.events["first_gen_morning"].id = "first_gen_morning";
+    content.events["second_gen_morning"].id = "second_gen_morning";
+    game::QuestDef oldQuest;
+    oldQuest.id = "old";
+    oldQuest.steps.push_back({"step", "never"});
+    content.quests.push_back(oldQuest);
+
+    game::GameState s;
+    CHECK(game::CurrentGeneration(s) == 1);
+    CHECK(game::GetQuestStatus(content.quests[0], s) == game::QuestStatus::Active);
+    s.day = 43;
+    s.Set("money", 150);
+    s.Set("bank.savings", 70);
+    s.Set("bank.loan", 20);
+    s.Set("reputation", 70);
+    s.Set("skill.money_sense", 6);
+    s.Set("skill.empathy", 4);
+    s.Set("leo.trust", 85);
+    s.party = {"maya", "leo"};
+    s.seenEvents.insert("leo_meet");
+    for (const char* flag : {"shop_partner", "branch_open", "leo_joined", "kofi_friend", "mom_recipe", "first_sale",
+                             "pushcart_sale", "manager_priya", "today.hot", "visited_city", "has_loan"}) {
+        s.SetFlag(flag);
+    }
+    s.AddStock({"lemonade", 5, 1, 40, false});
+
+    const game::LegacyReport report = game::StartNextGeneration(s, content);
+    CHECK(report.generation == 1 && report.wealth == 200);
+    CHECK(report.gift == 40 && report.childSavings == 50);
+    CHECK(report.familyReputation == 50);
+    CHECK(report.familyTalent == "Money sense");
+    bool leoLine = false;
+    for (const std::string& line : report.legacies) {
+        leoLine = leoLine || line.find("Leo became an artist") != std::string::npos;
+    }
+    CHECK(leoLine);
+
+    // A fresh start for the child...
+    CHECK(game::CurrentGeneration(s) == 2 && s.day == 1 && s.minutes == 8 * 60);
+    CHECK(s.Get("money") == 40 && s.Get("bank.savings") == 50 && s.Get("bank.loan") == 0);
+    CHECK(s.Get("skill.money_sense") == 2 && s.Get("skill.empathy") == 1);
+    CHECK(s.party.size() == 1 && s.party[0] == "nia" && s.stock.empty());
+    for (const char* gone : {"first_sale", "pushcart_sale", "manager_priya", "today.hot", "shop_partner", "branch_open"}) {
+        CHECK(!s.HasFlag(gone));
+    }
+    // ...in a town that remembers.
+    for (const char* kept : {"leo_joined", "kofi_friend", "mom_recipe", "visited_city", "next_generation", "legacy_branch"}) {
+        CHECK(s.HasFlag(kept));
+    }
+    CHECK(s.Get("leo2.trust") == 85);
+    CHECK(s.seenEvents.contains("leo_meet"));
+
+    // Content belongs to its generation.
+    CHECK(game::GetQuestStatus(content.quests[0], s) == game::QuestStatus::Hidden);
+    CHECK(!game::HasMet(content.npcs[0], s, content));  // grown-up Leo is a different character now
+    CHECK(game::HasMet(content.npcs[1], s, content));   // Nia is on the team
+    const std::vector<std::string> morning = game::StartDay(s, content);
+    CHECK(morning.size() == 1 && morning[0] == "second_gen_morning");
+
+    // What the child calls their parent.
+    game::ApplyEffects(Parse(R"({"name": {"parent": "Dad"}})"), s);
+    CHECK(s.names.at("parent") == "Dad");
+}
+
+void TestChapterFourWiring() {
+    game::Content content;
+    try {
+        content = game::Content::Load(FUN_ASSETS_DIR);
+    } catch (const std::exception&) {
+        CHECK(false);
+        return;
+    }
+    auto talk = [&](const game::GameState& s, const std::string& npc) {
+        const game::NpcDef* def = content.FindNpc(npc);
+        return def ? game::PickTalkEvent(*def, s) : std::string("<missing>");
+    };
+    auto play = [&](game::GameState& s, const std::string& event, int choice = -1) {
+        const game::EventDef* def = content.FindEvent(event);
+        if (def == nullptr) {
+            CHECK(false);
+            return;
+        }
+        s.seenEvents.insert(event);
+        game::ApplyEffects(def->effects, s);
+        if (choice >= 0) {
+            game::ApplyEffects(def->choices[static_cast<std::size_t>(choice)].effects, s);
+            game::Schedule(s, def->choices[static_cast<std::size_t>(choice)].later);
+        }
+    };
+
+    CHECK(content.ChapterTitle(4) == "Roots & Wings");
+    game::GameState s;
+    s.Set("chapter", 4);
+    s.day = 42;
+    s.seenEvents = {"ch3_start", "ch3_bulk_tip", "fair_soon", "ch2_start", "morning_farm_news", "staff_pay_talk",
+                    "price_war_start", "price_war_start_fridge", "morning_day2", "morning_stranger_rumor",
+                    "morning_market_news"};
+    game::EndDay(s);
+    std::vector<std::string> morning = game::StartDay(s, content);
+    CHECK(morning.size() == 1 && morning[0] == "generation_turn");
+    // "Not yet" asks again a week later.
+    play(s, "generation_turn", 1);
+    CHECK(s.scheduled.size() == 1 && s.scheduled[0].day == 50 && s.scheduled[0].event == "generation_turn");
+
+    s.SetFlag("maya_forgiven");
+    s.SetFlag("kofi_friend");
+    s.Set("money", 120);
+    game::StartNextGeneration(s, content);
+    CHECK(game::CurrentGeneration(s) == 2);
+    play(s, "g2_intro", 1);
+    CHECK(s.names.at("parent") == "Dad" && s.HasFlag("g2_started"));
+    play(s, "g2_nia_joins");
+    const game::QuestDef* tracked = game::TrackedQuest(s, content);
+    CHECK(tracked != nullptr && tracked->id == "roots_and_wings");
+
+    // The grown-ups remember what you did twenty years ago.
+    CHECK(talk(s, "aunt_maya") == "g2_maya_story_forgiven");
+    CHECK(talk(s, "kofi2") == "g2_kofi_story_friend");
+    CHECK(talk(s, "leo2") == "g2_leo_story");  // you never invited Leo in this playthrough
+    CHECK(talk(s, "great_grandpa") == "g2_gg_story");
+
+    // Giving back: choose a project, save 40 coins, donate.
+    s.day = 2;
+    game::EndDay(s);
+    morning = game::StartDay(s, content);
+    CHECK(morning.size() == 1 && morning[0] == "g2_project_news");
+    play(s, "g2_project_news");
+    CHECK(talk(s, "parent") == "g2_choose_project");
+    play(s, "g2_choose_project", 2);
+    s.Set("money", 10);
+    CHECK(talk(s, "parent") == "g2_saving_up");
+    s.Set("money", 45);
+    CHECK(talk(s, "parent") == "g2_donate");
+    const int reputation = s.Get("reputation");
+    play(s, "g2_donate", 0);
+    CHECK(s.Get("money") == 5 && s.Get("reputation") == reputation + 15 && s.HasFlag("g2_donated"));
+
+    // Festival Day and the end of the chapter.
+    s.day = 13;
+    game::EndDay(s);
+    morning = game::StartDay(s, content);
+    CHECK(!morning.empty() && morning[0] == "g2_festival_morning");
+    CHECK(game::PickEveningEvent(s, content) == "g2_end_donated");
+}
+
 void TestSellingSession() {
     game::Content content;
     game::ItemDef lemonade;
@@ -905,10 +1066,12 @@ int main() {
     TestChapterOneWiring();
     TestChapterTwoWiring();
     TestChapterThreeWiring();
+    TestChapterFourWiring();
     TestSellingSession();
     TestBank();
     TestItemRules();
     TestChainTier();
+    TestGenerations();
     TestEncounterRules();
     TestLifeWheelAndBedtime();
 

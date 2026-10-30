@@ -95,7 +95,7 @@
       ]
     },
     {
-      "id": "mrs_lin", "name": "Mrs. Lin", "x": 3, "y": 17,
+      "id": "mrs_lin", "generation": 0, "name": "Mrs. Lin", "x": 3, "y": 17,
       "body": "#d1495b", "hair": "#2b2b2b", "skin": "#f1d3b3",
       "talk": [
         { "when": { "not_seen": "lin_intro" }, "event": "lin_intro" },
@@ -112,7 +112,7 @@
     },
 
     {
-      "id": "okafor", "name": "Mr. Okafor", "map": "market", "x": 26, "y": 6,
+      "id": "okafor", "generation": 0, "name": "Mr. Okafor", "map": "market", "x": 26, "y": 6,
       "body": "#364fc7", "hair": "#212529", "skin": "#8d5524",
       "talk": [
         { "when": { "not_seen": "okafor_intro" }, "event": "okafor_intro" },
@@ -140,7 +140,7 @@
       ]
     },
     {
-      "id": "rosa", "name": "Baker Rosa", "map": "market", "x": 19, "y": 5,
+      "id": "rosa", "generation": 0, "name": "Baker Rosa", "map": "market", "x": 19, "y": 5,
       "body": "#f8f9fa", "hair": "#862e9c", "skin": "#e0ac69",
       "idle": [
         "On busy days I bake more bread. On quiet days, less. That's supply and demand!",
@@ -158,26 +158,26 @@
       ]
     },
     {
-      "id": "visitor_ana", "name": "Ana", "map": "market", "x": 9, "y": 9,
+      "id": "visitor_ana", "generation": 0, "name": "Ana", "map": "market", "x": 9, "y": 9,
       "body": "#20c997", "hair": "#5c3d2e", "skin": "#c68642",
       "present_when": { "flag": "today.festival" },
       "idle": [ "Happy Festival Day! Everything smells amazing.", "I came all the way from the next village!" ]
     },
     {
-      "id": "visitor_tom", "name": "Old Tom", "map": "market", "x": 20, "y": 12,
+      "id": "visitor_tom", "generation": 0, "name": "Old Tom", "map": "market", "x": 20, "y": 12,
       "body": "#495057", "hair": "#f1f3f5", "skin": "#f3d2b3",
       "present_when": { "flag": "today.festival" },
       "idle": [ "Sixty years I've come to this festival. Never missed one!", "Your grandpa's pushcart? I remember it! Best toffee apples." ]
     },
     {
-      "id": "visitor_zara", "name": "Zara", "map": "market", "x": 18, "y": 8,
+      "id": "visitor_zara", "generation": 0, "name": "Zara", "map": "market", "x": 18, "y": 8,
       "body": "#e64980", "hair": "#212529", "skin": "#8d5524",
       "present_when": { "flag": "today.festival" },
       "idle": [ "The music starts at noon!", "I'm spending all my pocket money today. Okay, maybe not ALL of it." ]
     },
 
     {
-      "id": "adeyemi", "name": "Ms. Adeyemi", "map": "market", "x": 26, "y": 17,
+      "id": "adeyemi", "generation": 0, "name": "Ms. Adeyemi", "map": "market", "x": 26, "y": 17,
       "body": "#1864ab", "hair": "#212529", "skin": "#7d4a2a",
       "talk": [
         { "when": { "not_seen": "adeyemi_intro" }, "event": "adeyemi_intro" },
@@ -185,7 +185,7 @@
       ]
     },
     {
-      "id": "ama", "name": "Farmer Ama", "map": "farm", "x": 21, "y": 7, "relationship": true,
+      "id": "ama", "generation": 0, "name": "Farmer Ama", "map": "farm", "x": 21, "y": 7, "relationship": true,
       "body": "#2b8a3e", "hair": "#343a40", "skin": "#8d5524",
       "talk": [
         { "when": { "not_seen": "ama_intro" }, "event": "ama_intro" },
@@ -204,11 +204,11 @@
     },
 
     {
-      "id": "osei", "name": "Mrs. Osei", "map": "city", "x": 19, "y": 8,
+      "id": "osei", "generation": 0, "name": "Mrs. Osei", "map": "city", "x": 19, "y": 8,
       "body": "#ae3ec9", "hair": "#343a40", "skin": "#8d5524",
       "talk": [
         { "when": { "not_seen": "osei_intro" }, "event": "osei_intro" },
-        { "when": { "not_flag": "branch_open" }, "event": "osei_offer" }
+        { "when": { "not_flag": ["branch_open", "legacy_branch"] }, "event": "osei_offer" }
       ],
       "idle": [
         "Rent day is the start of each week. Don't forget!",
@@ -216,7 +216,7 @@
       ]
     },
     {
-      "id": "haddad", "name": "Mr. Haddad", "map": "city", "x": 9, "y": 8,
+      "id": "haddad", "generation": 0, "name": "Mr. Haddad", "map": "city", "x": 9, "y": 8,
       "body": "#e67700", "hair": "#495057", "skin": "#c68642",
       "talk": [
         { "when": { "not_seen": "haddad_intro" }, "event": "haddad_intro" }
@@ -227,12 +227,125 @@
       ]
     },
     {
-      "id": "busker", "name": "Jazz the Busker", "map": "city", "x": 25, "y": 12,
+      "id": "busker", "generation": 0, "name": "Jazz the Busker", "map": "city", "x": 25, "y": 12,
       "body": "#20c997", "hair": "#fab005", "skin": "#e0ac69",
       "idle": [
         "I play for tips. Some days 2 coins, some days 20. So I save on the good days!",
         "Doing what you love is great. Knowing how to earn a living from it is even better."
       ]
+    },
+
+    {
+      "id": "parent", "name": "Mom", "x": 3, "y": 7, "relationship": true, "generation": 2,
+      "body": "#f5a623", "hair": "#462d1e", "skin": "#e2b284",
+      "talk": [
+        { "when": { "flag": "g2_project_news", "not_flag": "g2_project_chosen" }, "event": "g2_choose_project" },
+        { "when": { "flag": "g2_project_chosen", "not_flag": "g2_donated", "min": { "money": 40 } }, "event": "g2_donate" },
+        { "when": { "flag": "g2_project_chosen", "not_flag": "g2_donated" }, "event": "g2_saving_up" }
+      ],
+      "idle": [
+        "Buy for less, sell for more - and always be fair. Great-Grandpa taught me that.",
+        "I started with that pushcart when I was about your age. Look at us now!",
+        "Money is a tool. What matters is what you build with it - and who you build it with."
+      ]
+    },
+    {
+      "id": "grandma", "name": "Grandma", "x": 7, "y": 7, "relationship": true, "generation": 2,
+      "body": "#e07a5f", "hair": "#ced4da", "skin": "#e8b98a",
+      "idle": [
+        "Needs come first, then wants. I said that to your parent, too!",
+        "Your parent was always out at the park with that pushcart. Now it's your turn.",
+        "My cookie recipe is still the best in town. Use it well."
+      ]
+    },
+    {
+      "id": "grandpa2", "name": "Grandpa", "x": 17, "y": 7, "relationship": true, "generation": 2,
+      "body": "#3d5a80", "hair": "#dee2e6", "skin": "#c68e5f",
+      "talk": [
+        { "when": { "not_seen": "g2_grandpa_story" }, "event": "g2_grandpa_story" }
+      ],
+      "idle": [
+        "Your parent saved this shop once, you know. With a pushcart and a lot of lemonade.",
+        "Forty years behind this counter. I still know every customer's name."
+      ]
+    },
+    {
+      "id": "great_grandpa", "name": "Great-Grandpa", "map": "farm", "x": 17, "y": 7, "relationship": true,
+      "generation": 2,
+      "body": "#7a6a53", "hair": "#ffffff", "skin": "#f0c8a0",
+      "talk": [
+        { "when": { "not_seen": "g2_gg_story" }, "event": "g2_gg_story" }
+      ],
+      "idle": [
+        "The country air is good for old bones. And Farmer Ama makes excellent tea.",
+        "That pushcart has had three owners now. Look after it!"
+      ]
+    },
+    {
+      "id": "aunt_maya", "name": "Aunt Maya", "map": "market", "x": 14, "y": 12, "relationship": true,
+      "generation": 2,
+      "body": "#f4a6c0", "hair": "#4a2c1a", "skin": "#e8b98a",
+      "talk": [
+        { "when": { "flag": "maya_forgiven", "not_flag": "g2_maya_story" }, "event": "g2_maya_story_forgiven" },
+        { "when": { "flag": "maya_pays_back", "not_flag": "g2_maya_story" }, "event": "g2_maya_story_payback" },
+        { "when": { "not_flag": "g2_maya_story" }, "event": "g2_maya_story" }
+      ],
+      "idle": [
+        "Nia talks about nothing but your pushcart. I think you two make a great team.",
+        "I always dreamed of a sweet shop. Running a real shop taught me sweets are the easy part!"
+      ]
+    },
+    {
+      "id": "nia", "name": "Nia", "x": 4, "y": 7, "relationship": true, "generation": 2,
+      "body": "#748ffc", "hair": "#4a2c1a", "skin": "#e8b98a",
+      "staff": { "efficiency": 0.7 },
+      "bonus": { "customers": 0.1, "text": "Nia's chalk signs pointed people your way!" },
+      "idle": [
+        "Mum says your parent was the bossiest kid in town. Are you bossy too?",
+        "I drew a chalk arrow to the pushcart on the pavement. Is that marketing?",
+        "Let's save some coins for the festival project!"
+      ]
+    },
+    {
+      "id": "leo2", "name": "Leo", "map": "market", "x": 20, "y": 9, "relationship": true, "generation": 2,
+      "body": "#5fa86b", "hair": "#c9a227", "skin": "#f3d2b3",
+      "talk": [
+        { "when": { "flag": "leo_joined", "not_seen": "g2_leo_story_friend" }, "event": "g2_leo_story_friend" },
+        { "when": { "not_flag": "leo_joined", "not_seen": "g2_leo_story" }, "event": "g2_leo_story" }
+      ],
+      "idle": [
+        "This mural? It's the whole history of the market square. Your family is in it!",
+        "Art and business aren't so different. Both need you to understand people."
+      ]
+    },
+    {
+      "id": "priya2", "name": "Priya", "map": "city", "x": 22, "y": 9, "relationship": true, "generation": 2,
+      "body": "#9b5de5", "hair": "#1f1f1f", "skin": "#b77a4f",
+      "talk": [
+        { "when": { "flag": "priya_joined", "not_seen": "g2_priya_story_friend" }, "event": "g2_priya_story_friend" },
+        { "when": { "not_flag": "priya_joined", "not_seen": "g2_priya_story" }, "event": "g2_priya_story" }
+      ],
+      "idle": [
+        "My company helps small shops tell their story. Every shop has one!",
+        "Smile, say their name, remember what they like. Customers never forget that."
+      ]
+    },
+    {
+      "id": "kofi2", "name": "Kofi", "map": "market", "x": 7, "y": 5, "relationship": true, "generation": 2,
+      "body": "#f08c00", "hair": "#868e96", "skin": "#6f4518",
+      "talk": [
+        { "when": { "flag": "kofi_friend", "not_seen": "g2_kofi_story_friend" }, "event": "g2_kofi_story_friend" },
+        { "when": { "not_flag": "kofi_friend", "not_seen": "g2_kofi_story" }, "event": "g2_kofi_story" }
+      ],
+      "idle": [
+        "Fresh fruit! Still the best in the market - ask anyone.",
+        "My uncle's stall is three stalls now. Slow and steady!"
+      ]
+    },
+    {
+      "id": "clover", "name": "Clover the Cow", "map": "farm", "x": 8, "y": 10, "generation": 2,
+      "body": "#f8f9fa", "hair": "#8d6e63", "skin": "#f8f9fa",
+      "idle": [ "Moooo. (Clover is Daisy's granddaughter. She has the same curious eyes.)" ]
     }
   ]
 }

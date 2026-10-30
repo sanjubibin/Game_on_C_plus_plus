@@ -7,6 +7,7 @@
 
 #include "Visuals.h"
 #include "engine/Audio.h"
+#include "logic/Legacy.h"
 #include "logic/Rules.h"
 #include "logic/SaveGame.h"
 #include "logic/Selling.h"
@@ -15,6 +16,7 @@
 #include "scenes/DaySummaryScene.h"
 #include "scenes/DialogueScene.h"
 #include "scenes/EncounterScene.h"
+#include "scenes/LegacyScene.h"
 #include "scenes/SellScene.h"
 #include "scenes/SupplierScene.h"
 #include "scenes/WorldScene.h"
@@ -39,6 +41,31 @@ void InitNewState(GameSession& session) {
         session.state.JoinParty(member);
     }
     session.toasts.clear();
+    SyncNames(session);
+}
+
+void SyncNames(GameSession& session) {
+    if (session.baseNames.empty()) {
+        for (const game::NpcDef& npc : session.content.npcs) {
+            session.baseNames[npc.id] = npc.name;
+        }
+    }
+    for (game::NpcDef& npc : session.content.npcs) {
+        const auto it = session.state.names.find(npc.id);
+        npc.name = it != session.state.names.end() ? it->second : session.baseNames[npc.id];
+    }
+}
+
+void NewGeneration(engine::Application& app, GameSession& session) {
+    game::LegacyReport report = game::StartNextGeneration(session.state, session.content);
+    SyncNames(session);
+    std::vector<std::string> events = {"g2_intro"};
+    const std::vector<std::string> morning = game::StartDay(session.state, session.content);
+    events.insert(events.end(), morning.begin(), morning.end());
+    PlaceAtHome(session);
+    app.Scenes().Push(std::make_unique<LegacyScene>(app, session, std::move(report), [&app, &session, events]() {
+        PlayEvents(app, session, events);
+    }));
 }
 
 void PlaceAtHome(GameSession& session) {
@@ -70,6 +97,7 @@ bool ContinueGame(engine::Application& app, GameSession& session, std::string* e
         st.Set("chapter", 2);
     }
     session.toasts.clear();
+    SyncNames(session);
     const std::vector<std::string> events = game::StartDay(session.state, session.content);
     PlaceAtHome(session);
     app.Scenes().Replace(std::make_unique<WorldScene>(app, session));
@@ -110,6 +138,8 @@ void RunAction(engine::Application& app, GameSession& session, const std::string
         if (const game::VenueDef* venue = session.content.FindVenue(action.substr(10))) {
             app.Scenes().Push(std::make_unique<SellScene>(app, session, *venue));
         }
+    } else if (action == "new_generation") {
+        NewGeneration(app, session);
     } else if (action == "chapter_end") {
         app.Scenes().Push(std::make_unique<ChapterEndScene>(app, session));
     } else if (action.starts_with("travel:")) {
@@ -201,6 +231,9 @@ void ApplyEffects(GameSession& session, const Json::Value& effects) {
     const QuestSnapshot questsBefore = TakeQuestSnapshot(session);
     const int moneyBefore = session.state.Get("money");
     game::ApplyEffects(effects, session.state);
+    if (effects.isObject() && effects.isMember("name")) {
+        SyncNames(session);
+    }
     if (session.state.Get("money") > moneyBefore) {
         engine::audio::Play("coin");
     }

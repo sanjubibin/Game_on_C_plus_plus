@@ -146,7 +146,8 @@ EventDef ParseEvent(const Json::Value& v) {
 std::vector<TriggerRule> ParseTriggers(const Json::Value& rules) {
     std::vector<TriggerRule> out;
     for (const Json::Value& rule : rules) {
-        out.push_back({Field(rule, "when"), Str(rule, "event"), Bool(rule, "repeat", false)});
+        out.push_back({Field(rule, "when"), Str(rule, "event"), Bool(rule, "repeat", false),
+                       Int(rule, "generation", 1)});
     }
     return out;
 }
@@ -203,6 +204,7 @@ void ParseNpcs(const Json::Value& root, Content& c) {
         npc.x = Float(v, "x", 0.0f);
         npc.y = Float(v, "y", 0.0f);
         npc.relationship = Bool(v, "relationship", false);
+        npc.generation = Int(v, "generation", 1);
         npc.presentWhen = Field(v, "present_when");
         for (const Json::Value& rule : Field(v, "talk")) {
             npc.talk.push_back({Field(rule, "when"), Str(rule, "event")});
@@ -226,6 +228,7 @@ void ParseQuests(const Json::Value& root, Content& c) {
         QuestDef quest;
         quest.id = Str(v, "id");
         quest.chapter = Int(v, "chapter", 1);
+        quest.generation = Int(v, "generation", 1);
         quest.title = Str(v, "title");
         quest.summary = Str(v, "summary");
         quest.startFlag = Str(v, "start_flag");

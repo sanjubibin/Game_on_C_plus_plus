@@ -120,6 +120,7 @@ struct NpcDef {
     float x = 0.0f;  // tile coordinates
     float y = 0.0f;
     bool relationship = false;  // shown on the People page and counted in the Life Wheel
+    int generation = 1;         // which generation of the family meets them (0 = every one)
     Json::Value presentWhen;
     std::vector<TalkRule> talk;
     std::vector<std::string> idleEvents;  // generated from "idle" lines
@@ -138,6 +139,7 @@ struct QuestDef {
     std::string title;
     std::string summary;
     std::string startFlag;
+    int generation = 1;  // 0 = every generation
     std::vector<QuestStep> steps;
 };
 
@@ -254,6 +256,7 @@ struct TriggerRule {
     Json::Value when;
     std::string event;
     bool repeat = false;
+    int generation = 1;  // 0 = every generation
 };
 
 struct StartDef {
