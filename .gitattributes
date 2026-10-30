@@ -1,0 +1,7 @@
+# Keep LF line endings everywhere (matches .editorconfig), regardless of core.autocrlf.
+* text=auto eol=lf
+
+*.png binary
+*.ttf binary
+*.wav binary
+*.ogg binary

@@ -1,0 +1,56 @@
+{
+  "name": "Market Square",
+  "legend": {
+    ".": "grass", "f": "flowers", ":": "sidewalk", "=": "road", "p": "plaza paving",
+    "o": "fountain (solid)", "T": "tree (solid)"
+  },
+  "enter_flag": "visited_market",
+  "enter_event": "market_arrival",
+  "decor": "bunting",
+  "tiles": [
+    "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT",
+    "T..f.......f.......f.......f.T",
+    "T..pppppppppppppppppppppppp..T",
+    "T..pppppppppppppppppppppppp..T",
+    "T..pppppppppppppppppppppppp..T",
+    "T..pppppppppppppppppppppppp..T",
+    "T..pppppppppppppppppppppppp..T",
+    "T..pppppppppppppppppppppppp..T",
+    ":::pppppppppppppppppppppppp..T",
+    "===pppppppppppooppppppppppp..T",
+    "===pppppppppppooppppppppppp..T",
+    ":::pppppppppppppppppppppppp..T",
+    "T..pppppppppppppppppppppppp..T",
+    "T..pppppppppppppppppppppppp..T",
+    "T..pppppppppppppppppppppppp..T",
+    "T..pppppppppppppppppppppppp..T",
+    "T..pppppppppppppppppppppppp..T",
+    "T..pppppppppppppppppppppppp..T",
+    "T..f.......f.......f.......f.T",
+    "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
+  ],
+  "start": [2, 9],
+  "buildings": [
+    { "id": "kofi_stall", "label": "KOFI'S FRUIT", "style": "stall",
+      "x": 5, "y": 3, "w": 4, "h": 2, "wall": "#f3e3c3", "roof": "#2f9e44" },
+    { "id": "flower_stall", "label": "FLOWERS", "style": "stall",
+      "x": 11, "y": 3, "w": 4, "h": 2, "wall": "#f3e3c3", "roof": "#d6336c" },
+    { "id": "bread_stall", "label": "BREAD", "style": "stall",
+      "x": 17, "y": 3, "w": 4, "h": 2, "wall": "#f3e3c3", "roof": "#e8590c" },
+    { "id": "office", "label": "MARKET OFFICE", "action": "event:office_inside",
+      "x": 22, "y": 2, "w": 5, "h": 4, "door_x": 24, "wall": "#ece4d4", "roof": "#5f3dc4" },
+    { "id": "toy_stall", "label": "TOYS", "style": "stall",
+      "x": 5, "y": 14, "w": 4, "h": 2, "wall": "#f3e3c3", "roof": "#4263eb" },
+    { "id": "cheese_stall", "label": "CHEESE", "style": "stall",
+      "x": 17, "y": 14, "w": 4, "h": 2, "wall": "#f3e3c3", "roof": "#f59f00" }
+  ],
+  "spots": [
+    { "id": "your_stall", "label": "Open your stall", "action": "open_sell:stall", "draw": "stall",
+      "x": 12, "y": 14, "when": { "flag": "stall_rented" } },
+    { "id": "for_rent", "label": "Read the sign", "action": "event:stall_for_rent", "draw": "sign",
+      "x": 12, "y": 14, "when": { "not_flag": "stall_rented" } }
+  ],
+  "exits": [
+    { "x": 0, "y": 8, "w": 1, "h": 4, "to": "town", "at": [37, 9] }
+  ]
+}

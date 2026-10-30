@@ -1,0 +1,38 @@
+{
+  "map": "town",
+  "stats": {
+    "money": 10,
+    "reputation": 30,
+    "health": 70,
+    "happiness": 60,
+    "skill.money_sense": 1,
+    "skill.communication": 1,
+    "skill.empathy": 1,
+    "skill.creativity": 1,
+    "skill.hard_work": 1,
+    "mom.trust": 60, "mom.fun": 50, "mom.respect": 50,
+    "dad.trust": 60, "dad.fun": 45, "dad.respect": 50,
+    "grandpa.trust": 60, "grandpa.fun": 55, "grandpa.respect": 50,
+    "maya.trust": 55, "maya.fun": 60, "maya.respect": 40,
+    "priya.trust": 50, "priya.fun": 60, "priya.respect": 40,
+    "leo.trust": 10, "leo.fun": 10, "leo.respect": 10,
+    "kofi.trust": 20, "kofi.fun": 25, "kofi.respect": 20
+  },
+  "party": ["maya"],
+  "flags": [],
+  "events": ["intro"],
+  "tips": [
+    "Profit = what you earn minus what the things you sold cost you.",
+    "Buy only what you think you can sell. Leftover lemonade goes flat overnight!",
+    "Hot days make people thirsty. Check the weather at the top-left of the screen.",
+    "Fair prices keep customers coming back. That is your reputation.",
+    "If a deal sounds too good to be true, it usually is.",
+    "Friends and family matter as much as money. Look after both.",
+    "Needs before wants: rent and food first, treats later.",
+    "Fixed costs, like a stall fee, have to be paid even on a slow day.",
+    "Working together with a rival can be better than fighting.",
+    "Your own work can add value: ingredients for 2, cookies for 5!",
+    "Rest is part of the job. Tired people make tired decisions.",
+    "Listen first. Most problems are bigger on the inside."
+  ]
+}

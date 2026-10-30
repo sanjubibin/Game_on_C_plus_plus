@@ -1,0 +1,10 @@
+build/
+dist/
+out/
+.cache/
+.vs/
+.vscode/
+cmake-build-*/
+compile_commands.json
+CMakeUserPresets.json
+*.user

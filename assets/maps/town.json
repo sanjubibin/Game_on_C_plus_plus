@@ -1,0 +1,55 @@
+{
+  "name": "Town",
+  "legend": {
+    ".": "grass", "f": "flowers", ":": "path / sidewalk", "=": "road",
+    "T": "tree (solid)", "~": "water (solid)", "#": "hedge (solid)", "b": "bench (solid)"
+  },
+  "tiles": [
+    "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT",
+    "T......................................T",
+    "T......................................T",
+    "T......................................T",
+    "T......................................T",
+    "T......................................T",
+    "T......................................T",
+    "T.f......f.............................T",
+    "::::::::::::::::::::::::::::::::::::::::",
+    "========================================",
+    "========================================",
+    "::::::::::::::::::::::::::::::::::::::::",
+    "T.........:..#########:::##############T",
+    "T.........:..#.T......:::......T.....T#T",
+    "T.........:..#..f.....:::...f.........#T",
+    "T.........:..#........:::.............#T",
+    "T.........:..#........:::.....b.......#T",
+    "T....::::::..#::::::::::::::::::::::::#T",
+    "T.T.......f..#..b.....:::.....~~~~~...#T",
+    "T............#........:::....~~~~~~~..#T",
+    "T...T........#.f......:::....~~~~~~~..#T",
+    "T......f.....#........:::.....~~~~~..T#T",
+    "T.T..........#T.......:::.............#T",
+    "T........T...#..T.....:::.....f....T..#T",
+    "T............##########################T",
+    "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
+  ],
+  "start": [5, 7],
+  "buildings": [
+    { "id": "home", "label": "HOME", "action": "home",
+      "x": 2, "y": 2, "w": 7, "h": 5, "door_x": 5, "wall": "#f2e3c6", "roof": "#c0583f" },
+    { "id": "corner_shop", "label": "THE CORNER SHOP", "action": "event:shop_inside",
+      "x": 12, "y": 2, "w": 8, "h": 5, "door_x": 15, "wall": "#e8d8b0", "roof": "#3f7f5f" },
+    { "id": "megamart", "label": "MEGAMART", "action": "event:megamart_inside",
+      "x": 23, "y": 1, "w": 15, "h": 6, "door_x": 30, "wall": "#d5dce6", "roof": "#2f5fa8" },
+    { "id": "wholesale", "label": "LIN'S WHOLESALE", "action": "open_supplier",
+      "x": 2, "y": 13, "w": 7, "h": 4, "door_x": 5, "wall": "#efe0d0", "roof": "#8a5a9e" }
+  ],
+  "spots": [
+    { "id": "pushcart", "label": "Use the pushcart", "action": "open_sell:pushcart", "draw": "cart",
+      "x": 20, "y": 17, "when": { "flag": "got_pushcart" } },
+    { "id": "signpost", "label": "Read the signpost", "action": "event:signpost_market", "draw": "signpost",
+      "x": 37, "y": 7 }
+  ],
+  "exits": [
+    { "x": 39, "y": 8, "w": 1, "h": 4, "to": "market", "at": [2, 9] }
+  ]
+}

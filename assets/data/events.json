@@ -1,0 +1,768 @@
+{
+  "morning": [
+    { "when": { "day_min": 14, "day_max": 14 }, "event": "festival_morning" },
+    { "when": { "day_min": 12, "day_max": 13, "flag": "stall_rented" }, "event": "festival_soon_ready" },
+    { "when": { "day_min": 12, "day_max": 13, "flag": "market_news", "not_flag": "stall_rented" }, "event": "festival_soon" },
+    { "when": { "day_min": 4, "flag": "first_sale" }, "event": "morning_market_news" },
+    { "when": { "flag": "today.hot", "day_min": 2 }, "event": "morning_hot_tip" },
+    { "when": { "day_min": 2 }, "event": "morning_day2" },
+    { "when": { "day_min": 3 }, "event": "morning_stranger_rumor" }
+  ],
+  "evening": [
+    { "when": { "day_min": 14, "flag": "stall_festival_sale" }, "event": "chapter1_end_great" },
+    { "when": { "day_min": 14, "not_seen": "chapter1_end_great" }, "event": "chapter1_end_ok" },
+    { "when": { "day_min": 7, "flag": "rent_paid" }, "event": "week_end_success" },
+    { "when": { "day_min": 7, "not_flag": "rent_paid" }, "event": "week_end_late" },
+    { "when": { "flag": "first_sale" }, "event": "dinner_first_sale" },
+    { "when": { "flag": "first_sale", "day_min": 2 }, "event": "maya_took_coins" },
+    { "when": { "flag": "stall_rented" }, "event": "dinner_stall" },
+    { "when": { "flag": "leo_joined" }, "event": "dinner_leo" },
+    { "when": { "flag": "kofi_friend" }, "event": "dinner_kofi" },
+    { "when": { "flag": "today.hot" }, "event": "dinner_hot", "repeat": true },
+    { "event": "dinner_generic", "repeat": true }
+  ],
+  "events": [
+    {
+      "id": "intro", "speaker": "",
+      "effects": { "set_flag": "intro_done" },
+      "lines": [
+        "It's the first morning of the summer holidays.",
+        "Since MegaMart opened across the street, fewer and fewer people visit your family's little corner shop.",
+        { "speaker": "mom", "text": "Morning, sweetheart. Try not to worry Dad today. The shop rent is due on Day 7 and things are... tight." },
+        { "speaker": "maya", "text": "Psst! Grandpa has an old pushcart in the garage. We could sell stuff in the park and help!" },
+        "Grandpa is in the front yard. Walk with WASD or the arrow keys, and press E to talk."
+      ]
+    },
+
+    {
+      "id": "grandpa_pushcart", "speaker": "grandpa",
+      "effects": {
+        "set_flag": "got_pushcart", "add": { "grandpa.trust": 5 }, "log": "Grandpa gave you his old pushcart.",
+        "memory": "Grandpa gave us his old pushcart."
+      },
+      "lines": [
+        "Ah, my old pushcart! I sold snacks from it before your dad was born.",
+        "It's yours now. But remember the first rule of business:",
+        "Buy for less, sell for more - and always be fair to your customers.",
+        "Lin's Wholesale, down the road on the left, sells stock cheap. Then set up the cart in the park."
+      ],
+      "choices": [
+        { "label": "Thanks, Grandpa! I'll take good care of it.", "effects": { "add": { "grandpa.respect": 5 } } },
+        { "label": "Do you really think we can save the shop?", "then": "grandpa_hope" }
+      ]
+    },
+    {
+      "id": "grandpa_hope", "speaker": "grandpa",
+      "effects": { "add": { "grandpa.trust": 3, "skill.hard_work": 1 } },
+      "lines": [
+        "One coin at a time. Big things are built from small, steady steps.",
+        "And from people who don't give up."
+      ]
+    },
+    {
+      "id": "grandpa_scam_story", "speaker": "grandpa",
+      "effects": {
+        "add": { "grandpa.trust": 10, "skill.money_sense": 1 },
+        "set_flag": "scam_resolved", "clear_flag": "ask_grandpa_scam",
+        "log": "Grandpa warned you about Smiley Steve's trick.",
+        "memory": "Asked Grandpa before trusting a stranger's deal."
+      },
+      "lines": [
+        "Half price, cash only, no receipts, and it ends TODAY? Oh, I know that trick.",
+        "When I was young, a man sold me 'cheap' flour. Half of it was full of bugs! I lost a whole week's money.",
+        "If a deal is too good to be true, it usually is. Always check what you're buying.",
+        { "speaker": "", "text": "When you look back towards the park, Smiley Steve's van has already gone." }
+      ]
+    },
+
+    {
+      "id": "lin_intro", "speaker": "mrs_lin",
+      "effects": { "add": { "mrs_lin.trust": 5 } },
+      "lines": [
+        "Welcome to Lin's Wholesale! Shops buy from me in bulk, then sell to their own customers.",
+        "What you pay me is your COST PRICE. What you charge your customers is your SELLING PRICE.",
+        "The difference is your PROFIT - if you get it right!"
+      ],
+      "action": "open_supplier"
+    },
+    {
+      "id": "lin_shop", "speaker": "mrs_lin",
+      "lines": [ "Back again? Let's see what you need today." ],
+      "action": "open_supplier"
+    },
+
+    {
+      "id": "dad_worried", "speaker": "dad",
+      "lines": [
+        "Hey, kiddo. Quiet day at the shop again.",
+        "We need 50 more coins for the rent by Day 7. Don't worry - that's my job, not yours."
+      ]
+    },
+    {
+      "id": "dad_rent_offer", "speaker": "dad",
+      "lines": [ "You've saved 50 coins? From the pushcart? I... I don't know what to say." ],
+      "choices": [
+        {
+          "label": "Here, Dad. It's for the rent.",
+          "requires": { "min": { "money": 50 } },
+          "effects": {
+            "add": { "money": -50, "dad.trust": 15, "dad.respect": 15, "mom.trust": 5, "skill.communication": 1 },
+            "set_flag": "rent_paid", "log": "You gave Dad 50 coins for the rent.",
+            "memory": "Helped pay the family's rent."
+          },
+          "then": "dad_thanks"
+        },
+        { "label": "Can I use it to buy more stock first?", "effects": { "add": { "dad.respect": 5 } }, "then": "dad_invest" },
+        { "label": "Not yet." }
+      ]
+    },
+    {
+      "id": "dad_thanks", "speaker": "dad",
+      "lines": [
+        "You know what? This is the most valuable rent I've ever paid.",
+        { "speaker": "maya", "text": "I helped too!" },
+        "You both did. I'm so proud of you."
+      ]
+    },
+    {
+      "id": "dad_invest", "speaker": "dad",
+      "lines": [ "Smart thinking. Money that buys stock can make more money. Just make sure the rent is ready by Day 7." ]
+    },
+    {
+      "id": "dad_proud", "speaker": "dad",
+      "lines": [ "Rent's paid thanks to you two. Now let's work out how to win our customers back from MegaMart." ]
+    },
+
+    {
+      "id": "mom_budget_tip", "speaker": "mom",
+      "lines": [
+        "A tip from your mom: before you buy anything, ask yourself - is it a NEED or a WANT?",
+        "Rent and food are needs. Sweets and toys are wants. Needs come first!"
+      ]
+    },
+    {
+      "id": "home_early", "speaker": "mom",
+      "lines": [ "Home already? It's still light out." ],
+      "choices": [
+        { "label": "Yes, I'll call it a day.", "action": "end_day" },
+        { "label": "Not yet!" }
+      ]
+    },
+    {
+      "id": "shop_inside", "speaker": "",
+      "lines": [
+        "Inside the corner shop, the shelves are full but there are no customers.",
+        "You can hear MegaMart's cheerful music from across the street."
+      ]
+    },
+    {
+      "id": "megamart_inside", "speaker": "",
+      "lines": [
+        "MegaMart is huge, bright and busy. A sign says: BISCUITS - 5 COINS A PACKET.",
+        { "speaker": "maya", "text": "Five coins? That's more than Mrs. Lin charges US. How do they make people pay that?" },
+        { "speaker": "maya", "text": "Maybe because it's easy. Everything is in one place." }
+      ]
+    },
+
+    {
+      "id": "maya_took_coins", "speaker": "",
+      "effects": { "add": { "money": -5 } },
+      "lines": [
+        "At dinner, you notice the cart money box is lighter than it should be.",
+        { "speaker": "maya", "text": "..." },
+        "Maya admits she took 5 coins from the cart money to buy sweets for her friends."
+      ],
+      "choices": [
+        { "label": "Shout at her: \"That was OUR money!\"", "effects": { "add": { "maya.trust": -10, "maya.fun": -5 } }, "then": "maya_cries" },
+        { "label": "Ask her why she did it.", "effects": { "add": { "skill.empathy": 1 } }, "then": "their_side_maya" },
+        { "label": "Tell Mom.", "effects": { "add": { "mom.respect": 2, "maya.trust": -5 } }, "then": "mom_handles" }
+      ]
+    },
+    {
+      "id": "maya_cries", "speaker": "maya",
+      "effects": { "set_flag": "maya_upset", "log": "You shouted at Maya." },
+      "later": { "event": "maya_quiet_morning", "days": 1 },
+      "lines": [
+        "I'm sorry! I SAID I'm sorry!",
+        { "speaker": "", "text": "Maya runs to her room. The house feels very quiet." }
+      ]
+    },
+    {
+      "id": "mom_handles", "speaker": "mom",
+      "effects": { "set_flag": "maya_upset", "log": "You told Mom about Maya." },
+      "later": { "event": "maya_quiet_morning", "days": 1 },
+      "lines": [
+        "Maya, we'll talk about this after dinner.",
+        { "speaker": "", "text": "Mom handles it. But Maya won't look at you for the rest of the evening." }
+      ]
+    },
+    {
+      "id": "maya_quiet_morning", "speaker": "maya",
+      "lines": [
+        "...Morning.",
+        { "speaker": "", "text": "Maya still seems upset about last night. Maybe talk to her?" }
+      ]
+    },
+    {
+      "id": "maya_makeup", "speaker": "maya",
+      "lines": [ "What do you want?" ],
+      "choices": [
+        {
+          "label": "I'm sorry about last night. Can you tell me why you took the coins?",
+          "effects": { "add": { "maya.trust": 5, "skill.empathy": 1 }, "clear_flag": "maya_upset" },
+          "then": "their_side_maya"
+        },
+        { "label": "Nothing. Never mind." }
+      ]
+    },
+    {
+      "id": "their_side_maya", "speaker": "maya", "style": "their_side",
+      "lines": [
+        "Earlier that day, at the park...",
+        "The big kids laughed at Maya: \"Your family's shop is going broke! You can't even afford sweets!\"",
+        "Maya's face felt hot. She just wanted them to stop laughing.",
+        "So she took 5 coins from the money box and bought sweets for everyone.",
+        "It worked - for about a minute. Then she felt sick inside. She knew it was wrong.",
+        "All through dinner she was scared you would never trust her again."
+      ],
+      "then": "maya_after_side"
+    },
+    {
+      "id": "maya_after_side", "speaker": "maya",
+      "lines": [ "...The big kids said we were poor. I just wanted them to stop." ],
+      "choices": [
+        {
+          "label": "Hug her. \"We'll earn it back together. And those kids are wrong.\"",
+          "effects": {
+            "add": { "maya.trust": 15, "maya.fun": 5, "skill.empathy": 1 },
+            "clear_flag": "maya_upset", "set_flag": "maya_forgiven",
+            "log": "You listened to Maya's side of the story.",
+            "memory": "Listened to Maya's side of the story."
+          },
+          "then": "maya_grateful"
+        },
+        {
+          "label": "\"Okay. But you pay it back from your share.\"",
+          "effects": {
+            "add": { "maya.trust": 5, "maya.respect": 5 },
+            "clear_flag": "maya_upset", "set_flag": "maya_pays_back",
+            "log": "Maya agreed to pay back the 5 coins."
+          },
+          "then": "maya_payback_ok"
+        }
+      ]
+    },
+    {
+      "id": "maya_grateful", "speaker": "maya",
+      "lines": [ "You're the best big sibling ever. I'll work extra hard at the cart tomorrow!" ]
+    },
+    {
+      "id": "maya_payback_ok", "speaker": "maya",
+      "lines": [ "That's fair. I'll pay it back. Every coin." ]
+    },
+
+    {
+      "id": "dinner_first_sale", "speaker": "mom",
+      "lines": [
+        "Maya says you sold things at the park today!",
+        { "speaker": "dad", "text": "Our little business owners! How did it feel to earn your own money?" }
+      ],
+      "choices": [
+        { "label": "Amazing! I want to earn more!", "effects": { "add": { "dad.fun": 5, "mom.fun": 5 } } },
+        { "label": "Harder than I thought.", "then": "dinner_hard_work" }
+      ]
+    },
+    {
+      "id": "dinner_hard_work", "speaker": "dad",
+      "effects": { "add": { "skill.hard_work": 1, "dad.respect": 5 } },
+      "lines": [ "That's business. Every coin you earn is somebody choosing to trust you." ]
+    },
+    {
+      "id": "dinner_leo", "speaker": "maya",
+      "lines": [
+        "Leo's really funny! He did a voice like Grandpa!",
+        { "speaker": "grandpa", "text": "Did he now?" },
+        { "speaker": "", "text": "Everyone laughs. It's good to have a new friend." }
+      ]
+    },
+    {
+      "id": "dinner_hot", "speaker": "dad",
+      "lines": [ "What a hot one today! I bet lemonade was popular." ]
+    },
+    {
+      "id": "dinner_generic", "speaker": "mom",
+      "lines": [ "How was your day? Get a good night's sleep - tomorrow is a new chance." ]
+    },
+
+    {
+      "id": "week_end_success", "speaker": "",
+      "lines": [
+        "It's rent day.",
+        { "speaker": "dad", "text": "The rent is paid - and the landlord even asked about our famous pushcart!" },
+        { "speaker": "mom", "text": "This family can do anything when we work together." },
+        "You finished your first week. (This is the end of the Phase 1 demo - keep playing as long as you like!)"
+      ]
+    },
+    {
+      "id": "week_end_late", "speaker": "",
+      "lines": [
+        "It's rent day.",
+        { "speaker": "dad", "text": "We're a bit short this week. I talked to the landlord - we have a few more days." },
+        { "speaker": "dad", "text": "Don't feel bad. Every business has hard weeks. What matters is we learn and keep going." },
+        "(This is the end of the Phase 1 demo. You can still save 50 coins and give them to Dad.)"
+      ]
+    },
+
+    {
+      "id": "morning_day2", "speaker": "mom",
+      "lines": [ "Good morning! Lemonade sells best on hot days. Check the weather each morning before you buy stock." ]
+    },
+    {
+      "id": "morning_hot_tip", "speaker": "maya",
+      "lines": [ "Phew, it's SO hot today! Everyone at the park is going to be thirsty!" ]
+    },
+    {
+      "id": "morning_stranger_rumor", "speaker": "maya",
+      "lines": [ "I saw a man with a big smile near the park. He said he has \"amazing deals\"!" ]
+    },
+
+    {
+      "id": "stranger_offer", "speaker": "stranger",
+      "effects": { "set_flag": "met_stranger" },
+      "lines": [
+        "Hey there, young business person! Name's Steve. Smiley Steve!",
+        "I've got biscuits - 20 packets for just 20 coins! That's half what Mrs. Lin charges!",
+        "Cash only, no receipts, and the offer ends TODAY. Deal?"
+      ],
+      "choices": [
+        {
+          "label": "Deal! 20 packets for 20 coins.",
+          "requires": { "min": { "money": 20 } },
+          "effects": {
+            "buy_stock": { "item": "biscuits", "qty": 20, "unit_cost": 1, "dodgy": true },
+            "set_flag": ["scam_resolved", "bought_dodgy"],
+            "log": "You bought 20 cheap biscuits from Smiley Steve."
+          },
+          "later": { "event": "dodgy_biscuits", "days": 1 },
+          "then": "stranger_happy"
+        },
+        {
+          "label": "Can I see the expiry date first?",
+          "requires": { "min": { "skill.money_sense": 2 } },
+          "effects": {
+            "add": { "skill.money_sense": 1 }, "set_flag": "scam_resolved",
+            "log": "You spotted Smiley Steve's trick.", "memory": "Spotted a scam all by myself."
+          },
+          "then": "stranger_flees"
+        },
+        { "label": "I'll ask my grandpa first.", "effects": { "set_flag": "ask_grandpa_scam" }, "then": "stranger_pushy" },
+        { "label": "No, thanks.", "effects": { "set_flag": "scam_resolved" }, "then": "stranger_bye" }
+      ]
+    },
+    {
+      "id": "stranger_happy", "speaker": "stranger",
+      "lines": [
+        "Pleasure doing business! Don't look too closely at the dates, ha ha!",
+        { "speaker": "", "text": "His van drives away rather quickly." }
+      ]
+    },
+    {
+      "id": "stranger_flees", "speaker": "stranger",
+      "lines": [
+        "The... expiry date? Oh, would you look at the time! Gotta go!",
+        { "speaker": "", "text": "The packets were two months out of date. Smiley Steve drives off in a hurry." }
+      ]
+    },
+    {
+      "id": "stranger_pushy", "speaker": "stranger",
+      "lines": [ "Grandpa? Suit yourself, kid - but a deal like this won't last!" ]
+    },
+    {
+      "id": "stranger_bye", "speaker": "stranger",
+      "lines": [ "Your loss, kid!" ]
+    },
+    {
+      "id": "dodgy_biscuits", "speaker": "",
+      "effects": {
+        "remove_dodgy": true, "add": { "skill.money_sense": 1 },
+        "log": "Smiley Steve's biscuits were stale and had to be thrown away.",
+        "memory": "Learned the hard way: too good to be true usually is."
+      },
+      "lines": [
+        "You open one of Smiley Steve's biscuit packets. They're stale!",
+        "The date on the packet says they expired two months ago. You have to throw them all away.",
+        { "speaker": "grandpa", "text": "If a deal sounds too good to be true, it usually is. Next time, check before you buy." }
+      ]
+    },
+
+    {
+      "id": "leo_meet", "speaker": "leo",
+      "effects": { "set_flag": "met_leo" },
+      "lines": [
+        { "speaker": "", "text": "A boy sits alone on the bench, kicking at the gravel." },
+        "...Hi."
+      ],
+      "action": "encounter:leo_alone"
+    },
+    {
+      "id": "leo_try_again", "speaker": "leo",
+      "lines": [ "Oh. It's you again." ],
+      "action": "encounter:leo_alone"
+    },
+    {
+      "id": "leo_tomorrow", "speaker": "leo",
+      "lines": [ "I'd rather be on my own today. Maybe tomorrow." ]
+    },
+    {
+      "id": "leo_joins", "speaker": "leo",
+      "effects": {
+        "join_party": "leo", "set_flag": "leo_joined",
+        "add": { "leo.trust": 20, "leo.fun": 15, "skill.communication": 1, "happiness": 5 },
+        "log": "Leo joined your team!", "memory": "Made a new friend: Leo."
+      },
+      "lines": [
+        "You really mean it? I could paint you a sign for the cart! I'm good at drawing.",
+        { "speaker": "maya", "text": "Yay! A new friend!" },
+        { "speaker": "", "text": "Leo joined your team! His bright sign will bring more customers to the cart." }
+      ]
+    },
+    {
+      "id": "leo_not_yet", "speaker": "leo",
+      "effects": { "set_flag": "today.leo_tried" },
+      "lines": [
+        "Thanks... but I just want to be alone right now.",
+        { "speaker": "", "text": "Maybe try again tomorrow. Listening first might help." }
+      ]
+    },
+
+    {
+      "id": "priya_hello", "speaker": "priya",
+      "effects": { "add": { "priya.fun": 3 } },
+      "lines": [
+        "Hey! I heard you've got a pushcart now. That's so cool!",
+        "If you ever need someone to taste-test your lemonade... I volunteer!"
+      ]
+    },
+    {
+      "id": "priya_arcade", "speaker": "priya",
+      "lines": [ "Everyone's going to the arcade this afternoon! You HAVE to come!" ],
+      "choices": [
+        {
+          "label": "Let's go! (2 hours, 4 coins)",
+          "requires": { "min": { "money": 4 } },
+          "effects": {
+            "add": { "money": -4, "priya.fun": 10, "maya.fun": 5, "happiness": 8 }, "advance_minutes": 120,
+            "log": "You spent the afternoon at the arcade with Priya."
+          },
+          "then": "priya_arcade_fun"
+        },
+        { "label": "Sorry, I'm working the cart today.", "effects": { "add": { "priya.respect": 8, "priya.fun": -3 } }, "then": "priya_respect" },
+        {
+          "label": "Come and help at the cart instead - it'll be fun!",
+          "requires": { "min": { "skill.communication": 2 } },
+          "effects": { "add": { "priya.fun": 5, "priya.respect": 5, "reputation": 3 } },
+          "then": "priya_helps"
+        }
+      ]
+    },
+    {
+      "id": "priya_arcade_fun", "speaker": "",
+      "lines": [ "You win a plastic dinosaur and laugh until your stomach hurts. Fun matters too - but the cart stayed closed." ]
+    },
+    {
+      "id": "priya_respect", "speaker": "priya",
+      "lines": [ "Wow, you're really serious about this! Okay, boss. Next time, though!" ]
+    },
+    {
+      "id": "priya_helps", "speaker": "priya",
+      "lines": [
+        "Okay, okay - but I get free lemonade!",
+        { "speaker": "", "text": "Priya spends the afternoon shouting \"LEMONADE!\" at everyone. People love it." }
+      ]
+    },
+    {
+      "id": "priya_join_offer", "speaker": "priya",
+      "lines": [
+        "Hey... can I ask you something?",
+        "I'm really good at talking to people. What if I joined your team?"
+      ],
+      "choices": [
+        {
+          "label": "Welcome to the team, Priya!",
+          "effects": {
+            "join_party": "priya", "set_flag": "priya_joined",
+            "add": { "priya.trust": 10, "priya.fun": 10, "happiness": 5 },
+            "log": "Priya joined your team!", "memory": "Priya joined the team."
+          },
+          "then": "priya_joined_line"
+        },
+        { "label": "Maybe later.", "effects": { "add": { "priya.respect": -2 } } }
+      ]
+    },
+    {
+      "id": "priya_ask_again", "speaker": "priya",
+      "lines": [ "So... is there room on the team for me yet?" ],
+      "choices": [
+        {
+          "label": "Yes! Join us, Priya.",
+          "effects": {
+            "join_party": "priya", "set_flag": "priya_joined",
+            "add": { "priya.trust": 10, "priya.fun": 10, "happiness": 5 },
+            "log": "Priya joined your team!", "memory": "Priya joined the team."
+          },
+          "then": "priya_joined_line"
+        },
+        { "label": "Not yet." }
+      ]
+    },
+    {
+      "id": "priya_joined_line", "speaker": "priya",
+      "lines": [
+        "Yes! You won't regret it. Nobody can walk past my smile without buying something.",
+        { "speaker": "", "text": "Priya joined your team! Her cheerful voice brings more customers." }
+      ]
+    },
+
+    {
+      "id": "mom_recipe", "speaker": "mom",
+      "effects": { "set_flag": "mom_recipe", "log": "Mom shared her secret cookie recipe." },
+      "lines": [
+        "I hear the pushcart is going well. Want to know a family secret?",
+        "My cookie recipe! The flour, butter and sugar for a batch cost about 2 coins.",
+        "But people happily pay 5 coins for good homemade cookies. Your time and skill ADD VALUE.",
+        { "speaker": "", "text": "You can now buy cookie ingredients at Lin's Wholesale. Mom's Cookies stay fresh for 2 days." }
+      ]
+    },
+
+    {
+      "id": "signpost_market", "speaker": "",
+      "lines": [ "The signpost says: MARKET SQUARE ->  (keep walking east along the road)" ]
+    },
+    {
+      "id": "morning_market_news", "speaker": "grandpa",
+      "effects": { "set_flag": "market_news" },
+      "lines": [
+        "Did you know there's a market square at the end of our road? Just walk east along the street.",
+        "Every year on Day 14 they hold the Summer Festival. Half the town goes!",
+        "A stall at the festival... now THAT would help the family."
+      ]
+    },
+    {
+      "id": "market_arrival", "speaker": "",
+      "lines": [
+        "The market square is busy with stalls, music and the smell of fresh bread.",
+        { "speaker": "maya", "text": "Look at all the people! There must be ten times more customers here than in the park." },
+        { "speaker": "maya", "text": "That man by the purple building looks like he's in charge." }
+      ]
+    },
+    {
+      "id": "office_inside", "speaker": "",
+      "lines": [ "The Market Office is full of papers, maps of the stalls, and a very old cat. Mr. Okafor is outside." ]
+    },
+    {
+      "id": "stall_for_rent", "speaker": "",
+      "lines": [ "A sign on the empty stall says: STALL FOR RENT - ask Mr. Okafor at the Market Office." ]
+    },
+    {
+      "id": "okafor_intro", "speaker": "okafor",
+      "effects": { "set_flag": "met_okafor" },
+      "lines": [
+        "Welcome to the market square! I'm Mr. Okafor. I look after the stalls here.",
+        "A stall for the season costs 60 coins. And each day you open, there's a 5 coin fee for cleaning and lights.",
+        "Many more people walk through here than through the park. But it isn't cheap!"
+      ],
+      "then": "okafor_offer"
+    },
+    {
+      "id": "okafor_offer", "speaker": "okafor",
+      "lines": [ "So, would you like to rent a stall?" ],
+      "choices": [
+        { "label": "Could we talk about the price?", "show_when": { "not_flag": "okafor_negotiated" },
+          "action": "encounter:okafor_rent" },
+        {
+          "label": "Rent the stall (60 coins)",
+          "show_when": { "not_flag": "stall_discount" },
+          "requires": { "min": { "money": 60 } },
+          "effects": {
+            "add": { "money": -60 }, "set_flag": "stall_rented",
+            "log": "You rented a market stall for 60 coins.", "memory": "Rented a real market stall!"
+          },
+          "then": "okafor_welcome"
+        },
+        {
+          "label": "Rent the stall (45 coins)",
+          "show_when": { "flag": "stall_discount" },
+          "requires": { "min": { "money": 45 } },
+          "effects": {
+            "add": { "money": -45 }, "set_flag": "stall_rented",
+            "log": "You rented a market stall for 45 coins.", "memory": "Rented a real market stall!"
+          },
+          "then": "okafor_welcome"
+        },
+        { "label": "I'll come back when I've saved enough." }
+      ]
+    },
+    {
+      "id": "okafor_welcome", "speaker": "okafor",
+      "lines": [
+        "Wonderful! Yours is the empty stall at the bottom of the square. Good luck!",
+        { "speaker": "maya", "text": "A REAL stall! Wait until Dad sees this!" },
+        { "speaker": "", "text": "Busy market shoppers want lunch: you can now buy sandwich supplies at Lin's Wholesale." }
+      ]
+    },
+    {
+      "id": "okafor_discount", "speaker": "okafor",
+      "effects": {
+        "set_flag": ["stall_discount", "okafor_negotiated"],
+        "add": { "skill.communication": 1 },
+        "memory": "Talked Mr. Okafor into a fair discount."
+      },
+      "lines": [ "You know what? I like you. 45 coins - and you keep that promise." ],
+      "then": "okafor_offer"
+    },
+    {
+      "id": "okafor_no_discount", "speaker": "okafor",
+      "effects": { "set_flag": "okafor_negotiated" },
+      "lines": [
+        "Sorry, kid. The price is 60 coins. Come back when you're ready.",
+        { "speaker": "", "text": "Next time, try to find out what he really cares about before you make your offer." }
+      ]
+    },
+
+    {
+      "id": "kofi_hello", "speaker": "kofi",
+      "lines": [
+        "Hey! I'm Kofi. I run my uncle's fruit stall.",
+        "Best apples in the whole market. Only 2 coins!"
+      ]
+    },
+    {
+      "id": "kofi_confront", "speaker": "kofi",
+      "effects": { "set_flag": "met_kofi_rival" },
+      "lines": [
+        "Hey! You're selling things right next to my fruit stall now?",
+        "People who used to buy from me are buying from YOU!"
+      ],
+      "action": "encounter:kofi_rival"
+    },
+    {
+      "id": "kofi_try_again", "speaker": "kofi",
+      "lines": [ "You again..." ],
+      "action": "encounter:kofi_rival"
+    },
+    {
+      "id": "kofi_tomorrow", "speaker": "kofi",
+      "lines": [ "Not today. I've got customers to win back." ]
+    },
+    {
+      "id": "kofi_team_up", "speaker": "kofi",
+      "effects": {
+        "set_flag": "kofi_friend", "add": { "kofi.trust": 25, "kofi.fun": 10, "happiness": 5 },
+        "log": "You and Kofi agreed to help each other's stalls.",
+        "memory": "Turned a rival into a friend: Kofi."
+      },
+      "lines": [
+        "Deal! I'll tell my customers where to get a cold drink.",
+        "And you won't sell apples anymore, right? Shake on it.",
+        { "speaker": "", "text": "From now on you won't sell apples, and Kofi sends thirsty customers your way. Working together, you both earn more." }
+      ]
+    },
+    {
+      "id": "kofi_cold", "speaker": "kofi",
+      "effects": { "set_flag": "today.kofi_tried" },
+      "lines": [
+        "Whatever. I'll beat you on my own.",
+        { "speaker": "", "text": "Maybe try again tomorrow. What is Kofi really worried about?" }
+      ]
+    },
+
+    {
+      "id": "grumble_meet", "speaker": "grumble",
+      "effects": { "set_flag": "met_grumble" },
+      "lines": [
+        "YOU! Yes, you! The lemonade I bought from your stall was WARM!",
+        "Warm lemonade! On a day like this! What kind of business are you running?"
+      ],
+      "action": "encounter:grumble_complaint"
+    },
+    {
+      "id": "grumble_again", "speaker": "grumble",
+      "lines": [ "Hmph. I'm still waiting." ],
+      "action": "encounter:grumble_complaint"
+    },
+    {
+      "id": "grumble_happy", "speaker": "grumble",
+      "effects": {
+        "add": { "reputation": 5, "skill.empathy": 1 },
+        "set_flag": ["grumble_resolved", "grumble_regular"],
+        "log": "Mrs. Grumble calmed down and became a regular customer.",
+        "memory": "Turned an angry customer into a regular."
+      },
+      "lines": [
+        "...Well. Maybe I was a little grumpy. My feet DO hurt.",
+        "You're a good kid. I'll be back tomorrow - and I'm bringing my friends."
+      ]
+    },
+    {
+      "id": "grumble_storms", "speaker": "grumble",
+      "effects": {
+        "add": { "reputation": -4 }, "set_flag": "grumble_resolved",
+        "log": "Mrs. Grumble stormed off and complained to everyone."
+      },
+      "lines": [
+        "I'm telling EVERYONE about this!",
+        { "speaker": "", "text": "Mrs. Grumble stomps away. Word spreads fast at the market." }
+      ]
+    },
+
+    {
+      "id": "festival_soon", "speaker": "maya",
+      "lines": [ "The festival is only a couple of days away! We still don't have a stall... Mr. Okafor is at the market." ]
+    },
+    {
+      "id": "festival_soon_ready", "speaker": "maya",
+      "lines": [ "The festival is almost here! Lots of people means we'll need LOTS of stock." ]
+    },
+    {
+      "id": "festival_morning", "speaker": "",
+      "effects": { "set_flag": "today.festival", "add": { "happiness": 5 } },
+      "lines": [
+        "It's Festival Day! Music drifts from the market square, and the whole town is heading there.",
+        { "speaker": "grandpa", "text": "Today the park will be empty - everyone will be at the market!" }
+      ]
+    },
+    {
+      "id": "dinner_stall", "speaker": "dad",
+      "lines": [
+        "A real market stall? My kids rented a STALL?",
+        { "speaker": "mom", "text": "Just remember the 5 coin fee every day. A cost you pay even on a slow day is called a fixed cost." }
+      ]
+    },
+    {
+      "id": "dinner_kofi", "speaker": "maya",
+      "lines": [
+        "Kofi gave me a free banana because we're partners now!",
+        { "speaker": "grandpa", "text": "A good neighbour is worth more than a good price." }
+      ]
+    },
+    {
+      "id": "chapter1_end_great", "speaker": "",
+      "lines": [
+        "The festival lights glow over the market square as you pack up your stall.",
+        { "speaker": "dad", "text": "You saved this family's summer. Look at the shop's account book!" },
+        { "speaker": "grandpa", "text": "I sold snacks from that old cart for thirty years. I never had a stall at the festival." },
+        { "speaker": "grandpa", "text": "I'm proud of you." }
+      ],
+      "action": "chapter_end"
+    },
+    {
+      "id": "chapter1_end_ok", "speaker": "",
+      "lines": [
+        "The festival is over. You can still hear the music from the market square as you walk home.",
+        { "speaker": "dad", "text": "We didn't get to sell at the festival this year. That's okay." },
+        { "speaker": "grandpa", "text": "Every business has a year like this. What matters is what you learned." }
+      ],
+      "action": "chapter_end"
+    }
+  ]
+}

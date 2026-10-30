@@ -1,0 +1,16 @@
+{
+  "venues": [
+    {
+      "id": "pushcart", "name": "Pushcart", "backdrop": "park", "helper": "maya",
+      "customers": 1.0, "festival_customers": 0.4, "fee": 0, "hours": 3
+    },
+    {
+      "id": "stall", "name": "Market Stall", "backdrop": "market", "helper": "maya",
+      "customers": 1.7, "festival_customers": 2.5, "fee": 5, "hours": 3,
+      "bonuses": [
+        { "when": { "flag": "kofi_friend" }, "customers": 0.1, "text": "Kofi sent his fruit customers your way!" },
+        { "when": { "flag": "grumble_regular" }, "customers": 0.05, "text": "Mrs. Grumble brought her friends." }
+      ]
+    }
+  ]
+}

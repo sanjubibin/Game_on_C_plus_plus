@@ -1,0 +1,64 @@
+{
+  "quests": [
+    {
+      "id": "old_pushcart",
+      "title": "The Old Pushcart",
+      "summary": "The family shop is struggling. Help pay the rent by Day 7.",
+      "start_flag": "intro_done",
+      "steps": [
+        { "text": "Ask Grandpa about his old pushcart (front yard).", "done_flag": "got_pushcart" },
+        { "text": "Buy stock at Lin's Wholesale (down the road, on the left).", "done_flag": "bought_stock" },
+        { "text": "Sell something at the pushcart in the park.", "done_flag": "first_sale" },
+        { "text": "Save 50 coins and give them to Dad for the rent (by Day 7).", "done_flag": "rent_paid" }
+      ]
+    },
+    {
+      "id": "market_stall",
+      "title": "A Stall of Our Own",
+      "summary": "The Summer Festival is on Day 14. Rent a market stall and sell there on the big day!",
+      "start_flag": "market_news",
+      "steps": [
+        { "text": "Find the market square (walk east along the road).", "done_flag": "visited_market" },
+        { "text": "Talk to Mr. Okafor outside the Market Office.", "done_flag": "met_okafor" },
+        { "text": "Save up and rent a market stall from Mr. Okafor.", "done_flag": "stall_rented" },
+        { "text": "Sell at your stall on Festival Day (Day 14).", "done_flag": "stall_festival_sale" }
+      ]
+    },
+    {
+      "id": "market_rivals",
+      "title": "Market Rivals",
+      "summary": "Kofi thinks your stall is stealing his customers.",
+      "start_flag": "met_kofi_rival",
+      "steps": [
+        { "text": "Sort things out with Kofi. (What is he really worried about?)", "done_flag": "kofi_friend" }
+      ]
+    },
+    {
+      "id": "grumpy_customer",
+      "title": "The Grumpy Customer",
+      "summary": "Mrs. Grumble is NOT happy with your lemonade.",
+      "start_flag": "met_grumble",
+      "steps": [
+        { "text": "Help Mrs. Grumble calm down.", "done_flag": "grumble_resolved" }
+      ]
+    },
+    {
+      "id": "new_kid",
+      "title": "The New Kid",
+      "summary": "A boy sits alone on a park bench every day.",
+      "start_flag": "met_leo",
+      "steps": [
+        { "text": "Help Leo feel welcome. (Try listening first.)", "done_flag": "leo_joined" }
+      ]
+    },
+    {
+      "id": "too_good",
+      "title": "Too Good To Be True",
+      "summary": "A smiling man near the park has an amazing deal.",
+      "start_flag": "met_stranger",
+      "steps": [
+        { "text": "Decide what to do about Smiley Steve's offer.", "done_flag": "scam_resolved" }
+      ]
+    }
+  ]
+}

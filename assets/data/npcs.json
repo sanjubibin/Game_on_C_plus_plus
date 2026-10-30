@@ -1,0 +1,169 @@
+{
+  "npcs": [
+    {
+      "id": "mom", "name": "Mom", "x": 3, "y": 7, "relationship": true,
+      "body": "#e07a5f", "hair": "#4a2c1a", "skin": "#e8b98a",
+      "talk": [
+        { "when": { "flag": "first_sale", "day_min": 3, "not_seen": "mom_recipe" }, "event": "mom_recipe" },
+        { "when": { "flag": "got_pushcart", "not_seen": "mom_budget_tip" }, "event": "mom_budget_tip" }
+      ],
+      "idle": [
+        "Remember to drink water when it's hot out!",
+        "Needs come first, then wants. Rent is a need. Sweets are a want.",
+        "I'm proud of you two, you know that?",
+        "Home before dark, please. Tired people make tired decisions."
+      ]
+    },
+    {
+      "id": "dad", "name": "Dad", "x": 17, "y": 7, "relationship": true,
+      "body": "#3d5a80", "hair": "#2b2b2b", "skin": "#c68e5f",
+      "talk": [
+        { "when": { "flag": "rent_paid" }, "event": "dad_proud" },
+        { "when": { "flag": "got_pushcart", "min": { "money": 50 } }, "event": "dad_rent_offer" },
+        { "event": "dad_worried" }
+      ]
+    },
+    {
+      "id": "grandpa", "name": "Grandpa", "x": 8, "y": 7, "relationship": true,
+      "body": "#7a6a53", "hair": "#e6e6e6", "skin": "#f0c8a0",
+      "talk": [
+        { "when": { "flag": "ask_grandpa_scam", "not_flag": "scam_resolved" }, "event": "grandpa_scam_story" },
+        { "when": { "not_flag": "got_pushcart" }, "event": "grandpa_pushcart" }
+      ],
+      "idle": [
+        "Write down what you spend. Money you don't track just disappears.",
+        "A happy customer comes back. A cheated one tells ten friends.",
+        "If you can't sell it today, don't buy too much of it.",
+        "Hot days make people thirsty, you know. Lemonade weather!",
+        "When I was young, the festival was the best day of the year for business."
+      ]
+    },
+    {
+      "id": "maya", "name": "Maya", "x": 4, "y": 7, "relationship": true,
+      "body": "#f4a6c0", "hair": "#4a2c1a", "skin": "#e8b98a",
+      "talk": [
+        { "when": { "flag": "maya_upset" }, "event": "maya_makeup" }
+      ],
+      "idle": [
+        "Can I count the coins? Pleeease?",
+        "When I grow up I'm going to own a sweet shop. A BIG one.",
+        "Grandpa says hot days are lemonade days!",
+        "I like working with you. Even when you're bossy."
+      ]
+    },
+    {
+      "id": "leo", "name": "Leo", "x": 16, "y": 18, "relationship": true,
+      "body": "#5fa86b", "hair": "#c9a227", "skin": "#f3d2b3",
+      "present_when": { "not_flag": "leo_joined" },
+      "bonus": { "customers": 0.15, "text": "Leo's bright sign brought extra customers!" },
+      "talk": [
+        { "when": { "flag": "today.leo_tried", "not_flag": "leo_joined" }, "event": "leo_tomorrow" },
+        { "when": { "not_seen": "leo_meet", "not_flag": "leo_joined" }, "event": "leo_meet" },
+        { "when": { "not_flag": "leo_joined" }, "event": "leo_try_again" }
+      ],
+      "idle": [
+        "I'm thinking of a new design for the sign. With stars!",
+        "Thanks for asking me to join. Really.",
+        "My old town didn't have a pond. This one has ducks!"
+      ]
+    },
+    {
+      "id": "priya", "name": "Priya", "x": 26, "y": 15, "relationship": true,
+      "body": "#9b5de5", "hair": "#1f1f1f", "skin": "#b77a4f",
+      "present_when": { "not_flag": "priya_joined" },
+      "bonus": { "customers": 0.1, "text": "Priya's cheerful shouting drew a crowd!" },
+      "talk": [
+        { "when": { "flag": "first_sale", "day_min": 2, "not_seen": "priya_arcade" }, "event": "priya_arcade" },
+        { "when": { "flag": "first_sale", "day_min": 4, "not_seen": "priya_join_offer" }, "event": "priya_join_offer" },
+        { "when": { "seen": "priya_join_offer", "not_flag": "priya_joined" }, "event": "priya_ask_again" },
+        { "when": { "not_seen": "priya_hello" }, "event": "priya_hello" }
+      ],
+      "idle": [
+        "My mom says MegaMart puts its prices up once the small shops close.",
+        "Lemonade on a hot day is basically treasure.",
+        "You've got a real business face now. Very serious."
+      ]
+    },
+    {
+      "id": "mrs_lin", "name": "Mrs. Lin", "x": 3, "y": 17,
+      "body": "#d1495b", "hair": "#2b2b2b", "skin": "#f1d3b3",
+      "talk": [
+        { "when": { "not_seen": "lin_intro" }, "event": "lin_intro" },
+        { "event": "lin_shop" }
+      ]
+    },
+    {
+      "id": "stranger", "name": "Smiley Steve", "x": 28, "y": 11,
+      "body": "#f28c28", "hair": "#6b4f2a", "skin": "#e9c29b",
+      "present_when": { "day_min": 3, "not_flag": "scam_resolved" },
+      "talk": [
+        { "event": "stranger_offer" }
+      ]
+    },
+
+    {
+      "id": "okafor", "name": "Mr. Okafor", "map": "market", "x": 26, "y": 6,
+      "body": "#364fc7", "hair": "#212529", "skin": "#8d5524",
+      "talk": [
+        { "when": { "not_seen": "okafor_intro" }, "event": "okafor_intro" },
+        { "when": { "not_flag": "stall_rented" }, "event": "okafor_offer" }
+      ],
+      "idle": [
+        "Market tip: busy days need more stock. Quiet days need less.",
+        "The festival on Day 14 is the busiest day of the whole year!",
+        "Keep your stall open and your prices fair, and people will remember you."
+      ]
+    },
+    {
+      "id": "kofi", "name": "Kofi", "map": "market", "x": 7, "y": 5, "relationship": true,
+      "body": "#f08c00", "hair": "#212529", "skin": "#6f4518",
+      "talk": [
+        { "when": { "flag": "today.kofi_tried", "not_flag": "kofi_friend" }, "event": "kofi_tomorrow" },
+        { "when": { "flag": "stall_rented", "not_flag": "kofi_friend", "not_seen": "kofi_confront" }, "event": "kofi_confront" },
+        { "when": { "flag": "stall_rented", "not_flag": "kofi_friend" }, "event": "kofi_try_again" },
+        { "when": { "not_seen": "kofi_hello" }, "event": "kofi_hello" }
+      ],
+      "idle": [
+        "Fresh fruit! Get your fresh fruit!",
+        "Market life is hard work, but I love it.",
+        "My uncle taught me to always give a little extra. People remember."
+      ]
+    },
+    {
+      "id": "rosa", "name": "Baker Rosa", "map": "market", "x": 19, "y": 5,
+      "body": "#f8f9fa", "hair": "#862e9c", "skin": "#e0ac69",
+      "idle": [
+        "On busy days I bake more bread. On quiet days, less. That's supply and demand!",
+        "Bread that doesn't sell turns stale. I give it to the shelter instead of throwing it away.",
+        "The festival smell? That's my cinnamon buns."
+      ]
+    },
+    {
+      "id": "grumble", "name": "Mrs. Grumble", "map": "market", "x": 14, "y": 12,
+      "body": "#868e96", "hair": "#ced4da", "skin": "#f1c27d",
+      "present_when": { "flag": "stall_sale", "not_flag": "grumble_resolved" },
+      "talk": [
+        { "when": { "not_seen": "grumble_meet" }, "event": "grumble_meet" },
+        { "event": "grumble_again" }
+      ]
+    },
+    {
+      "id": "visitor_ana", "name": "Ana", "map": "market", "x": 9, "y": 9,
+      "body": "#20c997", "hair": "#5c3d2e", "skin": "#c68642",
+      "present_when": { "flag": "today.festival" },
+      "idle": [ "Happy Festival Day! Everything smells amazing.", "I came all the way from the next village!" ]
+    },
+    {
+      "id": "visitor_tom", "name": "Old Tom", "map": "market", "x": 20, "y": 12,
+      "body": "#495057", "hair": "#f1f3f5", "skin": "#f3d2b3",
+      "present_when": { "flag": "today.festival" },
+      "idle": [ "Sixty years I've come to this festival. Never missed one!", "Your grandpa's pushcart? I remember it! Best toffee apples." ]
+    },
+    {
+      "id": "visitor_zara", "name": "Zara", "map": "market", "x": 18, "y": 8,
+      "body": "#e64980", "hair": "#212529", "skin": "#8d5524",
+      "present_when": { "flag": "today.festival" },
+      "idle": [ "The music starts at noon!", "I'm spending all my pocket money today. Okay, maybe not ALL of it." ]
+    }
+  ]
+}
